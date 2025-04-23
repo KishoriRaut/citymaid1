@@ -1,0 +1,25 @@
+{
+  "name": "github-cloned-website-city-maid",
+  "version": "1.0.0",
+  "description": "��#\u0000 \u0000m\u0000a\u0000i\u0000d\u0000-\u0000s\u0000e\u0000r\u0000v\u0000i\u0000c\u0000e\u0000-\u0000h\u0000u\u0000b\u0000\r\u0000 \u0000",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KishoriRaut/maid-service-hub.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/KishoriRaut/maid-service-hub/issues"
+  },
+  "homepage": "https://github.com/KishoriRaut/maid-service-hub#readme",
+  "devDependencies": {
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.3",
+    "tailwindcss": "^4.1.4"
+  }
+}
