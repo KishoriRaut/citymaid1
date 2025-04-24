@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Maid Profile - City Maid Services</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        poppins: ['Poppins', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            primary: '#4F46E5',
+                            secondary: '#4338CA',
+                            light: '#EEF2FF',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-poppins bg-gray-50">
+    <!-- Navigation Bar -->
+    <nav class="bg-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20">
+                <div class="flex items-center">
+                    <a href="../index.html" class="text-3xl font-bold text-brand-primary tracking-tight">City<span class="text-brand-secondary"> Maid Services</span></a>
+                </div>
+                <!-- Desktop menu -->
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="../index.html" class="text-brand-primary font-semibold">Home</a>
+                    <a href="../jobs/find-jobs.html" class="text-gray-700 hover:text-brand-primary font-medium transition-colors">Find Jobs</a>
+                    <a href="../static/contact.html" class="text-gray-700 hover:text-brand-primary font-medium transition-colors">Contact Us</a>
+                    <a href="../static/about.html" class="text-gray-700 hover:text-brand-primary font-medium transition-colors">About Us</a>
+                    <div class="relative group">
+                        <button id="userMenuBtn" class="flex items-center space-x-2 text-gray-700 hover:text-brand-primary">
+                            <i class="fas fa-user-circle text-2xl"></i>
+                            <span class="font-medium">My Account</span>
+                        </button>
+                        <div class="hidden group-hover:block absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg">
+                            <a href="dashboard.html" class="block px-4 py-2 hover:bg-gray-100">Dashboard</a>
+                            <a href="profile.html" class="block px-4 py-2 hover:bg-gray-100">Profile</a>
+                            <a href="#" id="signOutBtn" class="block px-4 py-2 hover:bg-gray-100">Sign Out</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Profile Update Form -->
+    <div class="max-w-4xl mx-auto px-4 py-8">
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h1 class="text-2xl font-bold text-gray-900 mb-6">Update Your Profile</h1>
+            
+            <form id="profileForm" class="space-y-6">
+                <!-- Profile Photo -->
+                <div class="space-y-4">
+                    <label class="block text-sm font-medium text-gray-700">Profile Photo</label>
+                    <div class="flex items-center space-x-4">
+                        <div class="relative">
+                            <img id="profilePhotoPreview" src="https://via.placeholder.com/150" alt="Profile Photo" 
+                                class="w-32 h-32 rounded-full object-cover">
+                            <input type="file" id="profilePhoto" accept="image/*" class="hidden" title="Upload profile photo" placeholder="Select a photo">
+                            <button type="button" onclick="document.getElementById('profilePhoto').click()" 
+                                class="absolute bottom-0 right-0 bg-brand-primary text-white p-2 rounded-full hover:bg-brand-secondary" title="Upload photo">
+                                <i class="fas fa-camera"></i>
+                            </button>
+                        </div>
+                        <div>
+                            <button type="button" onclick="document.getElementById('profilePhoto').click()" 
+                                class="bg-brand-primary text-white px-4 py-2 rounded-lg hover:bg-brand-secondary">
+                                Change Photo
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Personal Information -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="fullName" class="block text-sm font-medium text-gray-700">Full Name *</label>
+                        <input type="text" id="fullName" name="fullName" required
+                            placeholder="Enter your full name as per documents"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary">
+                    </div>
+                    <div>
+                        <label for="ageGroup" class="block text-sm font-medium text-gray-700">Age Group *</label>
+                        <select id="ageGroup" name="ageGroup" required
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary">
+                            <option value="">Select Age Group</option>
+                            <option value="20">20 Years Plus</option>
+                            <option value="25">25 Years Plus</option>
+                            <option value="30">30 Years Plus</option>
+                            <option value="35">35 Years Plus</option>
+                            <option value="40">40 Years Plus</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="gender" class="block text-sm font-medium text-gray-700">Gender *</label>
+                        <select id="gender" name="gender" required
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary">
+                            <option value="">Select Gender</option>
+                            <option value="Female">Female</option>
+                            <option value="Male">Male</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="maritalStatus" class="block text-sm font-medium text-gray-700">Marital Status *</label>
+                        <select id="maritalStatus" name="maritalStatus" required
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary">
+                            <option value="">Select Status</option>
+                            <option value="Single">Single</option>
+                            <option value="Married">Married</option>
+                            <option value="Divorced">Divorced</option>
+                            <option value="Widowed">Widowed</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="nationality" class="block text-sm font-medium text-gray-700">Nationality *</label>
+                        <select id="nationality" name="nationality" required
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary">
+                            <option value="">Select Nationality</option>
+                            <option value="Nepali">Nepali</option>
+                            <option value="Indian">Indian</option>
+                            <option value="Chinese">Chinese</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="education" class="block text-sm font-medium text-gray-700">Education Level *</label>
+                        <select id="education" name="education" required
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary">
+                            <option value="">Select Education Level</option>
+                            <option value="Under SEE">Under SEE</option>
+                            <option value="SEE">SEE</option>
+                            <option value="Intermediate">Intermediate</option>
+                            <option value="Bachelor">Bachelor</option>
+                            <option value="Master">Master</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Contact Information -->
+                <div class="space-y-6">
+                    <h2 class="text-lg font-semibold text-gray-900">Contact Information</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-gray-700">Email *</label>
+                            <input type="email" id="email" name="email" required
+                                placeholder="Enter your active email address"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary">
+                        </div>
+                        <div>
+                            <label for="phone" class="block text-sm font-medium text-gray-700">Phone Number *</label>
+                            <input type="tel" id="phone" name="phone" required
+                                placeholder="Enter your active phone number"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary">
+                        </div>
+                        <div>
+                            <label for="address" class="block text-sm font-medium text-gray-700">Address *</label>
+                            <input type="text" id="address" name="address" required
+                                placeholder="Enter your current address"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary">
+                        </div>
+                        <div>
+                            <label for="emergencyContact" class="block text-sm font-medium text-gray-700">Emergency Contact *</label>
+                            <input type="tel" id="emergencyContact" name="emergencyContact" required
+                                placeholder="Enter emergency contact number"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Work Information -->
+                <div class="space-y-6">
+                    <h2 class="text-lg font-semibold text-gray-900">Work Information</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="experience" class="block text-sm font-medium text-gray-700">Years of Experience *</label>
+                            <input type="number" id="experience" name="experience" min="0" required
+                                placeholder="Enter total years of experience"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary">
+                        </div>
+                        <div>
+                            <label for="workType" class="block text-sm font-medium text-gray-700">Work Type *</label>
+                            <select id="workType" name="workType" required
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary">
+                                <option value="">Select Work Type</option>
+                                <option value="Full Time">Full Time</option>
+                                <option value="Part Time">Part Time</option>
+                                <option value="Live In">Live In</option>
+                                <option value="Live Out">Live Out</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="preferredTime" class="block text-sm font-medium text-gray-700">Preferred Working Time *</label>
+                            <select id="preferredTime" name="preferredTime" required
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary">
+                                <option value="">Select Preferred Time</option>
+                                <option value="Morning">Morning Time</option>
+                                <option value="Day">Day Time</option>
+                                <option value="Evening">Evening Time</option>
+                                <option value="Night">Night Time</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="salary" class="block text-sm font-medium text-gray-700">Expected Salary (NR) *</label>
+                            <input type="number" id="salary" name="salary" min="0" required
+                                placeholder="Enter your expected monthly salary"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary">
+                        </div>
+                        <div>
+                            <label for="workLocation" class="block text-sm font-medium text-gray-700">Preferred Work Location *</label>
+                            <input type="text" id="workLocation" name="workLocation" required
+                                placeholder="Enter preferred work location/area"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Skills -->
+                <div class="space-y-4">
+                    <label class="block text-sm font-medium text-gray-700">Skills * (Select all that apply)</label>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" class="skill-checkbox" value="Cooking" name="skills">
+                            <span>Cooking</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" class="skill-checkbox" value="Cleaning" name="skills">
+                            <span>Cleaning</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" class="skill-checkbox" value="Laundry" name="skills">
+                            <span>Laundry</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" class="skill-checkbox" value="Child Care" name="skills">
+                            <span>Child Care</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" class="skill-checkbox" value="Elderly Care" name="skills">
+                            <span>Elderly Care</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" class="skill-checkbox" value="Pet Care" name="skills">
+                            <span>Pet Care</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" class="skill-checkbox" value="Postnatal/Sutkeri Care" name="skills">
+                            <span>Postnatal/Sutkeri Care</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" class="skill-checkbox" value="Office Assistant" name="skills">
+                            <span>Office Assistant</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Languages -->
+                <div class="space-y-4">
+                    <label class="block text-sm font-medium text-gray-700">Languages * (Select all that apply)</label>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" class="language-checkbox" value="Nepali" name="languages">
+                            <span>Nepali</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" class="language-checkbox" value="English" name="languages">
+                            <span>English</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" class="language-checkbox" value="Hindi" name="languages">
+                            <span>Hindi</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- About Me -->
+                <div class="space-y-4">
+                    <label for="about" class="block text-sm font-medium text-gray-700">Additional Notes *</label>
+                    <textarea id="about" name="about" rows="4" required
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary"
+                        placeholder="Tell us about yourself, your experience, and what makes you a great domestic helper"></textarea>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="flex justify-end">
+                    <button type="submit"
+                        class="bg-brand-primary text-white px-8 py-3 rounded-lg hover:bg-brand-secondary transition-colors">
+                        Update Profile
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Supabase client
+        const SUPABASE_URL = 'https://fdgqqxyyofjnkhswkwcq.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZkZ3FxeHl5b2Zqbmtoc3drd2NxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQwMjQyMTMsImV4cCI6MjA1OTYwMDIxM30.YyJLLu3r2a7Mh7ny0ie-YzzLfPh5PdrJJHnBFBxWqVE';
+        const { createClient } = supabase;
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let currentUser = null;
+        let currentProfile = null;
+
+        // Check session and load profile
+        async function initializeProfile() {
+            try {
+                const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
+                if (sessionError) throw sessionError;
+                
+                if (!session) {
+                    window.location.href = '../auth/login.html?type=maid';
+                    return;
+                }
+
+                currentUser = session.user;
+                await loadProfile();
+            } catch (error) {
+                console.error('Error initializing profile:', error);
+                showError('Error loading profile. Please try again.');
+            }
+        }
+
+        // Load existing profile data
+        async function loadProfile() {
+            try {
+                const { data: profile, error } = await supabaseClient
+                    .from('maid_profiles')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .single();
+
+                if (error) throw error;
+
+                currentProfile = profile;
+                populateForm(profile);
+            } catch (error) {
+                console.error('Error loading profile:', error);
+                showError('Error loading profile data. Please try again.');
+            }
+        }
+
+        // Populate form with existing data
+        function populateForm(profile) {
+            document.getElementById('fullName').value = profile.full_name || '';
+            document.getElementById('ageGroup').value = profile.age_group || '';
+            document.getElementById('gender').value = profile.gender || '';
+            document.getElementById('maritalStatus').value = profile.marital_status || '';
+            document.getElementById('nationality').value = profile.nationality || '';
+            document.getElementById('education').value = profile.education || '';
+            document.getElementById('email').value = profile.email || '';
+            document.getElementById('phone').value = profile.phone || '';
+            document.getElementById('address').value = profile.address || '';
+            document.getElementById('emergencyContact').value = profile.emergency_contact || '';
+            document.getElementById('experience').value = profile.years_of_experience || '';
+            document.getElementById('workType').value = profile.work_type || '';
+            document.getElementById('preferredTime').value = profile.preferred_time || '';
+            document.getElementById('salary').value = profile.expected_salary || '';
+            document.getElementById('workLocation').value = profile.work_location || '';
+            document.getElementById('about').value = profile.additional_notes || '';
+
+            // Set profile photo
+            if (profile.profile_photo) {
+                const { data } = supabaseClient.storage
+                    .from('profile-photos')
+                    .getPublicUrl(profile.profile_photo);
+                if (data?.publicUrl) {
+                    document.getElementById('profilePhotoPreview').src = data.publicUrl;
+                }
+            }
+
+            // Set skills
+            if (profile.skills) {
+                const skillCheckboxes = document.querySelectorAll('.skill-checkbox');
+                skillCheckboxes.forEach(checkbox => {
+                    checkbox.checked = profile.skills.includes(checkbox.value);
+                });
+            }
+
+            // Set languages
+            if (profile.languages) {
+                const languageCheckboxes = document.querySelectorAll('.language-checkbox');
+                languageCheckboxes.forEach(checkbox => {
+                    checkbox.checked = profile.languages.includes(checkbox.value);
+                });
+            }
+        }
+
+        // Handle profile photo upload
+        document.getElementById('profilePhoto').addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            try {
+                const fileExt = file.name.split('.').pop();
+                const fileName = `${currentUser.id}-${Date.now()}.${fileExt}`;
+                const filePath = `${fileName}`;
+
+                // Delete old photo if exists
+                if (currentProfile?.profile_photo) {
+                    await supabaseClient.storage
+                        .from('profile-photos')
+                        .remove([currentProfile.profile_photo]);
+                }
+
+                const { error: uploadError } = await supabaseClient.storage
+                    .from('profile-photos')
+                    .upload(filePath, file);
+
+                if (uploadError) throw uploadError;
+
+                // Update profile photo preview
+                const { data } = supabaseClient.storage
+                    .from('profile-photos')
+                    .getPublicUrl(filePath);
+                
+                if (data?.publicUrl) {
+                    document.getElementById('profilePhotoPreview').src = data.publicUrl;
+                }
+
+                // Update profile in database
+                const { error: updateError } = await supabaseClient
+                    .from('maid_profiles')
+                    .update({ profile_photo: filePath })
+                    .eq('user_id', currentUser.id);
+
+                if (updateError) throw updateError;
+
+                showSuccess('Profile photo updated successfully');
+            } catch (error) {
+                console.error('Error uploading photo:', error);
+                showError('Error uploading profile photo. Please try again.');
+            }
+        });
+
+        // Handle form submission
+        document.getElementById('profileForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            try {
+                // Show loading state
+                const submitButton = document.querySelector('button[type="submit"]');
+                submitButton.disabled = true;
+                submitButton.textContent = 'Updating...';
+
+                // Get current session
+                const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
+                if (sessionError || !session) {
+                    throw new Error('Please log in again');
+                }
+
+                // Collect form data
+                const formData = new FormData(e.target);
+                const skills = Array.from(document.querySelectorAll('.skill-checkbox:checked'))
+                    .map(checkbox => checkbox.value);
+                const languages = Array.from(document.querySelectorAll('.language-checkbox:checked'))
+                    .map(checkbox => checkbox.value);
+
+                const profileData = {
+                    user_id: session.user.id,
+                    full_name: formData.get('fullName'),
+                    age_group: formData.get('ageGroup'),
+                    gender: formData.get('gender'),
+                    marital_status: formData.get('maritalStatus'),
+                    nationality: formData.get('nationality'),
+                    education: formData.get('education'),
+                    email: formData.get('email'),
+                    phone: formData.get('phone'),
+                    address: formData.get('address'),
+                    emergency_contact: formData.get('emergencyContact'),
+                    years_of_experience: parseInt(formData.get('experience')),
+                    work_type: formData.get('workType'),
+                    preferred_time: formData.get('preferredTime'),
+                    expected_salary: parseInt(formData.get('salary')),
+                    work_location: formData.get('workLocation'),
+                    skills: skills,
+                    languages: languages,
+                    additional_notes: formData.get('about'),
+                    updated_at: new Date().toISOString()
+                };
+
+                // Check if profile exists
+                const { data: existingProfile, error: checkError } = await supabaseClient
+                    .from('maid_profiles')
+                    .select('id')
+                    .eq('user_id', session.user.id)
+                    .single();
+
+                if (checkError && checkError.code !== 'PGRST116') {
+                    throw checkError;
+                }
+
+                let result;
+                if (existingProfile) {
+                    // Update existing profile
+                    const { data, error } = await supabaseClient
+                        .from('maid_profiles')
+                        .update(profileData)
+                        .eq('user_id', session.user.id)
+                        .select();
+                    result = { data, error };
+                } else {
+                    // Insert new profile
+                    const { data, error } = await supabaseClient
+                        .from('maid_profiles')
+                        .insert([profileData])
+                        .select();
+                    result = { data, error };
+                }
+
+                if (result.error) {
+                    throw result.error;
+                }
+
+                // Show success message
+                showSuccess('Profile updated successfully!');
+
+                // Reset button state
+                submitButton.disabled = false;
+                submitButton.textContent = 'Update Profile';
+
+                // Redirect to dashboard after 2 seconds
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 2000);
+
+            } catch (error) {
+                console.error('Update error:', error);
+                showError(error.message || 'Failed to update profile');
+                
+                // Reset button state
+                const submitButton = document.querySelector('button[type="submit"]');
+                submitButton.disabled = false;
+                submitButton.textContent = 'Update Profile';
+            }
+        });
+
+        // Handle sign out
+        document.getElementById('signOutBtn').addEventListener('click', async function() {
+            try {
+                const { error } = await supabaseClient.auth.signOut();
+                if (error) throw error;
+                window.location.href = '../index.html';
+            } catch (error) {
+                console.error('Error signing out:', error);
+                showError('Error signing out. Please try again.');
+            }
+        });
+
+        // Show success message
+        function showSuccess(message) {
+            const alert = document.createElement('div');
+            alert.className = 'fixed top-4 right-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded z-50';
+            alert.innerHTML = `
+                <span class="block sm:inline">${message}</span>
+            `;
+            document.body.appendChild(alert);
+            setTimeout(() => alert.remove(), 3000);
+        }
+
+        // Show error message
+        function showError(message) {
+            const alert = document.createElement('div');
+            alert.className = 'fixed top-4 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded z-50';
+            alert.innerHTML = `
+                <span class="block sm:inline">${message}</span>
+            `;
+            document.body.appendChild(alert);
+            setTimeout(() => alert.remove(), 3000);
+        }
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', initializeProfile);
+    </script>
+</body>
+</html> 
