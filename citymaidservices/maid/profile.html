@@ -398,6 +398,12 @@
                     checkbox.checked = profile.languages.includes(checkbox.value);
                 });
             }
+
+            // Set profile visibility toggle state
+            const toggle = document.getElementById('profileVisibilityToggle');
+            if (toggle) {
+                toggle.checked = profile.status === 'active';
+            }
         }
 
         // Handle profile photo upload
@@ -582,6 +588,54 @@
             document.body.appendChild(alert);
             setTimeout(() => alert.remove(), 3000);
         }
+
+        // Add profile visibility toggle functionality
+        async function toggleProfileVisibility() {
+            try {
+                if (!currentProfile || !supabaseClient) {
+                    throw new Error('Profile or Supabase client not initialized');
+                }
+
+                const toggle = document.getElementById('profileVisibilityToggle');
+                if (!toggle) return;
+
+                // Show loading state
+                toggle.disabled = true;
+
+                const newStatus = currentProfile.status === 'active' ? 'inactive' : 'active';
+                const { error } = await supabaseClient
+                    .from('maid_profiles')
+                    .update({ status: newStatus })
+                    .eq('user_id', currentUser.id);
+
+                if (error) throw error;
+
+                currentProfile.status = newStatus;
+                toggle.checked = newStatus === 'active';
+                toggle.disabled = false;
+
+                showSuccess(`Profile is now ${newStatus === 'active' ? 'public' : 'private'}`);
+            } catch (error) {
+                console.error('Error toggling profile visibility:', error);
+                
+                // Restore toggle state
+                const toggle = document.getElementById('profileVisibilityToggle');
+                if (toggle) {
+                    toggle.checked = currentProfile.status === 'active';
+                    toggle.disabled = false;
+                }
+
+                showError(`Failed to update profile visibility: ${error.message}`);
+            }
+        }
+
+        // Add event listener for toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggle = document.getElementById('profileVisibilityToggle');
+            if (toggle) {
+                toggle.addEventListener('change', toggleProfileVisibility);
+            }
+        });
 
         // Initialize the page
         document.addEventListener('DOMContentLoaded', initializeProfile);
