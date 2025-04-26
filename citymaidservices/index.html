@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${BRAND_CONFIG.SHORT_NAME} - Find Reliable Domestic Help</title>
+    <!-- Load Google Fonts first -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Then load other resources -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Add Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Load Brand Configuration -->
+    <script src="config.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif'],
+                        poppins: ['Poppins', 'sans-serif'],
+                    },
+                    
+                    colors: {
+                        brand: {
+                            primary: '#4F46E5',
+                            secondary: '#4338CA',
+                            light: '#EEF2FF',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer base {
+            html {
+                font-family: 'Poppins', sans-serif;
+            }
+        }
+        
+        @layer utilities {
+            .profile-image {
+                @apply aspect-[3/4] object-cover object-[center_15%];
+            }
+            
+            .card-shadow {
+                @apply shadow-[0_1px_3px_0_rgba(0,0,0,0.1),0_1px_2px_-1px_rgba(0,0,0,0.1)] transition-all duration-200;
+            }
+            
+            .card-shadow:hover {
+                @apply shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-2px_rgba(0,0,0,0.1)] -translate-y-0.5;
+            }
+
+            .section-title {
+                @apply relative inline-block pb-4;
+            }
+
+            .section-title::after {
+                content: '';
+                @apply absolute bottom-0 left-1/2 -translate-x-1/2 w-20 h-[3px] bg-gradient-to-r from-brand-primary to-brand-secondary rounded-sm;
+            }
+
+            .badge {
+                @apply bg-gradient-to-r from-brand-primary to-brand-secondary px-4 py-2 rounded-full text-white font-medium text-sm leading-5;
+            }
+
+            .truncate-2 {
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                @apply overflow-hidden;
+            }
+        }
+    </style>
+    <script>
+        // Update brand names after DOM loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Update page title
+            document.title = `${BRAND_CONFIG.SHORT_NAME} - Find Reliable Domestic Help`;
+
+            // Update header logo
+            const headerLogo = document.querySelector('.flex.items-center a');
+            if (headerLogo) {
+                headerLogo.innerHTML = BRAND_CONFIG.SHORT_NAME;
+            }
+
+            // Update any other brand references
+            const brandReferences = document.querySelectorAll('.text-brand-primary');
+            brandReferences.forEach(element => {
+                if (element.textContent.includes('City Maid Services')) {
+                    element.textContent = BRAND_CONFIG.SHORT_NAME;
+                }
+            });
+        });
+    </script>
+</head>
+<body class="font-poppins">
+    <!-- Navigation Bar -->
+    <nav class="bg-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20">
+                <div class="flex items-center">
+                    <a href="index.html" class="text-3xl font-bold text-brand-primary tracking-tight">${BRAND_CONFIG.SHORT_NAME}</a>
+                </div>
+                <!-- Mobile menu button -->
+                <div class="flex items-center md:hidden">
+                    <button id="mobileMenuBtn" class="text-gray-700 hover:text-brand-primary focus:outline-none" aria-label="Open menu">
+                        <i class="fas fa-bars text-2xl"></i>
+                    </button>
+                </div>
+                <!-- Desktop menu -->
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="index.html" class="text-brand-primary font-semibold">Home</a>
+                    <a href="jobs/find-maids.html" class="text-gray-700 hover:text-brand-primary font-medium transition-colors">Find Maids</a>
+                    <a href="jobs/find-jobs.html" class="text-gray-700 hover:text-brand-primary font-medium transition-colors">Find Jobs</a>
+                    <a href="static/contact.html" class="text-gray-700 hover:text-brand-primary font-medium transition-colors">Contact Us</a>
+                    <a href="static/about.html" class="text-gray-700 hover:text-brand-primary font-medium transition-colors">About Us</a>
+                    <a href="auth/login.html" class="bg-brand-primary text-white px-6 py-2 rounded-lg hover:bg-brand-secondary font-semibold transition-colors">
+                        Sign In
+                    </a>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile menu panel -->
+        <div id="mobileMenu" class="hidden md:hidden fixed inset-0 bg-black bg-opacity-50 z-50">
+            <div class="fixed inset-y-0 right-0 max-w-xs w-full bg-white shadow-xl">
+                <div class="flex items-center justify-between p-4 border-b">
+                    <div class="flex items-center space-x-4">
+                        <button onclick="window.history.back()" class="text-gray-500 hover:text-gray-700" aria-label="Go back">
+                            <i class="fas fa-arrow-left text-xl"></i>
+                        </button>
+                        <a href="index.html" class="text-gray-500 hover:text-gray-700" aria-label="Go to homepage">
+                            <i class="fas fa-home text-xl"></i>
+                        </a>
+                    </div>
+                    <h2 class="text-xl font-semibold text-gray-900">Menu</h2>
+                    <button id="closeMobileMenu" class="text-gray-500 hover:text-gray-700" aria-label="Close menu">
+                        <i class="fas fa-times text-2xl"></i>
+                    </button>
+                </div>
+                <div class="p-4 space-y-4">
+                    <a href="index.html" class="block text-gray-700 hover:text-brand-primary font-medium transition-colors">Home</a>
+                    <a href="jobs/find-maids.html" class="block text-gray-700 hover:text-brand-primary font-medium transition-colors">Find Maids</a>
+                    <a href="jobs/find-jobs.html" class="block text-gray-700 hover:text-brand-primary font-medium transition-colors">Find Jobs</a>
+                    <a href="static/contact.html" class="block text-gray-700 hover:text-brand-primary font-medium transition-colors">Contact Us</a>
+                    <a href="static/about.html" class="block text-gray-700 hover:text-brand-primary font-medium transition-colors">About Us</a>
+                    <div class="pt-4 border-t border-gray-200">
+                        <a href="auth/login.html" class="block text-gray-700 hover:text-brand-primary font-medium transition-colors">Sign In</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="bg-gradient-to-r from-brand-primary to-brand-secondary">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+            <div class="max-w-3xl mx-auto text-center">
+                <h1 class="text-4xl md:text-5xl font-bold mb-6 text-white">Find Trusted Domestic Help</h1>
+                <p class="text-xl mb-8 text-white/90">Connect with verified domestic helpers and employers in your area</p>
+                
+                <!-- Search and Filter Section -->
+                <div class="bg-white/95 rounded-lg p-6 shadow-lg backdrop-blur-sm">
+                    <!-- Search Bar -->
+                    <div class="relative mb-6">
+                        <input type="text" 
+                               id="searchInput"
+                               placeholder="Search by name, skills, or keywords..." 
+                               class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-brand-primary focus:ring-2 focus:ring-brand-light text-gray-900">
+                        <button class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-brand-primary" aria-label="Search">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+
+                    <!-- Essential Filters -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <!-- Location Filter -->
+                        <div class="relative">
+                            <select id="locationFilter" class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-brand-primary focus:ring-2 focus:ring-brand-light text-gray-900" aria-label="Select Location">
+                                <option value="">Select Location</option>
+                                <option value="kathmandu">Kathmandu</option>
+                                <option value="lalitpur">Lalitpur</option>
+                                <option value="bhaktapur">Bhaktapur</option>
+                            </select>
+                        </div>
+
+                        <!-- Work Type Filter -->
+                        <div class="relative">
+                            <select id="workTypeFilter" class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-brand-primary focus:ring-2 focus:ring-brand-light text-gray-900" aria-label="Select Work Type">
+                                <option value="">Select Work Type</option>
+                                <option value="full-time">Full-time</option>
+                                <option value="part-time">Part-time</option>
+                                <option value="live-in">Live-in</option>
+                            </select>
+                        </div>
+
+                        <!-- Salary Range Filter -->
+                        <div class="relative">
+                            <select id="salaryFilter" class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-brand-primary focus:ring-2 focus:ring-brand-light text-gray-900" aria-label="Select Salary Range">
+                                <option value="">Select Salary Range</option>
+                                <option value="0-15000">Up to NR 15,000</option>
+                                <option value="15000-25000">NR 15,000 - 25,000</option>
+                                <option value="25000+">NR 25,000+</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Get Started Section -->
+                <div class="text-center mt-8">
+                    <p class="text-white/90 mb-4">Ready to find your perfect match?</p>
+                    <a href="auth/select-role.html" 
+                       class="inline-flex items-center justify-center bg-white text-brand-primary px-8 py-4 rounded-lg hover:bg-white/90 transform hover:-translate-y-1 transition-all duration-300 text-center font-semibold">
+                        <i class="fas fa-rocket mr-2"></i>Get Started
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Featured Domestic Helpers Section -->
+    <section class="py-12 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="section-title text-3xl font-bold text-gray-900">Featured Domestic Helpers</h2>
+                <p class="mt-6 text-lg text-gray-700">
+                    Connect with experienced and reliable domestic helpers in your area
+                </p>
+            </div>
+            <div id="featuredMaids" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Maid cards will be inserted here -->
+            </div>
+            <div class="text-center mt-8">
+                <a href="jobs/find-maids.html" 
+                   class="inline-flex items-center justify-center bg-brand-primary text-white px-8 py-3 rounded-lg hover:bg-brand-secondary transform hover:-translate-y-1 transition-all duration-300">
+                    <span>View All Profiles</span>
+                    <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Latest Jobs Section -->
+    <section class="py-16 bg-brand-light">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="section-title text-3xl font-bold text-gray-900">
+                    Latest Job Openings
+                </h2>
+                <p class="mt-6 text-lg text-gray-600">
+                    Find the perfect domestic help opportunity
+                </p>
+            </div>
+            <div id="latestJobsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Jobs will be loaded here dynamically -->
+            </div>
+            <div class="text-center mt-8">
+                <a href="jobs/find-jobs.html" class="inline-block bg-brand-primary text-white px-8 py-3 rounded-lg hover:bg-brand-secondary transition-colors">
+                    View All Jobs <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="section-title text-3xl font-bold text-gray-900">
+                    Why Choose City Maid Services
+                </h2>
+                <p class="mt-6 text-lg text-gray-600">
+                    We make finding domestic help simple, secure, and reliable
+                </p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="text-center p-6">
+                    <div class="w-16 h-16 bg-brand-light rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-user-check text-2xl text-brand-primary"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Verified Profiles</h3>
+                    <p class="text-gray-600">All domestic helpers are thoroughly verified for your safety</p>
+                </div>
+                <div class="text-center p-6">
+                    <div class="w-16 h-16 bg-brand-light rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-bolt text-2xl text-brand-primary"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Quick Matching</h3>
+                    <p class="text-gray-600">Find the perfect match for your requirements quickly</p>
+                </div>
+                <div class="text-center p-6">
+                    <div class="w-16 h-16 bg-brand-light rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-shield-alt text-2xl text-brand-primary"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Secure Platform</h3>
+                    <p class="text-gray-600">Your data and transactions are always protected</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4">City Maid Services</h3>
+                    <p class="text-gray-400">Connecting trusted domestic helpers with employers in your area.</p>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold mb-4">Quick Links</h3>
+                    <ul class="space-y-2">
+                        <li><a href="index.html" class="text-gray-400 hover:text-white transition-colors">Home</a></li>
+                        <li><a href="jobs/find-jobs.html" class="text-gray-400 hover:text-white transition-colors">Find Jobs</a></li>
+                        <li><a href="static/about.html" class="text-gray-400 hover:text-white transition-colors">About Us</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold mb-4">Contact</h3>
+                    <ul class="space-y-2">
+                        <li class="flex items-center text-gray-400">
+                            <i class="fas fa-map-marker-alt mr-2"></i> Kathmandu, Nepal
+                        </li>
+                        <li class="flex items-center text-gray-400">
+                            <i class="fas fa-phone mr-2"></i> +977 1234567
+                        </li>
+                        <li class="flex items-center text-gray-400">
+                            <i class="fas fa-envelope mr-2"></i> info@citymaidservices.com
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold mb-4">Follow Us</h3>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fab fa-facebook-f text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fab fa-twitter text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fab fa-instagram text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fab fa-linkedin-in text-xl"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; <span id="currentYear"></span> City Maid Services. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile menu functionality
+        document.getElementById('mobileMenuBtn').addEventListener('click', function() {
+            document.getElementById('mobileMenu').classList.remove('hidden');
+        });
+
+        document.getElementById('closeMobileMenu').addEventListener('click', function() {
+            document.getElementById('mobileMenu').classList.add('hidden');
+        });
+
+        // Set current year in footer
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+        
+        // Initialize Supabase client
+        const SUPABASE_URL = 'https://fdgqqxyyofjnkhswkwcq.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZkZ3FxeHl5b2Zqbmtoc3drd2NxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQwMjQyMTMsImV4cCI6MjA1OTYwMDIxM30.YyJLLu3r2a7Mh7ny0ie-YzzLfPh5PdrJJHnBFBxWqVE';
+        
+        // Wait for Supabase to be loaded
+        function waitForSupabase() {
+            return new Promise((resolve, reject) => {
+                if (window.supabase) {
+                    resolve(window.supabase);
+                } else {
+                    const checkInterval = setInterval(() => {
+                        if (window.supabase) {
+                            clearInterval(checkInterval);
+                            resolve(window.supabase);
+                        }
+                    }, 100);
+                    
+                    // Timeout after 5 seconds
+                    setTimeout(() => {
+                        clearInterval(checkInterval);
+                        reject(new Error('Supabase failed to load'));
+                    }, 5000);
+                }
+            });
+        }
+
+        // Initialize Supabase client
+        async function initializeSupabase() {
+            try {
+                const supabase = await waitForSupabase();
+        const { createClient } = supabase;
+                return createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            } catch (error) {
+                console.error('Failed to initialize Supabase:', error);
+                throw error;
+            }
+        }
+
+        // Function to fetch and display latest jobs
+        async function fetchLatestJobs(supabaseClient) {
+            console.log('Starting fetchLatestJobs...');
+            const jobsContainer = document.getElementById('latestJobsContainer');
+            
+            if (!jobsContainer) {
+                console.error('Jobs container not found!');
+                return;
+            }
+            
+            // Show loading state
+            jobsContainer.innerHTML = `
+                <div class="col-span-full flex flex-col items-center justify-center py-8">
+                    <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brand-primary mb-4"></div>
+                    <p class="text-gray-600">Loading jobs...</p>
+                </div>
+            `;
+
+            try {
+                console.log('Fetching jobs from Supabase...');
+                const { data: jobs, error } = await supabaseClient
+                    .from('jobs')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(6);
+
+                console.log('Jobs fetch response:', { jobs, error });
+
+                if (error) {
+                    console.error('Error fetching jobs:', error);
+                    jobsContainer.innerHTML = `
+                        <div class="col-span-full text-center py-8">
+                            <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-exclamation-circle text-red-500 text-2xl"></i>
+                            </div>
+                            <h3 class="text-xl font-semibold text-gray-900 mb-2">Error Loading Jobs</h3>
+                            <p class="text-gray-600 mb-4">We couldn't load the jobs at this time. Please try again later.</p>
+                            <button onclick="window.location.reload()" 
+                                    class="bg-brand-primary text-white px-6 py-2 rounded-lg hover:bg-brand-secondary transition-colors">
+                                Try Again
+                            </button>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Clear loading state
+                jobsContainer.innerHTML = '';
+
+                if (!jobs || jobs.length === 0) {
+                    console.log('No jobs found, displaying sample jobs');
+                    jobsContainer.innerHTML = `
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <!-- Sample Job 1 -->
+                            <div class="bg-white rounded-xl overflow-hidden shadow-[0_1px_3px_0_rgba(0,0,0,0.1),0_1px_2px_-1px_rgba(0,0,0,0.1)] hover:shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-2px_rgba(0,0,0,0.1)] transition-all duration-200 hover:-translate-y-0.5">
+                                <div class="p-6">
+                                    <div class="flex items-center justify-between mb-4">
+                                        <div class="flex items-center">
+                                            <div class="w-12 h-12 rounded-full bg-brand-light flex items-center justify-center mr-3">
+                                                <i class="fas fa-briefcase text-brand-primary text-xl"></i>
+                                            </div>
+                                            <div>
+                                                <h3 class="font-semibold text-gray-900">Sample Company</h3>
+                                                <p class="text-sm text-gray-500">Kathmandu</p>
+                                            </div>
+                                        </div>
+                                        <span class="px-3 py-1 text-sm rounded-full bg-green-100 text-green-800">
+                                            Full-time
+                                        </span>
+                                    </div>
+                                    <h4 class="text-xl font-semibold text-gray-900 mb-2">Housekeeper Needed</h4>
+                                    <div class="mb-4">
+                                        <p class="text-gray-600 truncate-2">Looking for an experienced housekeeper to help with daily cleaning and maintenance tasks.</p>
+                                    </div>
+                                    <div class="flex flex-wrap gap-2 mb-4">
+                                        <span class="bg-brand-light text-brand-primary px-3 py-1 rounded-full text-sm">
+                                            <i class="fas fa-money-bill-wave mr-1"></i>NR 15,000 - 20,000
+                                        </span>
+                                        <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
+                                            <i class="fas fa-clock mr-1"></i>1+ years
+                                        </span>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm text-gray-500">
+                                            <i class="far fa-clock mr-1"></i>Posted Today
+                                        </span>
+                                        <span class="text-sm text-gray-500">
+                                            Sample Job
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Sample Job 2 -->
+                            <div class="bg-white rounded-xl overflow-hidden shadow-[0_1px_3px_0_rgba(0,0,0,0.1),0_1px_2px_-1px_rgba(0,0,0,0.1)] hover:shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-2px_rgba(0,0,0,0.1)] transition-all duration-200 hover:-translate-y-0.5">
+                                <div class="p-6">
+                                    <div class="flex items-center justify-between mb-4">
+                                        <div class="flex items-center">
+                                            <div class="w-12 h-12 rounded-full bg-brand-light flex items-center justify-center mr-3">
+                                                <i class="fas fa-briefcase text-brand-primary text-xl"></i>
+                                            </div>
+                                            <div>
+                                                <h3 class="font-semibold text-gray-900">Family Home</h3>
+                                                <p class="text-sm text-gray-500">Lalitpur</p>
+                                            </div>
+                                        </div>
+                                        <span class="px-3 py-1 text-sm rounded-full bg-green-100 text-green-800">
+                                            Part-time
+                                        </span>
+                                    </div>
+                                    <h4 class="text-xl font-semibold text-gray-900 mb-2">Domestic Helper</h4>
+                                    <div class="mb-4">
+                                        <p class="text-gray-600 truncate-2">Seeking a reliable domestic helper for light housekeeping and cooking duties.</p>
+                                    </div>
+                                    <div class="flex flex-wrap gap-2 mb-4">
+                                        <span class="bg-brand-light text-brand-primary px-3 py-1 rounded-full text-sm">
+                                            <i class="fas fa-money-bill-wave mr-1"></i>NR 12,000 - 15,000
+                                        </span>
+                                        <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
+                                            <i class="fas fa-clock mr-1"></i>No experience required
+                                        </span>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm text-gray-500">
+                                            <i class="far fa-clock mr-1"></i>Posted Today
+                                        </span>
+                                        <span class="text-sm text-gray-500">
+                                            Sample Job
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Display real jobs
+                jobs.forEach(job => {
+                    const jobCard = document.createElement('div');
+                    jobCard.className = 'bg-white rounded-xl overflow-hidden shadow-[0_1px_3px_0_rgba(0,0,0,0.1),0_1px_2px_-1px_rgba(0,0,0,0.1)] hover:shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-2px_rgba(0,0,0,0.1)] transition-all duration-200 hover:-translate-y-0.5';
+                    jobCard.innerHTML = `
+                        <div class="p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center">
+                                    <div class="w-12 h-12 rounded-full bg-brand-light flex items-center justify-center mr-3">
+                                        <i class="fas fa-briefcase text-brand-primary text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-900">${job.company_name || 'Private Employer'}</h3>
+                                        <p class="text-sm text-gray-500">${job.location || 'Location not specified'}</p>
+                                    </div>
+                                </div>
+                                <span class="px-3 py-1 text-sm rounded-full bg-green-100 text-green-800">
+                                    ${job.job_type || 'Full-time'}
+                                </span>
+                            </div>
+                            
+                            <h4 class="text-xl font-semibold text-gray-900 mb-2">${job.title || 'Job Title'}</h4>
+                            
+                            <div class="mb-4">
+                                <p class="text-gray-600 truncate-2">${job.description || 'No description available'}</p>
+                            </div>
+                            
+                            <div class="flex flex-wrap gap-2 mb-4">
+                                ${job.salary_range ? 
+                                    `<span class="bg-brand-light text-brand-primary px-3 py-1 rounded-full text-sm">
+                                        <i class="fas fa-money-bill-wave mr-1"></i>${job.salary_range}
+                                    </span>` : 
+                                    ''
+                                }
+                                ${job.experience_required ? 
+                                    `<span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
+                                        <i class="fas fa-clock mr-1"></i>${job.experience_required}
+                                    </span>` : 
+                                    ''
+                                }
+                            </div>
+                            
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-gray-500">
+                                    <i class="far fa-clock mr-1"></i>Posted ${new Date(job.created_at).toLocaleDateString()}
+                                </span>
+                                <a href="jobs/find-jobs.html?id=${job.id}" 
+                                   class="bg-brand-primary text-white px-4 py-2 rounded-lg hover:bg-brand-secondary transition-colors">
+                                    View Details
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                    jobsContainer.appendChild(jobCard);
+                });
+
+            } catch (error) {
+                console.error('Error in fetchLatestJobs:', error);
+                jobsContainer.innerHTML = `
+                    <div class="col-span-full text-center py-8">
+                        <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-exclamation-circle text-red-500 text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-900 mb-2">Something Went Wrong</h3>
+                        <p class="text-gray-600 mb-4">We encountered an error while loading jobs. Please try again later.</p>
+                        <button onclick="window.location.reload()" 
+                                class="bg-brand-primary text-white px-6 py-2 rounded-lg hover:bg-brand-secondary transition-colors">
+                            Try Again
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        // Load featured maids
+        async function loadFeaturedMaids(supabaseClient) {
+            console.log('Starting loadFeaturedMaids...');
+            try {
+                const featuredMaidsContainer = document.getElementById('featuredMaids');
+                if (!featuredMaidsContainer) {
+                    console.error('Featured maids container not found!');
+                    throw new Error('Featured maids container not found');
+                }
+
+                console.log('Fetching maid profiles from Supabase...');
+                const { data: maids, error } = await supabaseClient
+                    .from('maid_profiles')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                
+                console.log('Maid profiles fetch response:', { maids, error });
+                
+                if (error) {
+                    console.error('Error fetching maid profiles:', error);
+                    throw error;
+                }
+
+                featuredMaidsContainer.innerHTML = '';
+
+                if (!maids || maids.length === 0) {
+                    console.log('No maid profiles found');
+                    featuredMaidsContainer.innerHTML = `
+                        <div class="col-span-full text-center py-8">
+                            <p class="text-gray-500">No maid profiles available at the moment.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                console.log(`Found ${maids.length} maid profiles to display`);
+                // Display each maid profile
+                maids.forEach(maid => {
+                    let photoUrl = 'https://via.placeholder.com/300x300?text=No+Photo';
+                    
+                    if (maid.profile_photo) {
+                        try {
+                            const { data } = supabaseClient.storage
+                            .from('profile-photos')
+                            .getPublicUrl(maid.profile_photo);
+                        
+                        if (data?.publicUrl) {
+                            photoUrl = data.publicUrl;
+                            }
+                        } catch (photoError) {
+                            console.error('Error getting profile photo URL:', photoError);
+                        }
+                    }
+
+                    const skillsHtml = maid.skills && Array.isArray(maid.skills)
+                        ? maid.skills.slice(0, 3).map(skill => 
+                            `<span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">${skill}</span>`
+                        ).join('')
+                        : '';
+
+                    const languagesHtml = maid.languages && Array.isArray(maid.languages)
+                        ? maid.languages.map(lang => 
+                            `<span class="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded">${lang}</span>`
+                        ).join('')
+                        : '';
+
+                    const card = `
+                        <div class="bg-white rounded-xl overflow-hidden shadow-[0_1px_3px_0_rgba(0,0,0,0.1),0_1px_2px_-1px_rgba(0,0,0,0.1)] hover:shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-2px_rgba(0,0,0,0.1)] transition-all duration-200 hover:-translate-y-0.5">
+                            <div class="relative h-48 overflow-hidden group">
+                                <img src="${photoUrl}" alt="${maid.full_name}" 
+                                    class="w-full h-full object-cover object-[center_30%] transition-transform duration-300 group-hover:scale-110">
+                                <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
+                                    <h3 class="text-white font-semibold text-lg">${maid.full_name || 'Name not specified'}</h3>
+                                </div>
+                            </div>
+                            <div class="p-6">
+                                <div class="flex items-center mb-2">
+                                    <i class="fas fa-briefcase text-gray-500 mr-2"></i>
+                                    <span class="text-sm">${maid.work_type || 'Not specified'}</span>
+                                </div>
+                                <div class="flex items-center mb-2">
+                                    <i class="fas fa-map-marker-alt text-gray-500 mr-2"></i>
+                                    <span class="text-sm">${maid.work_location || 'Location not specified'}</span>
+                                </div>
+                                <div class="flex items-center mb-2">
+                                    <i class="fas fa-clock text-gray-500 mr-2"></i>
+                                    <span class="text-sm">${maid.preferred_time || 'Time not specified'}</span>
+                                </div>
+                                <div class="flex items-center mb-4">
+                                    <i class="fas fa-money-bill-wave text-gray-500 mr-2"></i>
+                                    <span class="text-sm">NR ${maid.expected_salary || 'Salary not specified'}</span>
+                                </div>
+                                <div class="space-y-2">
+                                    <div class="flex flex-wrap gap-1">
+                                        ${skillsHtml}
+                                    </div>
+                                    <div class="flex flex-wrap gap-1">
+                                        ${languagesHtml}
+                                    </div>
+                                </div>
+                                <div class="mt-4">
+                                    <a href="maid/view-profile.html?id=${maid.user_id}" 
+                                        class="block w-full bg-brand-primary text-white py-2 rounded-lg hover:bg-brand-secondary transition-colors text-center">
+                                        View Profile
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    featuredMaidsContainer.innerHTML += card;
+                });
+
+            } catch (error) {
+                console.error('Error in loadFeaturedMaids:', error);
+                const featuredMaidsContainer = document.getElementById('featuredMaids');
+                if (featuredMaidsContainer) {
+                    featuredMaidsContainer.innerHTML = `
+                    <div class="col-span-full text-center py-8">
+                        <p class="text-red-500">Error loading featured maids. Please try again later.</p>
+                            <p class="text-sm text-gray-500 mt-2">Error details: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+        }
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('DOM Content Loaded, initializing...');
+            try {
+                // Initialize Supabase
+                console.log('Creating Supabase client...');
+                const supabaseClient = await initializeSupabase();
+                console.log('Supabase client created successfully');
+
+                // Load maids first
+                console.log('Starting to load maid profiles...');
+                await loadFeaturedMaids(supabaseClient);
+
+                // Load jobs after a short delay
+                console.log('Setting up jobs fetch timer...');
+                setTimeout(() => {
+                    console.log('Starting jobs fetch...');
+                    fetchLatestJobs(supabaseClient);
+                }, 500);
+
+            } catch (error) {
+                console.error('Initialization error:', error);
+                const jobsContainer = document.getElementById('latestJobsContainer');
+                if (jobsContainer) {
+                    jobsContainer.innerHTML = `
+                        <div class="col-span-full text-center py-8">
+                            <p class="text-red-500">Failed to initialize the application.</p>
+                            <p class="text-sm text-gray-500 mt-2">${error.message}</p>
+                        </div>
+                    `;
+                }
+            }
+        });
+
+        // Update the script section with complete search and filter implementation
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get filter elements
+            const searchInput = document.getElementById('searchInput');
+            const locationFilter = document.getElementById('locationFilter');
+            const workTypeFilter = document.getElementById('workTypeFilter');
+            const salaryFilter = document.getElementById('salaryFilter');
+            const searchButton = document.querySelector('button[aria-label="Search"]');
+
+            // Store active filters
+            let activeFilters = {
+                search: '',
+                location: '',
+                workType: '',
+                salary: ''
+            };
+
+            // Function to update filters and trigger search
+            function updateFilters() {
+                // Update active filters
+                activeFilters.search = searchInput.value.trim();
+                activeFilters.location = locationFilter.value;
+                activeFilters.workType = workTypeFilter.value;
+                activeFilters.salary = salaryFilter.value;
+
+                // Trigger search with updated filters
+                searchMaids(activeFilters);
+            }
+
+            // Add event listeners
+            searchInput.addEventListener('input', debounce(updateFilters, 300));
+            searchButton.addEventListener('click', updateFilters);
+            locationFilter.addEventListener('change', updateFilters);
+            workTypeFilter.addEventListener('change', updateFilters);
+            salaryFilter.addEventListener('change', updateFilters);
+
+            // Debounce function for search input
+            function debounce(func, wait) {
+                let timeout;
+                return function executedFunction(...args) {
+                    const later = () => {
+                        clearTimeout(timeout);
+                        func(...args);
+                    };
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                };
+            }
+
+            // Function to search maids based on filters
+            async function searchMaids(filters) {
+                try {
+                    const supabaseClient = await initializeSupabase();
+                    
+                    let query = supabaseClient
+                        .from('maid_profiles')
+                        .select('*');
+
+                    // Apply filters
+                    if (filters.search) {
+                        query = query.or(`full_name.ilike.%${filters.search}%,skills.cs.{${filters.search}}`);
+                    }
+                    if (filters.location) {
+                        query = query.eq('work_location', filters.location);
+                    }
+                    if (filters.workType) {
+                        query = query.eq('work_type', filters.workType);
+                    }
+                    if (filters.salary) {
+                        const [min, max] = filters.salary.split('-');
+                        if (max) {
+                            query = query.gte('expected_salary', parseInt(min))
+                                       .lte('expected_salary', parseInt(max));
+                        } else {
+                            query = query.gte('expected_salary', parseInt(min));
+                        }
+                    }
+
+                    // Show loading state
+                    const featuredMaidsContainer = document.getElementById('featuredMaids');
+                    if (featuredMaidsContainer) {
+                        featuredMaidsContainer.innerHTML = `
+                            <div class="col-span-full flex flex-col items-center justify-center py-8">
+                                <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brand-primary mb-4"></div>
+                                <p class="text-gray-600">Searching maids...</p>
+                            </div>
+                        `;
+                    }
+
+                    const { data: maids, error } = await query;
+
+                    if (error) throw error;
+
+                    // Update the UI with filtered results
+                    updateFeaturedMaids(maids, supabaseClient);
+
+                    // If no results found, show appropriate message
+                    if (!maids || maids.length === 0) {
+                        const noResultsMessage = `
+                            <div class="col-span-full text-center py-8">
+                                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <i class="fas fa-search text-gray-400 text-2xl"></i>
+                                </div>
+                                <h3 class="text-xl font-semibold text-gray-900 mb-2">No Results Found</h3>
+                                <p class="text-gray-600">Try adjusting your search criteria</p>
+                            </div>
+                        `;
+                        if (featuredMaidsContainer) {
+                            featuredMaidsContainer.innerHTML = noResultsMessage;
+                        }
+                    }
+
+                } catch (error) {
+                    console.error('Error searching maids:', error);
+                    const featuredMaidsContainer = document.getElementById('featuredMaids');
+                    if (featuredMaidsContainer) {
+                        featuredMaidsContainer.innerHTML = `
+                            <div class="col-span-full text-center py-8">
+                                <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <i class="fas fa-exclamation-circle text-red-500 text-2xl"></i>
+                                </div>
+                                <h3 class="text-xl font-semibold text-gray-900 mb-2">Error Searching Maids</h3>
+                                <p class="text-gray-600 mb-4">Please try again later</p>
+                                <button onclick="window.location.reload()" 
+                                        class="bg-brand-primary text-white px-6 py-2 rounded-lg hover:bg-brand-secondary transition-colors">
+                                    Try Again
+                                </button>
+                            </div>
+                        `;
+                    }
+                }
+            }
+
+            // Function to create a maid card
+            function createMaidCard(maid, supabaseClient) {
+                const card = document.createElement('div');
+                card.className = 'bg-white rounded-xl overflow-hidden shadow-[0_1px_3px_0_rgba(0,0,0,0.1),0_1px_2px_-1px_rgba(0,0,0,0.1)] hover:shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-2px_rgba(0,0,0,0.1)] transition-all duration-200 hover:-translate-y-0.5';
+                
+                let photoUrl = 'https://via.placeholder.com/300x300?text=No+Photo';
+                if (maid.profile_photo) {
+                    try {
+                        const { data } = supabaseClient.storage
+                            .from('profile-photos')
+                            .getPublicUrl(maid.profile_photo);
+                        if (data?.publicUrl) {
+                            photoUrl = data.publicUrl;
+                        }
+                    } catch (photoError) {
+                        console.error('Error getting profile photo URL:', photoError);
+                    }
+                }
+
+                const skillsHtml = maid.skills && Array.isArray(maid.skills)
+                    ? maid.skills.slice(0, 3).map(skill => 
+                        `<span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">${skill}</span>`
+                    ).join('')
+                    : '';
+
+                card.innerHTML = `
+                    <div class="relative h-48 overflow-hidden group">
+                        <img src="${photoUrl}" alt="${maid.full_name}" 
+                            class="w-full h-full object-cover object-[center_30%] transition-transform duration-300 group-hover:scale-110">
+                        <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
+                            <h3 class="text-white font-semibold text-lg">${maid.full_name || 'Name not specified'}</h3>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center mb-2">
+                            <i class="fas fa-briefcase text-gray-500 mr-2"></i>
+                            <span class="text-sm">${maid.work_type || 'Not specified'}</span>
+                        </div>
+                        <div class="flex items-center mb-2">
+                            <i class="fas fa-map-marker-alt text-gray-500 mr-2"></i>
+                            <span class="text-sm">${maid.work_location || 'Location not specified'}</span>
+                        </div>
+                        <div class="flex items-center mb-2">
+                            <i class="fas fa-clock text-gray-500 mr-2"></i>
+                            <span class="text-sm">${maid.preferred_time || 'Time not specified'}</span>
+                        </div>
+                        <div class="flex items-center mb-4">
+                            <i class="fas fa-money-bill-wave text-gray-500 mr-2"></i>
+                            <span class="text-sm">${maid.expected_salary ? `NR ${maid.expected_salary}` : 'Salary not specified'}</span>
+                        </div>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            ${skillsHtml}
+                        </div>
+                        <a href="maid/view-profile.html?id=${maid.id}" 
+                           class="block w-full text-center bg-brand-primary text-white px-4 py-2 rounded-lg hover:bg-brand-secondary transition-colors">
+                            View Profile
+                        </a>
+                    </div>
+                `;
+                
+                return card;
+            }
+
+            // Function to update the featured maids section
+            function updateFeaturedMaids(maids, supabaseClient) {
+                const featuredMaidsContainer = document.getElementById('featuredMaids');
+                if (!featuredMaidsContainer) return;
+
+                // Clear existing content
+                featuredMaidsContainer.innerHTML = '';
+
+                // Add filtered maid cards
+                maids.forEach(maid => {
+                    const card = createMaidCard(maid, supabaseClient);
+                    featuredMaidsContainer.appendChild(card);
+                });
+            }
+
+            // Initial search with empty filters
+            updateFilters();
+        });
+    </script>
+</body>
+</html>
