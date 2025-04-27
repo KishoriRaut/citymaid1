@@ -255,12 +255,13 @@
                     Find the perfect domestic help opportunity
                 </p>
             </div>
-            <div id="latestJobsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div id="latestJobsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <!-- Jobs will be loaded here dynamically -->
             </div>
             <div class="text-center mt-8">
-                <a href="jobs/find-jobs.html" class="inline-block bg-brand-primary text-white px-8 py-3 rounded-lg hover:bg-brand-secondary transition-colors">
-                    View All Jobs <i class="fas fa-arrow-right ml-2"></i>
+                <a href="jobs/find-jobs.html" class="inline-flex items-center justify-center bg-brand-primary text-white px-8 py-3 rounded-lg hover:bg-brand-secondary transform hover:-translate-y-1 transition-all duration-300">
+                    <span>View All Jobs</span>
+                    <i class="fas fa-arrow-right ml-2"></i>
                 </a>
             </div>
         </div>
@@ -431,6 +432,7 @@
                 const { data: jobs, error } = await supabaseClient
                     .from('jobs')
                     .select('*')
+                    .eq('status', 'active')
                     .order('created_at', { ascending: false })
                     .limit(6);
 
@@ -458,148 +460,21 @@
                 jobsContainer.innerHTML = '';
 
                 if (!jobs || jobs.length === 0) {
-                    console.log('No jobs found, displaying sample jobs');
                     jobsContainer.innerHTML = `
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            <!-- Sample Job 1 -->
-                            <div class="bg-white rounded-xl overflow-hidden shadow-[0_1px_3px_0_rgba(0,0,0,0.1),0_1px_2px_-1px_rgba(0,0,0,0.1)] hover:shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-2px_rgba(0,0,0,0.1)] transition-all duration-200 hover:-translate-y-0.5">
-                                <div class="p-6">
-                                    <div class="flex items-center justify-between mb-4">
-                                        <div class="flex items-center">
-                                            <div class="w-12 h-12 rounded-full bg-brand-light flex items-center justify-center mr-3">
-                                                <i class="fas fa-briefcase text-brand-primary text-xl"></i>
-                                            </div>
-                                            <div>
-                                                <h3 class="font-semibold text-gray-900">Sample Company</h3>
-                                                <p class="text-sm text-gray-500">Kathmandu</p>
-                                            </div>
-                                        </div>
-                                        <span class="px-3 py-1 text-sm rounded-full bg-green-100 text-green-800">
-                                            Full-time
-                                        </span>
-                                    </div>
-                                    <h4 class="text-xl font-semibold text-gray-900 mb-2">Housekeeper Needed</h4>
-                                    <div class="mb-4">
-                                        <p class="text-gray-600 truncate-2">Looking for an experienced housekeeper to help with daily cleaning and maintenance tasks.</p>
-                                    </div>
-                                    <div class="flex flex-wrap gap-2 mb-4">
-                                        <span class="bg-brand-light text-brand-primary px-3 py-1 rounded-full text-sm">
-                                            <i class="fas fa-money-bill-wave mr-1"></i>NR 15,000 - 20,000
-                                        </span>
-                                        <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
-                                            <i class="fas fa-clock mr-1"></i>1+ years
-                                        </span>
-                                    </div>
-                                    <div class="flex justify-between items-center">
-                                        <span class="text-sm text-gray-500">
-                                            <i class="far fa-clock mr-1"></i>Posted Today
-                                        </span>
-                                        <span class="text-sm text-gray-500">
-                                            Sample Job
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- Sample Job 2 -->
-                            <div class="bg-white rounded-xl overflow-hidden shadow-[0_1px_3px_0_rgba(0,0,0,0.1),0_1px_2px_-1px_rgba(0,0,0,0.1)] hover:shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-2px_rgba(0,0,0,0.1)] transition-all duration-200 hover:-translate-y-0.5">
-                                <div class="p-6">
-                                    <div class="flex items-center justify-between mb-4">
-                                        <div class="flex items-center">
-                                            <div class="w-12 h-12 rounded-full bg-brand-light flex items-center justify-center mr-3">
-                                                <i class="fas fa-briefcase text-brand-primary text-xl"></i>
-                                            </div>
-                                            <div>
-                                                <h3 class="font-semibold text-gray-900">Family Home</h3>
-                                                <p class="text-sm text-gray-500">Lalitpur</p>
-                                            </div>
-                                        </div>
-                                        <span class="px-3 py-1 text-sm rounded-full bg-green-100 text-green-800">
-                                            Part-time
-                                        </span>
-                                    </div>
-                                    <h4 class="text-xl font-semibold text-gray-900 mb-2">Domestic Helper</h4>
-                                    <div class="mb-4">
-                                        <p class="text-gray-600 truncate-2">Seeking a reliable domestic helper for light housekeeping and cooking duties.</p>
-                                    </div>
-                                    <div class="flex flex-wrap gap-2 mb-4">
-                                        <span class="bg-brand-light text-brand-primary px-3 py-1 rounded-full text-sm">
-                                            <i class="fas fa-money-bill-wave mr-1"></i>NR 12,000 - 15,000
-                                        </span>
-                                        <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
-                                            <i class="fas fa-clock mr-1"></i>No experience required
-                                        </span>
-                                    </div>
-                                    <div class="flex justify-between items-center">
-                                        <span class="text-sm text-gray-500">
-                                            <i class="far fa-clock mr-1"></i>Posted Today
-                                        </span>
-                                        <span class="text-sm text-gray-500">
-                                            Sample Job
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="col-span-full text-center py-12">
+                            <i class="fas fa-search text-6xl text-gray-300 mb-4"></i>
+                            <h3 class="text-xl font-semibold text-gray-900 mb-2">No Jobs Available</h3>
+                            <p class="text-gray-600">There are currently no job opportunities available.</p>
                         </div>
                     `;
                     return;
                 }
 
-                // Display real jobs
+                // Display jobs
                 jobs.forEach(job => {
-                    const jobCard = document.createElement('div');
-                    jobCard.className = 'bg-white rounded-xl overflow-hidden shadow-[0_1px_3px_0_rgba(0,0,0,0.1),0_1px_2px_-1px_rgba(0,0,0,0.1)] hover:shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-2px_rgba(0,0,0,0.1)] transition-all duration-200 hover:-translate-y-0.5';
-                    jobCard.innerHTML = `
-                        <div class="p-6">
-                            <div class="flex items-center justify-between mb-4">
-                                <div class="flex items-center">
-                                    <div class="w-12 h-12 rounded-full bg-brand-light flex items-center justify-center mr-3">
-                                        <i class="fas fa-briefcase text-brand-primary text-xl"></i>
-                                    </div>
-                                    <div>
-                                        <h3 class="font-semibold text-gray-900">${job.company_name || 'Private Employer'}</h3>
-                                        <p class="text-sm text-gray-500">${job.location || 'Location not specified'}</p>
-                                    </div>
-                                </div>
-                                <span class="px-3 py-1 text-sm rounded-full bg-green-100 text-green-800">
-                                    ${job.job_type || 'Full-time'}
-                                </span>
-                            </div>
-                            
-                            <h4 class="text-xl font-semibold text-gray-900 mb-2">${job.title || 'Job Title'}</h4>
-                            
-                            <div class="mb-4">
-                                <p class="text-gray-600 truncate-2">${job.description || 'No description available'}</p>
-                            </div>
-                            
-                            <div class="flex flex-wrap gap-2 mb-4">
-                                ${job.salary_range ? 
-                                    `<span class="bg-brand-light text-brand-primary px-3 py-1 rounded-full text-sm">
-                                        <i class="fas fa-money-bill-wave mr-1"></i>${job.salary_range}
-                                    </span>` : 
-                                    ''
-                                }
-                                ${job.experience_required ? 
-                                    `<span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
-                                        <i class="fas fa-clock mr-1"></i>${job.experience_required}
-                                    </span>` : 
-                                    ''
-                                }
-                            </div>
-                            
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm text-gray-500">
-                                    <i class="far fa-clock mr-1"></i>Posted ${new Date(job.created_at).toLocaleDateString()}
-                                </span>
-                                <a href="jobs/find-jobs.html?id=${job.id}" 
-                                   class="bg-brand-primary text-white px-4 py-2 rounded-lg hover:bg-brand-secondary transition-colors">
-                                    View Details
-                                </a>
-                            </div>
-                        </div>
-                    `;
+                    const jobCard = createJobCard(job);
                     jobsContainer.appendChild(jobCard);
                 });
-
             } catch (error) {
                 console.error('Error in fetchLatestJobs:', error);
                 jobsContainer.innerHTML = `
@@ -607,8 +482,8 @@
                         <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                             <i class="fas fa-exclamation-circle text-red-500 text-2xl"></i>
                         </div>
-                        <h3 class="text-xl font-semibold text-gray-900 mb-2">Something Went Wrong</h3>
-                        <p class="text-gray-600 mb-4">We encountered an error while loading jobs. Please try again later.</p>
+                        <h3 class="text-xl font-semibold text-gray-900 mb-2">Error Loading Jobs</h3>
+                        <p class="text-gray-600 mb-4">We encountered an error while loading job listings.</p>
                         <button onclick="window.location.reload()" 
                                 class="bg-brand-primary text-white px-6 py-2 rounded-lg hover:bg-brand-secondary transition-colors">
                             Try Again
@@ -616,6 +491,121 @@
                     </div>
                 `;
             }
+        }
+
+        // Add the createJobCard function
+        function createJobCard(job) {
+            const card = document.createElement('div');
+            card.className = 'bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300';
+            
+            // Create a header section with a background color
+            const headerSection = document.createElement('div');
+            headerSection.className = 'relative h-32 bg-gradient-to-r from-brand-primary to-brand-secondary';
+            
+            // Add a job type badge
+            const badge = document.createElement('div');
+            badge.className = 'absolute top-4 right-4 bg-white text-brand-primary px-3 py-1 rounded-full text-sm font-medium';
+            badge.textContent = job.job_type ? job.job_type.replace('_', ' ') : 'Full Time';
+            headerSection.appendChild(badge);
+            
+            // Add job title to the header
+            const titleInHeader = document.createElement('h3');
+            titleInHeader.className = 'absolute bottom-4 left-4 text-white text-xl font-bold';
+            titleInHeader.textContent = job.title || 'No title';
+            headerSection.appendChild(titleInHeader);
+            
+            card.appendChild(headerSection);
+            
+            // Create the content section
+            const contentSection = document.createElement('div');
+            contentSection.className = 'p-6';
+            
+            // Create a row for location and time
+            const locationTimeRow = document.createElement('div');
+            locationTimeRow.className = 'flex flex-wrap justify-between gap-4 mb-4';
+            
+            // Time section (now on the left)
+            const timeSection = document.createElement('div');
+            timeSection.className = 'flex items-center text-gray-600';
+            timeSection.innerHTML = `
+                <i class="fas fa-clock w-6 text-brand-primary"></i>
+                <span>${job.preferred_time || 'Not specified'}</span>
+            `;
+            locationTimeRow.appendChild(timeSection);
+            
+            // Location section (now on the right)
+            const locationSection = document.createElement('div');
+            locationSection.className = 'flex items-center text-gray-600';
+            locationSection.innerHTML = `
+                <i class="fas fa-map-marker-alt w-6 text-brand-primary"></i>
+                <span>${job.city && job.area ? `${job.city}, ${job.area}` : job.working_location || 'Location not specified'}</span>
+            `;
+            locationTimeRow.appendChild(locationSection);
+            
+            contentSection.appendChild(locationTimeRow);
+            
+            // Skills section (directly under location and time)
+            const skillsSection = document.createElement('div');
+            skillsSection.className = 'mb-4';
+            
+            const skillsTitle = document.createElement('h4');
+            skillsTitle.className = 'font-semibold text-gray-700 mb-2';
+            skillsTitle.textContent = 'Required Skills';
+            skillsSection.appendChild(skillsTitle);
+            
+            const skillsContainer = document.createElement('div');
+            skillsContainer.className = 'flex flex-wrap gap-2';
+            
+            if (job.required_skills && Array.isArray(job.required_skills) && job.required_skills.length > 0) {
+                job.required_skills.forEach(skill => {
+                    const skillTag = document.createElement('span');
+                    skillTag.className = 'bg-brand-light text-brand-primary px-3 py-1 rounded-full text-sm font-medium';
+                    skillTag.textContent = skill;
+                    skillsContainer.appendChild(skillTag);
+                });
+            } else {
+                const noSkills = document.createElement('span');
+                noSkills.className = 'text-gray-500 text-sm';
+                noSkills.textContent = 'No skills listed';
+                skillsContainer.appendChild(noSkills);
+            }
+            
+            skillsSection.appendChild(skillsContainer);
+            contentSection.appendChild(skillsSection);
+            
+            // Add salary range with icon
+            const salaryDiv = document.createElement('div');
+            salaryDiv.className = 'flex items-center text-gray-600 mb-4';
+            salaryDiv.innerHTML = `
+                <i class="fas fa-money-bill-wave w-6 text-brand-primary"></i>
+                <span class="font-semibold">${job.salary_range || 'Not specified'}</span>
+            `;
+            contentSection.appendChild(salaryDiv);
+            
+            // Add experience
+            const experienceDiv = document.createElement('div');
+            experienceDiv.className = 'flex items-center text-gray-600 mb-4';
+            experienceDiv.innerHTML = `
+                <i class="fas fa-briefcase w-6 text-brand-primary"></i>
+                <span>${job.experience_required || 'Not specified'} experience</span>
+            `;
+            contentSection.appendChild(experienceDiv);
+            
+            // Add view details button
+            const buttonDiv = document.createElement('div');
+            buttonDiv.className = 'mt-6';
+            
+            const viewButton = document.createElement('a');
+            viewButton.href = `jobs/find-jobs.html?id=${job.id}`;
+            viewButton.className = 'block w-full bg-gradient-to-r from-brand-primary to-brand-secondary text-white px-6 py-3 rounded-lg hover:shadow-lg transition-all duration-300 text-center font-semibold';
+            viewButton.textContent = 'View Details';
+            buttonDiv.appendChild(viewButton);
+            
+            contentSection.appendChild(buttonDiv);
+            
+            card.appendChild(contentSection);
+            
+            return card;
         }
 
         // Load featured maids

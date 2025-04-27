@@ -295,6 +295,32 @@
                         placeholder="Tell us about yourself, your experience, and what makes you a great domestic helper"></textarea>
                 </div>
 
+                <!-- Profile Status -->
+                <div class="space-y-4">
+                    <h2 class="text-lg font-semibold text-gray-900">Profile Status</h2>
+                    <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                        <div>
+                            <h3 class="font-medium text-gray-900">Profile Visibility</h3>
+                            <p class="text-sm text-gray-600">Toggle to make your profile visible or hidden to employers</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="profileVisibilityToggle" class="sr-only peer" aria-label="Toggle profile visibility">
+                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-brand-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-primary"></div>
+                        </label>
+                    </div>
+                    
+                    <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                        <div>
+                            <h3 class="font-medium text-gray-900">Availability Status</h3>
+                            <p class="text-sm text-gray-600">Mark yourself as available or engaged</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="availabilityToggle" class="sr-only peer" aria-label="Toggle availability status">
+                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-brand-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
+                        </label>
+                    </div>
+                </div>
+
                 <!-- Submit Button -->
                 <div class="flex justify-end">
                     <button type="submit"
@@ -400,9 +426,15 @@
             }
 
             // Set profile visibility toggle state
-            const toggle = document.getElementById('profileVisibilityToggle');
-            if (toggle) {
-                toggle.checked = profile.status === 'active';
+            const visibilityToggle = document.getElementById('profileVisibilityToggle');
+            if (visibilityToggle) {
+                visibilityToggle.checked = profile.status === 'active';
+            }
+            
+            // Set availability toggle state
+            const availabilityToggle = document.getElementById('availabilityToggle');
+            if (availabilityToggle) {
+                availabilityToggle.checked = profile.is_available !== false; // Default to true if not set
             }
         }
 
@@ -475,6 +507,10 @@
                     .map(checkbox => checkbox.value);
                 const languages = Array.from(document.querySelectorAll('.language-checkbox:checked'))
                     .map(checkbox => checkbox.value);
+                
+                // Get toggle states
+                const isAvailable = document.getElementById('availabilityToggle').checked;
+                const status = document.getElementById('profileVisibilityToggle').checked ? 'active' : 'inactive';
 
                 const profileData = {
                     user_id: session.user.id,
@@ -496,6 +532,8 @@
                     skills: skills,
                     languages: languages,
                     additional_notes: formData.get('about'),
+                    is_available: isAvailable,
+                    status: status,
                     updated_at: new Date().toISOString()
                 };
 
@@ -628,12 +666,57 @@
                 showError(`Failed to update profile visibility: ${error.message}`);
             }
         }
+        
+        // Add availability toggle functionality
+        async function toggleAvailability() {
+            try {
+                if (!currentProfile || !supabaseClient) {
+                    throw new Error('Profile or Supabase client not initialized');
+                }
+
+                const toggle = document.getElementById('availabilityToggle');
+                if (!toggle) return;
+
+                // Show loading state
+                toggle.disabled = true;
+
+                const newAvailability = !toggle.checked;
+                const { error } = await supabaseClient
+                    .from('maid_profiles')
+                    .update({ is_available: newAvailability })
+                    .eq('user_id', currentUser.id);
+
+                if (error) throw error;
+
+                currentProfile.is_available = newAvailability;
+                toggle.checked = newAvailability;
+                toggle.disabled = false;
+
+                showSuccess(`You are now marked as ${newAvailability ? 'available' : 'engaged'}`);
+            } catch (error) {
+                console.error('Error toggling availability:', error);
+                
+                // Restore toggle state
+                const toggle = document.getElementById('availabilityToggle');
+                if (toggle) {
+                    toggle.checked = currentProfile.is_available !== false;
+                    toggle.disabled = false;
+                }
+
+                showError(`Failed to update availability status: ${error.message}`);
+            }
+        }
 
         // Add event listener for toggle
         document.addEventListener('DOMContentLoaded', function() {
-            const toggle = document.getElementById('profileVisibilityToggle');
-            if (toggle) {
-                toggle.addEventListener('change', toggleProfileVisibility);
+            const visibilityToggle = document.getElementById('profileVisibilityToggle');
+            if (visibilityToggle) {
+                visibilityToggle.addEventListener('change', toggleProfileVisibility);
+            }
+            
+            const availabilityToggle = document.getElementById('availabilityToggle');
+            if (availabilityToggle) {
+                availabilityToggle.addEventListener('change', toggleAvailability);
             }
         });
 

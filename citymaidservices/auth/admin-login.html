@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Login - ${BRAND_CONFIG.SHORT_NAME}</title>
+    <title>Admin Login - City Maid</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -62,7 +62,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-20">
                 <div class="flex items-center">
-                    <a href="../index.html" class="text-3xl font-bold text-brand-primary tracking-tight">${BRAND_CONFIG.SHORT_NAME}</a>
+                    <a href="../index.html" class="text-3xl font-bold text-brand-primary tracking-tight">City Maid</a>
                 </div>
             </div>
         </div>
@@ -115,11 +115,17 @@
     </div>
 
     <script>
-        // Initialize Supabase client with service role key for admin operations
+        // Initialize Supabase client with anon key
         const SUPABASE_URL = 'https://fdgqqxyyofjnkhswkwcq.supabase.co';
-        const SUPABASE_SERVICE_KEY = 'your-service-role-key'; // Get this from Supabase dashboard
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZkZ3FxeHl5b2Zqbmtoc3drd2NxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQwMjQyMTMsImV4cCI6MjA1OTYwMDIxM30.YyJLLu3r2a7Mh7ny0ie-YzzLfPh5PdrJJHnBFBxWqVE';
         
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+            auth: {
+                autoRefreshToken: true,
+                persistSession: true,
+                detectSessionInUrl: true
+            }
+        });
 
         // Handle form submission
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
