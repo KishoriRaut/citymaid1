@@ -74,6 +74,14 @@
                 -webkit-box-orient: vertical;
                 @apply overflow-hidden;
             }
+
+            .nav-link {
+                @apply text-gray-700 hover:text-brand-primary font-medium transition-colors;
+            }
+
+            .nav-link.active {
+                @apply text-brand-primary font-semibold;
+            }
         }
     </style>
     <script>
@@ -98,13 +106,13 @@
         });
     </script>
 </head>
-<body class="font-poppins">
+<body class="font-poppins" data-current-page="home">
     <!-- Navigation Bar -->
     <nav class="bg-white shadow-lg sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-20">
                 <div class="flex items-center">
-                    <a href="index.html" class="text-3xl font-bold text-brand-primary tracking-tight">${BRAND_CONFIG.SHORT_NAME}</a>
+                    <a href="index.html" class="text-3xl font-bold text-brand-primary tracking-tight">City<span class="text-brand-secondary"> Maid</span></a>
                 </div>
                 <!-- Mobile menu button -->
                 <div class="flex items-center md:hidden">
@@ -114,12 +122,12 @@
                 </div>
                 <!-- Desktop menu -->
                 <div class="hidden md:flex items-center space-x-6">
-                    <a href="index.html" class="text-brand-primary font-semibold">Home</a>
-                    <a href="jobs/find-maids.html" class="text-gray-700 hover:text-brand-primary font-medium transition-colors">Find Maids</a>
-                    <a href="jobs/find-jobs.html" class="text-gray-700 hover:text-brand-primary font-medium transition-colors">Find Jobs</a>
-                    <a href="static/contact.html" class="text-gray-700 hover:text-brand-primary font-medium transition-colors">Contact Us</a>
-                    <a href="static/about.html" class="text-gray-700 hover:text-brand-primary font-medium transition-colors">About Us</a>
-                    <a href="auth/login.html" class="bg-brand-primary text-white px-6 py-2 rounded-lg hover:bg-brand-secondary font-semibold transition-colors">
+                    <a href="../index.html" class="nav-link active" data-page="home">Home</a>
+                    <a href="../jobs/find-maids.html" class="nav-link" data-page="find-maids">Find Maids</a>
+                    <a href="../jobs/find-jobs.html" class="nav-link" data-page="find-jobs">Find Jobs</a>
+                    <a href="../static/contact.html" class="nav-link" data-page="contact">Contact Us</a>
+                    <a href="../static/about.html" class="nav-link" data-page="about">About Us</a>
+                    <a href="../auth/login.html" class="bg-brand-primary text-white px-6 py-2 rounded-lg hover:bg-brand-secondary font-semibold transition-colors">
                         Sign In
                     </a>
                 </div>
@@ -133,7 +141,7 @@
                         <button onclick="window.history.back()" class="text-gray-500 hover:text-gray-700" aria-label="Go back">
                             <i class="fas fa-arrow-left text-xl"></i>
                         </button>
-                        <a href="index.html" class="text-gray-500 hover:text-gray-700" aria-label="Go to homepage">
+                        <a href="../index.html" class="text-gray-500 hover:text-gray-700" aria-label="Go to homepage">
                             <i class="fas fa-home text-xl"></i>
                         </a>
                     </div>
@@ -143,13 +151,15 @@
                     </button>
                 </div>
                 <div class="p-4 space-y-4">
-                    <a href="index.html" class="block text-gray-700 hover:text-brand-primary font-medium transition-colors">Home</a>
-                    <a href="jobs/find-maids.html" class="block text-gray-700 hover:text-brand-primary font-medium transition-colors">Find Maids</a>
-                    <a href="jobs/find-jobs.html" class="block text-gray-700 hover:text-brand-primary font-medium transition-colors">Find Jobs</a>
-                    <a href="static/contact.html" class="block text-gray-700 hover:text-brand-primary font-medium transition-colors">Contact Us</a>
-                    <a href="static/about.html" class="block text-gray-700 hover:text-brand-primary font-medium transition-colors">About Us</a>
+                    <a href="../index.html" class="block nav-link active" data-page="home">Home</a>
+                    <a href="../jobs/find-maids.html" class="block nav-link" data-page="find-maids">Find Maids</a>
+                    <a href="../jobs/find-jobs.html" class="block nav-link" data-page="find-jobs">Find Jobs</a>
+                    <a href="../static/contact.html" class="block nav-link" data-page="contact">Contact Us</a>
+                    <a href="../static/about.html" class="block nav-link" data-page="about">About Us</a>
                     <div class="pt-4 border-t border-gray-200">
-                        <a href="auth/login.html" class="block text-gray-700 hover:text-brand-primary font-medium transition-colors">Sign In</a>
+                        <a href="../auth/register.html?role=maid" class="block text-gray-700 hover:text-brand-primary font-medium transition-colors mb-2">Register as Maid</a>
+                        <a href="../auth/register.html?role=employer" class="block text-gray-700 hover:text-brand-primary font-medium transition-colors mb-2">Post a Job</a>
+                        <a href="../auth/login.html" class="block text-gray-700 hover:text-brand-primary font-medium transition-colors mt-4">Sign In</a>
                     </div>
                 </div>
             </div>
@@ -709,7 +719,7 @@
                                     </div>
                                 </div>
                                 <div class="mt-4">
-                                    <a href="maid/view-profile.html?id=${maid.user_id}" 
+                                    <a href="jobs/find-maids.html?highlight=${maid.id}" 
                                         class="block w-full bg-brand-primary text-white py-2 rounded-lg hover:bg-brand-secondary transition-colors text-center">
                                         View Profile
                                     </a>
@@ -954,7 +964,7 @@
                         <div class="flex flex-wrap gap-2 mb-4">
                             ${skillsHtml}
                         </div>
-                        <a href="maid/view-profile.html?id=${maid.id}" 
+                        <a href="jobs/find-maids.html?highlight=${maid.id}" 
                            class="block w-full text-center bg-brand-primary text-white px-4 py-2 rounded-lg hover:bg-brand-secondary transition-colors">
                             View Profile
                         </a>
@@ -981,6 +991,24 @@
 
             // Initial search with empty filters
             updateFilters();
+        });
+
+        // Add this to your existing script section
+        document.addEventListener('DOMContentLoaded', () => {
+            // Update navigation active states
+            const currentPage = document.body.dataset.currentPage;
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            navLinks.forEach(link => {
+                const linkPage = link.dataset.page;
+                if (linkPage === currentPage) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+
+            // Rest of your existing initialization code...
         });
     </script>
 </body>
