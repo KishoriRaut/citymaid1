@@ -136,6 +136,20 @@
                         </select>
                     </div>
                     <div>
+                        <label for="religion" class="block text-sm font-medium text-gray-700">Religion</label>
+                        <select id="religion" name="religion"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary">
+                            <option value="">Select Religion</option>
+                            <option value="Hindu">Hindu</option>
+                            <option value="Buddhist">Buddhist</option>
+                            <option value="Muslim">Muslim</option>
+                            <option value="Christian">Christian</option>
+                            <option value="Kirat">Kirat</option>
+                            <option value="Jain">Jain</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div>
                         <label for="education" class="block text-sm font-medium text-gray-700">Education Level *</label>
                         <select id="education" name="education" required
                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary">
@@ -252,6 +266,10 @@
                             <span>Elderly Care</span>
                         </label>
                         <label class="flex items-center space-x-2">
+                            <input type="checkbox" class="skill-checkbox" value="Patient Care" name="skills">
+                            <span>Patient Care</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
                             <input type="checkbox" class="skill-checkbox" value="Pet Care" name="skills">
                             <span>Pet Care</span>
                         </label>
@@ -281,6 +299,26 @@
                         <label class="flex items-center space-x-2">
                             <input type="checkbox" class="language-checkbox" value="Hindi" name="languages">
                             <span>Hindi</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" class="language-checkbox" value="Newari" name="languages">
+                            <span>Newari</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" class="language-checkbox" value="Tamang" name="languages">
+                            <span>Tamang</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" class="language-checkbox" value="Gurung" name="languages">
+                            <span>Gurung</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" class="language-checkbox" value="Magar" name="languages">
+                            <span>Magar</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" class="language-checkbox" value="Tharu" name="languages">
+                            <span>Tharu</span>
                         </label>
                     </div>
                 </div>
@@ -385,6 +423,7 @@
             document.getElementById('gender').value = profile.gender || '';
             document.getElementById('maritalStatus').value = profile.marital_status || '';
             document.getElementById('nationality').value = profile.nationality || '';
+            document.getElementById('religion').value = profile.religion || '';
             document.getElementById('education').value = profile.education || '';
             document.getElementById('email').value = profile.email || '';
             document.getElementById('phone').value = profile.phone || '';
@@ -517,6 +556,7 @@
                     gender: formData.get('gender'),
                     marital_status: formData.get('maritalStatus'),
                     nationality: formData.get('nationality'),
+                    religion: formData.get('religion'),
                     education: formData.get('education'),
                     email: formData.get('email'),
                     phone: formData.get('phone'),
