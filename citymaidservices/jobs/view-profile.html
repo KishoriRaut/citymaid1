@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maid Profile - City Maid Services</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        poppins: ['Poppins', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            primary: '#4F46E5',
+                            secondary: '#4338CA',
+                            light: '#EEF2FF',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-poppins bg-gray-50">
+    <!-- Navigation Bar -->
+    <nav class="bg-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20">
+                <div class="flex items-center">
+                    <a href="../index.html" class="text-3xl font-bold text-brand-primary tracking-tight">City<span class="text-brand-secondary"> Maid</span></a>
+                </div>
+                <!-- Mobile menu button -->
+                <div class="flex items-center md:hidden">
+                    <button id="mobileMenuBtn" class="text-gray-700 hover:text-brand-primary focus:outline-none" aria-label="Open menu">
+                        <i class="fas fa-bars text-2xl"></i>
+                    </button>
+                </div>
+                <!-- Desktop menu -->
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="../index.html" class="nav-link" data-page="home">Home</a>
+                    <a href="find-maids.html" class="nav-link active" data-page="find-maids" id="findMaidsLink">Find Maids</a>
+                    <a href="find-jobs.html" class="nav-link" data-page="find-jobs" id="findJobsLink">Find Jobs</a>
+                    <a href="../auth/login.html" class="bg-brand-primary text-white px-6 py-2 rounded-lg hover:bg-brand-secondary font-semibold transition-colors">
+                        Sign In
+                    </a>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile menu panel -->
+        <div id="mobileMenu" class="hidden md:hidden fixed inset-0 bg-black bg-opacity-50 z-50">
+            <div class="fixed inset-y-0 right-0 max-w-xs w-full bg-white shadow-xl">
+                <div class="flex items-center justify-between p-4 border-b">
+                    <div class="flex items-center space-x-4">
+                        <button onclick="window.history.back()" class="text-gray-500 hover:text-gray-700" aria-label="Go back">
+                            <i class="fas fa-arrow-left text-xl"></i>
+                        </button>
+                        <a href="../index.html" class="text-gray-500 hover:text-gray-700" aria-label="Go to homepage">
+                            <i class="fas fa-home text-xl"></i>
+                        </a>
+                    </div>
+                    <h2 class="text-xl font-semibold text-gray-900">Menu</h2>
+                    <button id="closeMobileMenu" class="text-gray-500 hover:text-gray-700" aria-label="Close menu">
+                        <i class="fas fa-times text-2xl"></i>
+                    </button>
+                </div>
+                <div class="p-4 space-y-4">
+                    <a href="../index.html" class="block nav-link" data-page="home">Home</a>
+                    <a href="find-maids.html" class="block nav-link active" data-page="find-maids" id="mobileFindMaidsLink">Find Maids</a>
+                    <a href="find-jobs.html" class="block nav-link" data-page="find-jobs" id="mobileFindJobsLink">Find Jobs</a>
+                    <div class="pt-4 border-t border-gray-200">
+                        <a href="../auth/login.html" class="block text-gray-700 hover:text-brand-primary font-medium transition-colors mt-4">Sign In</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Profile Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <!-- Loading State -->
+        <div id="loadingState" class="text-center py-20">
+            <div class="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brand-primary"></div>
+            <p class="mt-4 text-lg text-gray-600">Loading profile...</p>
+        </div>
+
+        <!-- Profile Content (hidden until loaded) -->
+        <div id="profileContent" class="hidden">
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+                <div class="md:flex">
+                    <!-- Profile Image Section -->
+                    <div class="md:w-1/3 relative">
+                        <img id="profileImage" src="https://via.placeholder.com/600x800?text=No+Image" alt="Maid Profile" class="w-full h-full object-cover md:h-auto md:min-h-full" style="min-height: 300px;">
+                        <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-6">
+                            <div id="profileRating" class="flex items-center mb-2">
+                                <!-- Rating stars here -->
+                            </div>
+                            <h1 id="profileName" class="text-3xl font-bold text-white mb-2">Name loading...</h1>
+                            <div class="flex items-center text-white">
+                                <i class="fas fa-map-marker-alt mr-2"></i>
+                                <span id="profileLocation">Location loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Profile Details Section -->
+                    <div class="md:w-2/3 p-6 md:p-8">
+                        <div class="flex flex-wrap gap-2 mb-6">
+                            <div id="profileStatus" class="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-800">
+                                <span class="w-2 h-2 mr-1 rounded-full bg-green-500"></span>
+                                Available
+                            </div>
+                            <div id="profileSalary" class="inline-flex items-center rounded-full bg-brand-light px-3 py-1 text-sm font-medium text-brand-primary">
+                                <i class="fas fa-dollar-sign mr-1"></i>
+                                Salary loading...
+                            </div>
+                            <div id="profileExperience" class="inline-flex items-center rounded-full bg-orange-100 px-3 py-1 text-sm font-medium text-orange-800">
+                                <i class="fas fa-briefcase mr-1"></i>
+                                Experience loading...
+                            </div>
+                        </div>
+                        
+                        <div class="mb-8">
+                            <h2 class="text-xl font-semibold text-gray-900 mb-3">Skills</h2>
+                            <div id="profileSkills" class="flex flex-wrap gap-2">
+                                <!-- Skills will be added here -->
+                            </div>
+                        </div>
+                        
+                        <div class="mb-8">
+                            <h2 class="text-xl font-semibold text-gray-900 mb-3">About</h2>
+                            <p id="profileBio" class="text-gray-700">Bio loading...</p>
+                        </div>
+                        
+                        <div class="grid md:grid-cols-2 gap-6 mb-8">
+                            <div>
+                                <h2 class="text-xl font-semibold text-gray-900 mb-3">Personal Information</h2>
+                                <ul class="space-y-2">
+                                    <li class="flex items-start">
+                                        <span class="text-brand-primary mr-2 w-24">Gender:</span>
+                                        <span id="profileGender" class="text-gray-700">Loading...</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-brand-primary mr-2 w-24">Age:</span>
+                                        <span id="profileAge" class="text-gray-700">Loading...</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-brand-primary mr-2 w-24">Education:</span>
+                                        <span id="profileEducation" class="text-gray-700">Loading...</span>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h2 class="text-xl font-semibold text-gray-900 mb-3">Work Preferences</h2>
+                                <ul class="space-y-2">
+                                    <li class="flex items-start">
+                                        <span class="text-brand-primary mr-2 w-24">Work Type:</span>
+                                        <span id="profileWorkType" class="text-gray-700">Loading...</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-brand-primary mr-2 w-24">Languages:</span>
+                                        <span id="profileLanguages" class="text-gray-700">Loading...</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-brand-primary mr-2 w-24">Preferred Time:</span>
+                                        <span id="profileTime" class="text-gray-700">Loading...</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="flex mt-8">
+                            <button id="contactButton" class="bg-brand-primary text-white px-8 py-3 rounded-lg hover:bg-brand-secondary font-semibold transition-colors">
+                                Contact Now
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Error State -->
+        <div id="errorState" class="hidden text-center py-20">
+            <i class="fas fa-exclamation-circle text-5xl text-red-500 mb-4"></i>
+            <h3 class="text-xl font-medium text-gray-700 mb-2">Profile Not Found</h3>
+            <p class="text-gray-500 mb-6">We couldn't find this maid profile. Please make sure you have the correct profile ID in the URL.</p>
+            <a href="find-maids.html" class="bg-brand-primary text-white px-6 py-2 rounded-lg hover:bg-brand-secondary font-semibold transition-colors">
+                Back to Find Maids
+            </a>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4">City Maid Services</h3>
+                    <p class="text-gray-400">Connecting trusted domestic helpers with employers in your area.</p>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold mb-4">Quick Links</h3>
+                    <ul class="space-y-2">
+                        <li><a href="../index.html" class="text-gray-400 hover:text-white transition-colors">Home</a></li>
+                        <li><a href="find-maids.html" class="text-gray-400 hover:text-white transition-colors" id="footerFindMaidsLink">Find Maids</a></li>
+                        <li><a href="find-jobs.html" class="text-gray-400 hover:text-white transition-colors" id="footerFindJobsLink">Find Jobs</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold mb-4">Contact</h3>
+                    <ul class="space-y-2">
+                        <li class="flex items-center text-gray-400">
+                            <i class="fas fa-map-marker-alt mr-2"></i> Kathmandu, Nepal
+                        </li>
+                        <li class="flex items-center text-gray-400">
+                            <i class="fas fa-phone mr-2"></i> +977 1234567
+                        </li>
+                        <li class="flex items-center text-gray-400">
+                            <i class="fas fa-envelope mr-2"></i> info@citymaidservices.com
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold mb-4">Follow Us</h3>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fab fa-facebook-f text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fab fa-twitter text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fab fa-instagram text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fab fa-linkedin-in text-xl"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; <span id="currentYear"></span> City Maid Services. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Initialize Supabase client
+        const supabaseUrl = 'https://fdgqqxyyofjnkhswkwcq.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZkZ3FxeHl5b2Zqbmtoc3drd2NxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQwMjQyMTMsImV4cCI6MjA1OTYwMDIxM30.YyJLLu3r2a7Mh7ny0ie-YzzLfPh5PdrJJHnBFBxWqVE';
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+        // Sample maid data (fallback if database fetch fails)
+        const sampleMaid = {
+            id: 1,
+            full_name: "Aakriti Sharma",
+            work_location: "Kathmandu",
+            years_of_experience: 5,
+            skills: ["Cooking", "Cleaning", "Laundry"],
+            additional_notes: "Experienced in all household duties with a focus on cooking traditional Nepali dishes. I am reliable, punctual, and take pride in my work.",
+            expected_salary: 15000,
+            gender: "Female",
+            age_group: "25",
+            education: "SEE",
+            work_type: "Full Time",
+            languages: ["Nepali", "English", "Hindi"],
+            preferred_time: "Morning"
+        };
+
+        // Role-based navigation control
+        function updateNavigationBasedOnRole() {
+            const userRole = localStorage.getItem('userRole');
+            
+            // Get all navigation elements
+            const findMaidsLink = document.getElementById('findMaidsLink');
+            const findJobsLink = document.getElementById('findJobsLink');
+            const mobileFindMaidsLink = document.getElementById('mobileFindMaidsLink');
+            const mobileFindJobsLink = document.getElementById('mobileFindJobsLink');
+            const footerFindMaidsLink = document.getElementById('footerFindMaidsLink');
+            const footerFindJobsLink = document.getElementById('footerFindJobsLink');
+            
+            if (userRole === 'maid') {
+                // Maids should see Find Jobs but not Find Maids
+                if (findMaidsLink) findMaidsLink.classList.add('hidden');
+                if (mobileFindMaidsLink) mobileFindMaidsLink.classList.add('hidden');
+                if (footerFindMaidsLink) footerFindMaidsLink.classList.add('hidden');
+                
+                // Highlight Find Jobs as the active link for maids
+                if (findJobsLink) {
+                    findJobsLink.classList.remove('hidden');
+                    findJobsLink.classList.add('active');
+                }
+                if (mobileFindJobsLink) {
+                    mobileFindJobsLink.classList.remove('hidden');
+                    mobileFindJobsLink.classList.add('active');
+                }
+                if (footerFindJobsLink) {
+                    footerFindJobsLink.classList.remove('hidden');
+                }
+                
+                // Update the "Back to" link in error state to point to find-jobs.html
+                const errorBackLink = document.querySelector('#errorState a');
+                if (errorBackLink) {
+                    errorBackLink.href = 'find-jobs.html';
+                    errorBackLink.textContent = 'Back to Find Jobs';
+                }
+            } else if (userRole === 'employer') {
+                // Employers should see Find Maids but not Find Jobs
+                if (findJobsLink) findJobsLink.classList.add('hidden');
+                if (mobileFindJobsLink) mobileFindJobsLink.classList.add('hidden');
+                if (footerFindJobsLink) footerFindJobsLink.classList.add('hidden');
+                
+                // Highlight Find Maids as the active link for employers
+                if (findMaidsLink) {
+                    findMaidsLink.classList.remove('hidden');
+                    findMaidsLink.classList.add('active');
+                }
+                if (mobileFindMaidsLink) {
+                    mobileFindMaidsLink.classList.remove('hidden');
+                    mobileFindMaidsLink.classList.add('active');
+                }
+                if (footerFindMaidsLink) {
+                    footerFindMaidsLink.classList.remove('hidden');
+                }
+            }
+        }
+
+        // Set current year in footer
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+        
+        // Mobile menu functionality
+        document.getElementById('mobileMenuBtn').addEventListener('click', function() {
+            document.getElementById('mobileMenu').classList.remove('hidden');
+        });
+
+        document.getElementById('closeMobileMenu').addEventListener('click', function() {
+            document.getElementById('mobileMenu').classList.add('hidden');
+        });
+
+        // Generate star rating HTML
+        function getStarRating(rating) {
+            const fullStars = Math.floor(rating);
+            const halfStar = rating % 1 >= 0.5;
+            const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+            
+            let starsHtml = '';
+            
+            // Full stars
+            for (let i = 0; i < fullStars; i++) {
+                starsHtml += '<i class="fas fa-star text-yellow-400"></i>';
+            }
+            
+            // Half star
+            if (halfStar) {
+                starsHtml += '<i class="fas fa-star-half-alt text-yellow-400"></i>';
+            }
+            
+            // Empty stars
+            for (let i = 0; i < emptyStars; i++) {
+                starsHtml += '<i class="far fa-star text-yellow-400"></i>';
+            }
+            
+            return starsHtml;
+        }
+
+        // Get profile ID from URL
+        function getProfileIdFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('id');
+        }
+
+        // Fetch maid profile from Supabase
+        async function fetchMaidProfile() {
+            const profileId = getProfileIdFromUrl();
+            
+            if (!profileId) {
+                // No ID provided in the URL
+                showError();
+                // Update error message for more clarity
+                document.querySelector('#errorState h3').textContent = 'No Profile ID Provided';
+                document.querySelector('#errorState p').textContent = 'Please select a maid from the find maids page or make sure you have a profile ID in the URL.';
+                return;
+            }
+            
+            try {
+                console.log("Fetching profile with ID:", profileId);
+                const { data, error } = await supabaseClient
+                    .from('maid_profiles')
+                    .select('*')
+                    .eq('id', profileId)
+                    .single();
+                
+                if (error) {
+                    throw error;
+                }
+                
+                if (data) {
+                    console.log("Profile data:", data);
+                    displayProfile(data);
+                } else {
+                    // Try users_profile if maid_profiles doesn't exist
+                    const { data: userData, error: userError } = await supabaseClient
+                        .from('users_profile')
+                        .select('*')
+                        .eq('id', profileId)
+                        .single();
+                    
+                    if (userError || !userData) {
+                        // If both fail, use sample data
+                        console.log("Using sample data");
+                        displayProfile(sampleMaid);
+                    } else {
+                        console.log("Profile data from users_profile:", userData);
+                        displayProfile(userData);
+                    }
+                }
+            } catch (error) {
+                console.error("Error fetching profile:", error);
+                displayProfile(sampleMaid);
+            }
+        }
+
+        // Display profile information
+        function displayProfile(profile) {
+            document.getElementById('loadingState').classList.add('hidden');
+            document.getElementById('profileContent').classList.remove('hidden');
+            
+            // Profile image
+            const profileImage = document.getElementById('profileImage');
+            if (profile.profile_photo) {
+                profileImage.src = `https://fdgqqxyyofjnkhswkwcq.supabase.co/storage/v1/object/public/profile-photos/${profile.profile_photo}`;
+            } else {
+                profileImage.src = 'https://via.placeholder.com/600x800?text=No+Profile+Image';
+            }
+            profileImage.alt = profile.full_name || 'Maid Profile';
+            
+            // Basic info
+            document.getElementById('profileName').textContent = profile.full_name || 'Name not provided';
+            document.getElementById('profileLocation').textContent = profile.work_location || profile.address || 'Location not specified';
+            document.getElementById('profileRating').innerHTML = getStarRating(4.5) + ' <span class="ml-1 text-white">4.5</span>';
+            document.getElementById('profileSalary').innerHTML = `<i class="fas fa-dollar-sign mr-1"></i> ₹${profile.expected_salary || 0}/month`;
+            document.getElementById('profileExperience').innerHTML = `<i class="fas fa-briefcase mr-1"></i> ${profile.years_of_experience || 0} years`;
+            
+            // Skills
+            const skillsContainer = document.getElementById('profileSkills');
+            skillsContainer.innerHTML = '';
+            
+            if (profile.skills && Array.isArray(profile.skills) && profile.skills.length > 0) {
+                profile.skills.forEach(skill => {
+                    const skillBadge = document.createElement('span');
+                    skillBadge.className = 'inline-flex items-center rounded-full bg-brand-light px-3 py-1 text-sm font-medium text-brand-primary';
+                    skillBadge.textContent = skill;
+                    skillsContainer.appendChild(skillBadge);
+                });
+            } else {
+                skillsContainer.innerHTML = '<span class="text-gray-500">No skills listed</span>';
+            }
+            
+            // Bio
+            document.getElementById('profileBio').textContent = profile.additional_notes || 'No additional information provided.';
+            
+            // Personal info
+            document.getElementById('profileGender').textContent = profile.gender || 'Not specified';
+            document.getElementById('profileAge').textContent = profile.age_group ? `${profile.age_group}+ years` : 'Not specified';
+            document.getElementById('profileEducation').textContent = profile.education || 'Not specified';
+            
+            // Work preferences
+            document.getElementById('profileWorkType').textContent = profile.work_type || 'Not specified';
+            
+            // Languages
+            const languages = profile.languages || [];
+            document.getElementById('profileLanguages').textContent = 
+                Array.isArray(languages) && languages.length > 0 
+                    ? languages.join(', ') 
+                    : 'Not specified';
+            
+            document.getElementById('profileTime').textContent = profile.preferred_time || 'Not specified';
+            
+            // Status indicator
+            const statusElement = document.getElementById('profileStatus');
+            if (profile.is_available === false) {
+                statusElement.className = 'inline-flex items-center rounded-full bg-red-100 px-3 py-1 text-sm font-medium text-red-800';
+                statusElement.innerHTML = '<span class="w-2 h-2 mr-1 rounded-full bg-red-500"></span> Not Available';
+            }
+            
+            // Contact button
+            document.getElementById('contactButton').addEventListener('click', function() {
+                alert('Contact feature coming soon! Please check back later.');
+            });
+        }
+
+        // Show error state
+        function showError() {
+            document.getElementById('loadingState').classList.add('hidden');
+            document.getElementById('profileContent').classList.add('hidden');
+            document.getElementById('errorState').classList.remove('hidden');
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // First update navigation based on user role
+            updateNavigationBasedOnRole();
+            
+            // Then fetch the profile data
+            fetchMaidProfile();
+        });
+    </script>
+</body>
+</html> 

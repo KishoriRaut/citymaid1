@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post a Job - City Maid Services</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        poppins: ['Poppins', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            primary: '#4F46E5',
+                            secondary: '#4338CA',
+                            light: '#EEF2FF',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-poppins bg-gray-50" onload="initPage()">
+    <!-- Navigation Bar -->
+    <nav class="bg-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20">
+                <div class="flex items-center">
+                    <a href="../index.html" class="text-3xl font-bold text-brand-primary tracking-tight">City<span class="text-brand-secondary"> Maid Services</span></a>
+                </div>
+                <!-- Desktop menu -->
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="../index.html" class="text-gray-700 hover:text-brand-primary font-medium transition-colors">Home</a>
+                    <a href="../jobs/find-maids.html" class="text-gray-700 hover:text-brand-primary font-medium transition-colors">Find Maids</a>
+                    <a href="post-job.html" class="text-brand-primary font-semibold">Post a Job</a>
+                    <div class="relative group">
+                        <button id="userMenuBtn" class="flex items-center space-x-2 text-gray-700 hover:text-brand-primary">
+                            <i class="fas fa-user-circle text-2xl"></i>
+                            <span class="font-medium">My Account</span>
+                        </button>
+                        <div class="hidden group-hover:block absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg">
+                            <a href="dashboard.html" class="block px-4 py-2 hover:bg-gray-100">Dashboard</a>
+                            <a href="profile.html" class="block px-4 py-2 hover:bg-gray-100">Profile</a>
+                            <a href="#" id="signOutBtn" class="block px-4 py-2 hover:bg-gray-100">Sign Out</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Job Posting Form -->
+    <div class="max-w-4xl mx-auto px-4 py-8">
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h1 class="text-2xl font-bold text-gray-900 mb-6">Post a Job</h1>
+            
+            <form id="postJobForm" class="space-y-6">
+                <!-- Job Basic Information -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="jobTitle" class="block text-sm font-medium text-gray-700">Job Title *</label>
+                        <select id="jobTitle" name="jobTitle" required
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary">
+                            <option value="">Select Job Title</option>
+                            <option value="Regular House Cleaning">Regular House Cleaning</option>
+                            <option value="Childcare and Light Cleaning">Childcare and Light Cleaning</option>
+                            <option value="Elderly Care and Housekeeping">Elderly Care and Housekeeping</option>
+                            <option value="Full House Cleaning">Full House Cleaning</option>
+                            <option value="Cook and Housekeeper">Cook and Housekeeper</option>
+                            <option value="Live-in Domestic Helper">Live-in Domestic Helper</option>
+                            <option value="Office Cleaning">Office Cleaning</option>
+                            <option value="Post-Construction Cleaning">Post-Construction Cleaning</option>
+                            <option value="Weekend Housekeeper">Weekend Housekeeper</option>
+                            <option value="Laundry and Ironing">Laundry and Ironing</option>
+                            <option value="Baby Caretaker">Baby Caretaker</option>
+                            <option value="Pet Care and Housekeeping">Pet Care and Housekeeping</option>
+                            <option value="Sutkeri Helper">Sutkeri Helper</option>
+                            <option value="Special Event Cleaning">Special Event Cleaning</option>
+                            <option value="Other">Other (Specify in Description)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="jobType" class="block text-sm font-medium text-gray-700">Job Type *</label>
+                        <select id="jobType" name="jobType" required
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary">
+                            <option value="">Select Job Type</option>
+                            <option value="Regular">Regular</option>
+                            <option value="Full-time">Full-time</option>
+                            <option value="Part-time">Part-time</option>
+                            <option value="One-time">One-time</option>
+                            <option value="Weekly">Weekly</option>
+                            <option value="Monthly">Monthly</option>
+                            <option value="Live-in">Live-in</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="location" class="block text-sm font-medium text-gray-700">Location *</label>
+                        <select id="location" name="location" required
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary">
+                            <option value="">Select Location</option>
+                            <option value="Kathmandu">Kathmandu</option>
+                            <option value="Lalitpur">Lalitpur</option>
+                            <option value="Bhaktapur">Bhaktapur</option>
+                            <option value="Pokhara">Pokhara</option>
+                            <option value="Biratnagar">Biratnagar</option>
+                            <option value="Birgunj">Birgunj</option>
+                            <option value="Dharan">Dharan</option>
+                            <option value="Itahari">Itahari</option>
+                            <option value="Hetauda">Hetauda</option>
+                            <option value="Butwal">Butwal</option>
+                            <option value="Nepalgunj">Nepalgunj</option>
+                            <option value="Dhangadhi">Dhangadhi</option>
+                            <option value="Other">Other (Specify in Description)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="hourlyRate" class="block text-sm font-medium text-gray-700">Hourly Rate (NR) *</label>
+                        <select id="hourlyRate" name="hourlyRate" required
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary">
+                            <option value="">Select Hourly Rate</option>
+                            <option value="150">NR 150</option>
+                            <option value="200">NR 200</option>
+                            <option value="250">NR 250</option>
+                            <option value="300">NR 300</option>
+                            <option value="350">NR 350</option>
+                            <option value="400">NR 400</option>
+                            <option value="450">NR 450</option>
+                            <option value="500">NR 500</option>
+                            <option value="600">NR 600</option>
+                            <option value="700">NR 700</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Specific Address (Hidden by default) -->
+                <div class="mt-4">
+                    <div class="flex items-center mb-2">
+                        <input id="showAddressToggle" type="checkbox" class="rounded text-brand-primary focus:ring-brand-primary">
+                        <label for="showAddressToggle" class="ml-2 text-sm font-medium text-gray-700">Add specific address details (will be shared only with selected applicants)</label>
+                    </div>
+                    <div id="addressFields" class="grid grid-cols-1 md:grid-cols-2 gap-6 hidden mt-4">
+                        <div>
+                            <label for="area" class="block text-sm font-medium text-gray-700">Area/Neighborhood</label>
+                            <select id="area" name="area"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary">
+                                <option value="">Select Area</option>
+                                <!-- Kathmandu Areas -->
+                                <optgroup label="Kathmandu">
+                                    <option value="Thamel">Thamel</option>
+                                    <option value="Baluwatar">Baluwatar</option>
+                                    <option value="Lazimpat">Lazimpat</option>
+                                    <option value="Durbar Marg">Durbar Marg</option>
+                                    <option value="Baneshwor">Baneshwor</option>
+                                    <option value="Kalanki">Kalanki</option>
+                                    <option value="Chabahil">Chabahil</option>
+                                    <option value="Samakhusi">Samakhusi</option>
+                                    <option value="Budhanilkantha">Budhanilkantha</option>
+                                </optgroup>
+                                <!-- Lalitpur Areas -->
+                                <optgroup label="Lalitpur">
+                                    <option value="Jhamsikhel">Jhamsikhel</option>
+                                    <option value="Sanepa">Sanepa</option>
+                                    <option value="Kupondole">Kupondole</option>
+                                    <option value="Jawalakhel">Jawalakhel</option>
+                                    <option value="Pulchowk">Pulchowk</option>
+                                    <option value="Mangal Bazaar">Mangal Bazaar</option>
+                                </optgroup>
+                                <!-- Bhaktapur Areas -->
+                                <optgroup label="Bhaktapur">
+                                    <option value="Suryabinayak">Suryabinayak</option>
+                                    <option value="Durbar Square">Durbar Square</option>
+                                    <option value="Katunje">Katunje</option>
+                                    <option value="Lokanthali">Lokanthali</option>
+                                </optgroup>
+                                <option value="Other">Other (Specify Below)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="landmark" class="block text-sm font-medium text-gray-700">Landmark</label>
+                            <select id="landmark" name="landmark"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary">
+                                <option value="">Select Landmark Type</option>
+                                <option value="Near School">Near School</option>
+                                <option value="Near Hospital">Near Hospital</option>
+                                <option value="Near Mall">Near Mall</option>
+                                <option value="Near Temple">Near Temple</option>
+                                <option value="Near Market">Near Market</option>
+                                <option value="Near Hotel">Near Hotel</option>
+                                <option value="Near Restaurant">Near Restaurant</option>
+                                <option value="Near Bus Stop">Near Bus Stop</option>
+                                <option value="Near Police Station">Near Police Station</option>
+                                <option value="Other">Other (Specify Below)</option>
+                            </select>
+                        </div>
+                        <div class="col-span-2">
+                            <label for="addressNotes" class="block text-sm font-medium text-gray-700">Additional Address Notes</label>
+                            <textarea id="addressNotes" name="addressNotes" rows="2"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary"
+                                placeholder="Only if needed (e.g., building name, street name, specific directions)"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Job Description Template -->
+                <div class="space-y-4">
+                    <label for="descriptionTemplate" class="block text-sm font-medium text-gray-700">Job Description Template *</label>
+                    <select id="descriptionTemplate" name="descriptionTemplate" required
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary">
+                        <option value="">Select a Description Template</option>
+                        <option value="regular-cleaning">Regular House Cleaning</option>
+                        <option value="childcare">Childcare and Light Cleaning</option>
+                        <option value="cooking">Cooking and Meal Preparation</option>
+                        <option value="elderly-care">Elderly Care</option>
+                        <option value="live-in">Live-in Maid</option>
+                        <option value="office-cleaning">Office Cleaning</option>
+                        <option value="custom">Custom Description</option>
+                    </select>
+                    
+                    <textarea id="description" name="description" rows="4" required
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary"
+                        placeholder="Job description will be generated based on your selection above. You can edit or customize it as needed."></textarea>
+                </div>
+
+                <!-- Household Information -->
+                <div class="space-y-4">
+                    <h2 class="text-lg font-semibold text-gray-900">Household Information</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="householdSize" class="block text-sm font-medium text-gray-700">Household Size</label>
+                            <select id="householdSize" name="householdSize"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary">
+                                <option value="">Select Household Size</option>
+                                <option value="1-2">1-2 people</option>
+                                <option value="3-4">3-4 people</option>
+                                <option value="5-6">5-6 people</option>
+                                <option value="7+">7+ people</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="houseType" class="block text-sm font-medium text-gray-700">Type of Residence</label>
+                            <select id="houseType" name="houseType"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary">
+                                <option value="">Select Residence Type</option>
+                                <option value="Apartment">Apartment</option>
+                                <option value="House">House</option>
+                                <option value="Villa">Villa</option>
+                                <option value="Office">Office Space</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="houseSize" class="block text-sm font-medium text-gray-700">Size of Space</label>
+                            <select id="houseSize" name="houseSize"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary">
+                                <option value="">Select Approximate Size</option>
+                                <option value="Small">Small (1-2 rooms)</option>
+                                <option value="Medium">Medium (3-4 rooms)</option>
+                                <option value="Large">Large (5+ rooms)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="hasPets" class="block text-sm font-medium text-gray-700">Pets in Household</label>
+                            <select id="hasPets" name="hasPets"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary">
+                                <option value="No">No Pets</option>
+                                <option value="Dogs">Dogs</option>
+                                <option value="Cats">Cats</option>
+                                <option value="Both">Both Dogs and Cats</option>
+                                <option value="Other">Other Pets</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Required Skills -->
+                <div class="space-y-4">
+                    <label class="block text-sm font-medium text-gray-700">Required Skills * (Select all that apply)</label>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" class="skill-checkbox" value="Cooking" name="skills">
+                            <span>Cooking</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" class="skill-checkbox" value="Cleaning" name="skills">
+                            <span>Cleaning</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" class="skill-checkbox" value="Laundry" name="skills">
+                            <span>Laundry</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" class="skill-checkbox" value="Child Care" name="skills">
+                            <span>Child Care</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" class="skill-checkbox" value="Elderly Care" name="skills">
+                            <span>Elderly Care</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" class="skill-checkbox" value="Pet Care" name="skills">
+                            <span>Pet Care</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" class="skill-checkbox" value="Postnatal/Sutkeri Care" name="skills">
+                            <span>Postnatal/Sutkeri Care</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" class="skill-checkbox" value="Office Assistant" name="skills">
+                            <span>Office Assistant</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" class="skill-checkbox" value="Gardening" name="skills">
+                            <span>Gardening</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" class="skill-checkbox" value="Driving" name="skills">
+                            <span>Driving</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" class="skill-checkbox" value="Ironing" name="skills">
+                            <span>Ironing</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" class="skill-checkbox" value="Dishwashing" name="skills">
+                            <span>Dishwashing</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Experience and Schedule -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="minExperience" class="block text-sm font-medium text-gray-700">Minimum Experience (Years)</label>
+                        <select id="minExperience" name="minExperience"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary">
+                            <option value="0">No experience required</option>
+                            <option value="1">1+ year</option>
+                            <option value="2">2+ years</option>
+                            <option value="3">3+ years</option>
+                            <option value="5">5+ years</option>
+                            <option value="10">10+ years</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="workingDays" class="block text-sm font-medium text-gray-700">Working Days</label>
+                        <select id="workingDays" name="workingDays"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary">
+                            <option value="">Select Working Days</option>
+                            <option value="Mon-Fri">Monday to Friday</option>
+                            <option value="Weekends">Weekends Only</option>
+                            <option value="Flexible">Flexible Schedule</option>
+                            <option value="Alternate">Alternate Days</option>
+                            <option value="Daily">Daily</option>
+                            <option value="Mon">Mondays Only</option>
+                            <option value="Tue">Tuesdays Only</option>
+                            <option value="Wed">Wednesdays Only</option>
+                            <option value="Thu">Thursdays Only</option>
+                            <option value="Fri">Fridays Only</option>
+                            <option value="Sat">Saturdays Only</option>
+                            <option value="Sun">Sundays Only</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="workingHours" class="block text-sm font-medium text-gray-700">Working Hours</label>
+                        <select id="workingHours" name="workingHours"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary">
+                            <option value="">Select Working Hours</option>
+                            <option value="Morning">Morning (6AM-12PM)</option>
+                            <option value="Afternoon">Afternoon (12PM-6PM)</option>
+                            <option value="Evening">Evening (6PM-10PM)</option>
+                            <option value="Full Day">Full Day (8AM-5PM)</option>
+                            <option value="6-2">6:00 AM - 2:00 PM</option>
+                            <option value="7-3">7:00 AM - 3:00 PM</option>
+                            <option value="8-4">8:00 AM - 4:00 PM</option>
+                            <option value="9-5">9:00 AM - 5:00 PM</option>
+                            <option value="10-6">10:00 AM - 6:00 PM</option>
+                            <option value="2-10">2:00 PM - 10:00 PM</option>
+                            <option value="Live-in">Live-in (Full Day)</option>
+                            <option value="Custom">Custom Hours</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="customHours" class="block text-sm font-medium text-gray-700">Custom Hours (if applicable)</label>
+                        <select id="customHours" name="customHours"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary">
+                            <option value="">Select Hours</option>
+                            <option value="1 hour daily">1 hour daily</option>
+                            <option value="2 hours daily">2 hours daily</option>
+                            <option value="3 hours daily">3 hours daily</option>
+                            <option value="4 hours daily">4 hours daily</option>
+                            <option value="5 hours daily">5 hours daily</option>
+                            <option value="6 hours daily">6 hours daily</option>
+                            <option value="8 hours daily">8 hours daily</option>
+                            <option value="10 hours daily">10 hours daily</option>
+                            <option value="2 hours, 3 days a week">2 hours, 3 days a week</option>
+                            <option value="3 hours, 2 days a week">3 hours, 2 days a week</option>
+                            <option value="4 hours weekly">4 hours weekly</option>
+                            <option value="8 hours weekly">8 hours weekly</option>
+                            <option value="One-time service">One-time service</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Additional Requirements -->
+                <div class="space-y-4">
+                    <h2 class="text-lg font-semibold text-gray-900">Additional Requirements</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="language" class="block text-sm font-medium text-gray-700">Language Requirements</label>
+                            <select id="language" name="language" multiple
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary">
+                                <option value="Nepali">Nepali</option>
+                                <option value="English">English</option>
+                                <option value="Hindi">Hindi</option>
+                                <option value="Newari">Newari</option>
+                                <option value="Tamang">Tamang</option>
+                                <option value="Gurung">Gurung</option>
+                                <option value="Magar">Magar</option>
+                                <option value="Tharu">Tharu</option>
+                            </select>
+                            <p class="mt-1 text-xs text-gray-500">Hold Ctrl/Cmd to select multiple languages</p>
+                        </div>
+                        <div>
+                            <label for="agePreference" class="block text-sm font-medium text-gray-700">Age Preference</label>
+                            <select id="agePreference" name="agePreference"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary">
+                                <option value="">No Preference</option>
+                                <option value="18-25">18-25 years</option>
+                                <option value="25-35">25-35 years</option>
+                                <option value="35-45">35-45 years</option>
+                                <option value="45+">45+ years</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="educationLevel" class="block text-sm font-medium text-gray-700">Minimum Education</label>
+                            <select id="educationLevel" name="educationLevel"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary">
+                                <option value="">No Education Required</option>
+                                <option value="Primary">Primary School</option>
+                                <option value="SEE">SEE</option>
+                                <option value="Intermediate">Intermediate</option>
+                                <option value="Bachelor">Bachelor's Degree</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="referencesRequired" class="block text-sm font-medium text-gray-700">References Required</label>
+                            <select id="referencesRequired" name="referencesRequired"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary">
+                                <option value="No">No references needed</option>
+                                <option value="Preferred">References preferred</option>
+                                <option value="Required">References required</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Notes -->
+                <div class="space-y-4">
+                    <label for="requirements" class="block text-sm font-medium text-gray-700">Additional Notes</label>
+                    <textarea id="requirements" name="requirements" rows="3"
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary"
+                        placeholder="Any other specific requirements or information you want to share with potential candidates"></textarea>
+                </div>
+
+                <!-- Contact Information -->
+                <div class="space-y-6">
+                    <h2 class="text-lg font-semibold text-gray-900">Contact Information</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="contactName" class="block text-sm font-medium text-gray-700">Contact Name *</label>
+                            <input type="text" id="contactName" name="contactName" required
+                                placeholder="Your name"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary">
+                        </div>
+                        <div>
+                            <label for="contactPhone" class="block text-sm font-medium text-gray-700">Phone Number *</label>
+                            <input type="tel" id="contactPhone" name="contactPhone" required
+                                placeholder="Your phone number"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary">
+                        </div>
+                        <div>
+                            <label for="contactEmail" class="block text-sm font-medium text-gray-700">Email *</label>
+                            <input type="email" id="contactEmail" name="contactEmail" required
+                                placeholder="Your email address"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary">
+                        </div>
+                        <div>
+                            <label for="preferredContact" class="block text-sm font-medium text-gray-700">Preferred Contact Method</label>
+                            <select id="preferredContact" name="preferredContact"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary">
+                                <option value="Any">Any Method</option>
+                                <option value="Phone">Phone</option>
+                                <option value="Email">Email</option>
+                                <option value="WhatsApp">WhatsApp</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="flex justify-end">
+                    <button type="submit"
+                        class="bg-brand-primary text-white px-8 py-3 rounded-lg hover:bg-brand-secondary transition-colors">
+                        Post Job
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Supabase client
+        const supabaseUrl = 'https://fdgqqxyyofjnkhswkwcq.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZkZ3FxeHl5b2Zqbmtoc3drd2NxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQwMjQyMTMsImV4cCI6MjA1OTYwMDIxM30.YyJLLu3r2a7Mh7ny0ie-YzzLfPh5PdrJJHnBFBxWqVE';
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+        
+        // Session related variables
+        let currentUser = null;
+        
+        // Main initialization function
+        function initPage() {
+            console.log("Initializing page...");
+            
+            // Set up description template handler
+            setupDescriptionTemplates();
+            
+            // Set up address toggle
+            setupAddressToggle();
+            
+            // Set up skill checkers
+            setupSkillCheckboxes();
+            
+            // Set up job title change handler
+            setupJobTitleHandler();
+            
+            // Authentication check
+            // Commented out for testing purposes
+            // checkSession();
+        }
+        
+        // Setup description templates functionality
+        function setupDescriptionTemplates() {
+            console.log("Setting up description templates...");
+            const descriptionTemplateSelect = document.getElementById('descriptionTemplate');
+            const descriptionTextarea = document.getElementById('description');
+            
+            if (descriptionTemplateSelect && descriptionTextarea) {
+                descriptionTemplateSelect.addEventListener('change', function() {
+                    console.log("Template selected:", this.value);
+                    const selectedTemplate = this.value;
+                    let templateText = '';
+                    
+                    switch(selectedTemplate) {
+                        case 'regular-cleaning':
+                            templateText = "Looking for a reliable maid for regular house cleaning. Duties include sweeping, mopping, dusting, bathroom cleaning, and general tidying. The ideal candidate is thorough, detail-oriented, and can work independently. Must have good time management skills and be reliable.";
+                            break;
+                        case 'childcare':
+                            templateText = "Seeking a caring and responsible maid for childcare and light cleaning. Responsibilities include looking after children, preparing meals, helping with homework, light cleaning, and maintaining a safe environment. The ideal candidate is patient, energetic, and experienced with children.";
+                            break;
+                        case 'cooking':
+                            templateText = "Hiring a skilled cook for meal preparation. Duties include planning meals, grocery shopping, cooking daily meals, and keeping the kitchen clean. Must be knowledgeable about Nepali cuisine and able to prepare healthy and varied meals. Food hygiene knowledge is essential.";
+                            break;
+                        case 'elderly-care':
+                            templateText = "Looking for a compassionate caregiver for an elderly family member. Responsibilities include personal care assistance, medication reminders, meal preparation, light housekeeping, and companionship. The ideal candidate is patient, experienced with elderly care, and able to provide emotional support.";
+                            break;
+                        case 'live-in':
+                            templateText = "Seeking a full-time live-in maid for household management. Responsibilities include cleaning, cooking, childcare, laundry, and general household maintenance. Accommodation and meals provided. The ideal candidate is hardworking, trustworthy, and organized with experience in managing a household.";
+                            break;
+                        case 'office-cleaning':
+                            templateText = "Hiring a cleaner for regular office maintenance. Duties include dusting, vacuuming, bathroom cleaning, trash removal, and keeping common areas tidy. Must be reliable, detail-oriented, and able to work efficiently with minimal supervision.";
+                            break;
+                        case 'custom':
+                            templateText = ""; // Empty for custom description
+                            break;
+                    }
+                    
+                    if (templateText) {
+                        descriptionTextarea.value = templateText;
+                    }
+                });
+            }
+        }
+        
+        // Setup address toggle functionality
+        function setupAddressToggle() {
+            console.log("Setting up address toggle...");
+            const showAddressToggle = document.getElementById('showAddressToggle');
+            const addressFields = document.getElementById('addressFields');
+            
+            if (showAddressToggle && addressFields) {
+                showAddressToggle.addEventListener('change', function() {
+                    if (this.checked) {
+                        addressFields.classList.remove('hidden');
+                    } else {
+                        addressFields.classList.add('hidden');
+                    }
+                });
+            }
+        }
+        
+        // Setup skill checkboxes
+        function setupSkillCheckboxes() {
+            console.log("Setting up skill checkboxes...");
+            const skillCheckboxes = document.querySelectorAll('.skill-checkbox');
+            
+            if (skillCheckboxes.length > 0) {
+                skillCheckboxes.forEach(checkbox => {
+                    checkbox.addEventListener('change', updateRequirements);
+                });
+            }
+        }
+        
+        // Setup job title handler
+        function setupJobTitleHandler() {
+            console.log("Setting up job title handler...");
+            const jobTitleSelect = document.getElementById('jobTitle');
+            const hourlyRateSelect = document.getElementById('hourlyRate');
+            
+            if (jobTitleSelect && hourlyRateSelect) {
+                jobTitleSelect.addEventListener('change', function() {
+                    const selectedJob = this.value;
+                    
+                    // Set suggested hourly rates based on job type
+                    switch(selectedJob) {
+                        case 'Regular House Cleaning':
+                        case 'Laundry and Ironing':
+                            suggestHourlyRate('250');
+                            break;
+                        case 'Childcare and Light Cleaning':
+                        case 'Elderly Care and Housekeeping':
+                        case 'Cook and Housekeeper':
+                            suggestHourlyRate('300');
+                            break;
+                        case 'Full House Cleaning':
+                        case 'Office Cleaning':
+                        case 'Baby Caretaker':
+                            suggestHourlyRate('350');
+                            break;
+                        case 'Post-Construction Cleaning':
+                            suggestHourlyRate('400');
+                            break;
+                        case 'Sutkeri Helper':
+                        case 'Pet Care and Housekeeping':
+                            suggestHourlyRate('450');
+                            break;
+                        case 'Live-in Domestic Helper':
+                            suggestHourlyRate('300');
+                            break;
+                    }
+                });
+            }
+        }
+        
+        // Utility functions
+        function showLoading() {
+            // Disable submit button and change text
+            const submitButton = document.querySelector('button[type="submit"]');
+            if (submitButton) {
+                submitButton.disabled = true;
+                submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Posting...';
+            }
+        }
+        
+        function hideLoading() {
+            // Re-enable submit button
+            const submitButton = document.querySelector('button[type="submit"]');
+            if (submitButton) {
+                submitButton.disabled = false;
+                submitButton.innerHTML = 'Post Job';
+            }
+        }
+        
+        function showError(message) {
+            // Create error toast
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 flex items-center';
+            toast.innerHTML = `
+                <i class="fas fa-exclamation-circle mr-2"></i>
+                <span>${message}</span>
+            `;
+            document.body.appendChild(toast);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+        
+        function showSuccess(message) {
+            // Create success toast
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 flex items-center';
+            toast.innerHTML = `
+                <i class="fas fa-check-circle mr-2"></i>
+                <span>${message}</span>
+            `;
+            document.body.appendChild(toast);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+        
+        // Check session and redirect if not logged in
+        async function checkSession() {
+            // Get current session
+            const { data: { session }, error } = await supabaseClient.auth.getSession();
+            
+            if (error || !session) {
+                // Redirect to login if no session
+                window.location.href = '../auth/login.html?redirect=employer/post-job.html&type=employer';
+                return;
+            }
+            
+            // Get user profile
+            const { data: profile, error: profileError } = await supabaseClient
+                .from('profiles')
+                .select('*')
+                .eq('id', session.user.id)
+                .single();
+                
+            if (profileError || !profile) {
+                console.error('Error fetching profile:', profileError);
+                return;
+            }
+            
+            // Check if user is an employer
+            if (profile.user_type !== 'employer') {
+                // Redirect to jobs page if not an employer
+                window.location.href = '../jobs/find-jobs.html';
+                showError('Only employers can post jobs');
+                return;
+            }
+            
+            // Store current user
+            currentUser = session.user;
+            
+            // Update UI to show logged in state
+            updateNavigation(profile);
+        }
+        
+        // Update navigation based on user profile
+        function updateNavigation(profile) {
+            // Show/hide elements based on authentication status
+            document.querySelectorAll('.auth-required').forEach(el => el.classList.remove('hidden'));
+            document.querySelectorAll('.auth-not-required').forEach(el => el.classList.add('hidden'));
+            
+            // Update profile button if it exists
+            const profileButton = document.getElementById('profileButton');
+            if (profileButton) {
+                profileButton.textContent = profile.full_name || 'My Profile';
+                profileButton.classList.remove('hidden');
+            }
+        }
+
+        // Handle the post job form submission
+        document.getElementById('postJobForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            try {
+                showLoading();
+                
+                // Collect form data
+                const formData = new FormData(e.target);
+                const skills = Array.from(document.querySelectorAll('.skill-checkbox:checked'))
+                    .map(checkbox => checkbox.value);
+                
+                // Requirements as an array
+                const requirements = document.getElementById('requirements').value
+                    .split('\n')
+                    .filter(line => line.trim() !== '')
+                    .map(line => line.trim());
+
+                // Address information
+                const showAddress = document.getElementById('showAddressToggle').checked;
+                let addressInfo = null;
+                
+                if (showAddress) {
+                    addressInfo = {
+                        area: document.getElementById('area').value,
+                        landmark: document.getElementById('landmark').value,
+                        notes: document.getElementById('addressNotes').value
+                    };
+                }
+                
+                // Language requirements (multi-select)
+                const languageSelect = document.getElementById('language');
+                const languages = Array.from(languageSelect.selectedOptions).map(option => option.value);
+                
+                // Collect household information
+                const householdInfo = {
+                    size: document.getElementById('householdSize').value,
+                    type: document.getElementById('houseType').value,
+                    houseSize: document.getElementById('houseSize').value,
+                    hasPets: document.getElementById('hasPets').value
+                };
+                
+                // Additional requirements
+                const additionalRequirements = {
+                    languages: languages,
+                    agePreference: document.getElementById('agePreference').value,
+                    educationLevel: document.getElementById('educationLevel').value,
+                    referencesRequired: document.getElementById('referencesRequired').value
+                };
+                
+                // Schedule information
+                const scheduleInfo = {
+                    workingDays: document.getElementById('workingDays').value,
+                    workingHours: document.getElementById('workingHours').value,
+                    customHours: document.getElementById('customHours').value
+                };
+
+                // Prepare job data
+                const jobData = {
+                    user_id: currentUser.id,
+                    title: formData.get('jobTitle'),
+                    job_type: formData.get('jobType'),
+                    location: formData.get('location'),
+                    hourly_rate: parseInt(formData.get('hourlyRate')),
+                    description: formData.get('description'),
+                    min_experience: parseInt(formData.get('minExperience') || "0"),
+                    skills: skills,
+                    requirements: requirements,
+                    created_at: new Date().toISOString(),
+                    status: 'active',
+                    address: showAddress ? addressInfo : null,
+                    household_info: householdInfo,
+                    additional_requirements: additionalRequirements,
+                    schedule: scheduleInfo
+                };
+
+                console.log('Posting job with data:', jobData);
+                
+                // Save to Supabase
+                const { data, error } = await supabaseClient
+                    .from('jobs')
+                    .insert([jobData]);
+                    
+                if (error) throw error;
+                
+                hideLoading();
+                showSuccess('Your job has been posted successfully!');
+                
+                // Redirect to jobs page after short delay
+                setTimeout(() => {
+                    window.location.href = '../jobs/find-maids.html';
+                }, 2000);
+                    
+            } catch (error) {
+                console.error('Error posting job:', error);
+                hideLoading();
+                showError('Failed to post job. Please try again.');
+            }
+        });
+
+        // Handle sign out
+        document.getElementById('signOutBtn').addEventListener('click', async function() {
+            try {
+                const { error } = await supabaseClient.auth.signOut();
+                if (error) throw error;
+                window.location.href = '../index.html';
+            } catch (error) {
+                console.error('Error signing out:', error);
+                showError('Error signing out. Please try again.');
+            }
+        });
+
+        // Update requirements based on selected skills
+        function updateRequirements() {
+            const skillsSelected = Array.from(document.querySelectorAll('.skill-checkbox:checked'))
+                .map(checkbox => checkbox.value);
+            
+            // Don't auto-generate if user has already typed something
+            const requirementsField = document.getElementById('requirements');
+            if (requirementsField && requirementsField.value.trim() === '') {
+                let suggestedRequirements = '';
+                
+                if (skillsSelected.includes('Cooking')) {
+                    suggestedRequirements += '- Experience in Nepali and international cuisine preferred\n';
+                }
+                
+                if (skillsSelected.includes('Cleaning')) {
+                    suggestedRequirements += '- Knowledge of cleaning products and techniques required\n';
+                }
+                
+                if (skillsSelected.includes('Child Care')) {
+                    suggestedRequirements += '- Experience with children of different age groups\n';
+                }
+                
+                if (skillsSelected.includes('Elderly Care')) {
+                    suggestedRequirements += '- Understanding of elderly needs and patience required\n';
+                }
+                
+                if (skillsSelected.includes('Pet Care')) {
+                    suggestedRequirements += '- Comfortable with pets and basic pet care knowledge\n';
+                }
+                
+                if (skillsSelected.includes('Postnatal/Sutkeri Care')) {
+                    suggestedRequirements += '- Experience with newborns and knowledge of postnatal care\n';
+                }
+                
+                if (skillsSelected.includes('Driving')) {
+                    suggestedRequirements += '- Valid driving license required\n';
+                }
+                
+                requirementsField.value = suggestedRequirements;
+            }
+        }
+        
+        // Suggest hourly rate based on job title
+        function suggestHourlyRate(rate) {
+            const hourlyRateSelect = document.getElementById('hourlyRate');
+            if (hourlyRateSelect) {
+                hourlyRateSelect.value = rate;
+            }
+        }
+    </script>
+</body>
+</html> 

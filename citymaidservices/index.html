@@ -103,7 +103,105 @@
                     element.textContent = BRAND_CONFIG.SHORT_NAME;
                 }
             });
+
+            // Check if user has selected a role in localStorage
+            checkUserRole();
         });
+
+        // Function to check if user has a role stored
+        function checkUserRole() {
+            const userRole = localStorage.getItem('userRole');
+            
+            // If a role is stored, update the navigation and content visibility
+            if (userRole) {
+                updateUIForRole(userRole);
+            }
+        }
+
+        // Function to save the user role and redirect
+        function selectUserRole(role) {
+            // Save role to localStorage
+            localStorage.setItem('userRole', role);
+            
+            // Redirect to login page with the role as a parameter
+            window.location.href = `auth/login.html?type=${role}`;
+        }
+
+        // Function to update UI based on selected role
+        function updateUIForRole(role) {
+            // Get navigation links
+            const findMaidsLink = document.querySelector('a[href="jobs/find-maids.html"]');
+            const findJobsLink = document.querySelector('a[href="jobs/find-jobs.html"]');
+            
+            // Also update mobile navigation
+            const mobileFindMaidsLink = document.querySelector('a.block[href="jobs/find-maids.html"]');
+            const mobileFindJobsLink = document.querySelector('a.block[href="jobs/find-jobs.html"]');
+            
+            // Hide inappropriate links based on role
+            if (role === 'employer') {
+                // Employers should see Find Maids and not Find Jobs
+                if (findJobsLink) findJobsLink.classList.add('hidden');
+                if (mobileFindJobsLink) mobileFindJobsLink.classList.add('hidden');
+                
+                // Show employer-appropriate links
+                if (findMaidsLink) {
+                    findMaidsLink.classList.remove('hidden');
+                    findMaidsLink.classList.add('font-bold', 'text-brand-primary');
+                }
+                if (mobileFindMaidsLink) {
+                    mobileFindMaidsLink.classList.remove('hidden');
+                    mobileFindMaidsLink.classList.add('font-bold', 'text-brand-primary');
+                }
+            } else if (role === 'maid') {
+                // Maids should see Find Jobs and not Find Maids
+                if (findMaidsLink) findMaidsLink.classList.add('hidden');
+                if (mobileFindMaidsLink) mobileFindMaidsLink.classList.add('hidden');
+                
+                // Show maid-appropriate links
+                if (findJobsLink) {
+                    findJobsLink.classList.remove('hidden');
+                    findJobsLink.classList.add('font-bold', 'text-brand-primary');
+                }
+                if (mobileFindJobsLink) {
+                    mobileFindJobsLink.classList.remove('hidden');
+                    mobileFindJobsLink.classList.add('font-bold', 'text-brand-primary');
+                }
+            }
+            
+            // Also update featured sections based on role
+            const featuredMaidsSection = document.querySelector('section:has(#featuredMaids)');
+            const latestJobsSection = document.querySelector('section:has(#latestJobsContainer)');
+            
+            if (featuredMaidsSection && latestJobsSection) {
+                if (role === 'employer') {
+                    // Employers see featured maids but not jobs
+                    featuredMaidsSection.classList.remove('hidden');
+                    latestJobsSection.classList.add('hidden');
+                } else if (role === 'maid') {
+                    // Maids see latest jobs but not featured maids
+                    featuredMaidsSection.classList.add('hidden');
+                    latestJobsSection.classList.remove('hidden');
+                }
+            }
+        }
+
+        // Function to sign out
+        async function signOut() {
+            try {
+                const { error } = await supabaseClient.auth.signOut();
+                if (error) throw error;
+                window.location.href = 'index.html';
+            } catch (error) {
+                console.error('Error signing out:', error);
+                showError('Error signing out. Please try again.');
+            }
+        }
+        
+        // Add event listener for sign out button
+        const signOutBtn = document.getElementById('signOutBtn');
+        if (signOutBtn) {
+            signOutBtn.addEventListener('click', signOut);
+        }
     </script>
 </head>
 <body class="font-poppins" data-current-page="home">
@@ -122,14 +220,7 @@
                 </div>
                 <!-- Desktop menu -->
                 <div class="hidden md:flex items-center space-x-6">
-                    <a href="../index.html" class="nav-link active" data-page="home">Home</a>
-                    <a href="../jobs/find-maids.html" class="nav-link" data-page="find-maids">Find Maids</a>
-                    <a href="../jobs/find-jobs.html" class="nav-link" data-page="find-jobs">Find Jobs</a>
-                    <a href="../static/contact.html" class="nav-link" data-page="contact">Contact Us</a>
-                    <a href="../static/about.html" class="nav-link" data-page="about">About Us</a>
-                    <a href="../auth/login.html" class="bg-brand-primary text-white px-6 py-2 rounded-lg hover:bg-brand-secondary font-semibold transition-colors">
-                        Sign In
-                    </a>
+                    <a href="index.html" class="nav-link active" data-page="home">Home</a>
                 </div>
             </div>
         </div>
@@ -151,86 +242,217 @@
                     </button>
                 </div>
                 <div class="p-4 space-y-4">
-                    <a href="../index.html" class="block nav-link active" data-page="home">Home</a>
-                    <a href="../jobs/find-maids.html" class="block nav-link" data-page="find-maids">Find Maids</a>
-                    <a href="../jobs/find-jobs.html" class="block nav-link" data-page="find-jobs">Find Jobs</a>
-                    <a href="../static/contact.html" class="block nav-link" data-page="contact">Contact Us</a>
-                    <a href="../static/about.html" class="block nav-link" data-page="about">About Us</a>
+                    <a href="index.html" class="block nav-link active" data-page="home">Home</a>
                     <div class="pt-4 border-t border-gray-200">
-                        <a href="../auth/register.html?role=maid" class="block text-gray-700 hover:text-brand-primary font-medium transition-colors mb-2">Register as Maid</a>
-                        <a href="../auth/register.html?role=employer" class="block text-gray-700 hover:text-brand-primary font-medium transition-colors mb-2">Post a Job</a>
-                        <a href="../auth/login.html" class="block text-gray-700 hover:text-brand-primary font-medium transition-colors mt-4">Sign In</a>
+                        <p class="text-gray-700 font-medium mb-2">I want to:</p>
+                        <a href="#" onclick="selectUserRole('employer')" class="block text-gray-700 hover:text-brand-primary font-medium transition-colors mb-2">
+                            <i class="fas fa-user-tie mr-2"></i> Hire a Maid
+                        </a>
+                        <a href="#" onclick="selectUserRole('maid')" class="block text-gray-700 hover:text-brand-primary font-medium transition-colors mb-2">
+                            <i class="fas fa-broom mr-2"></i> Find Work as a Maid
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
     </nav>
 
-    <!-- Hero Section -->
+    <!-- Hero Section with Role Selection -->
     <div class="bg-gradient-to-r from-brand-primary to-brand-secondary">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
             <div class="max-w-3xl mx-auto text-center">
-                <h1 class="text-4xl md:text-5xl font-bold mb-6 text-white">Find Trusted Domestic Help</h1>
-                <p class="text-xl mb-8 text-white/90">Connect with verified domestic helpers and employers in your area</p>
+                <h1 class="text-4xl md:text-5xl font-bold mb-6 text-white">Find Your Perfect Match</h1>
+                <p class="text-xl mb-10 text-white/90">Connect with trusted domestic help or find the perfect job opportunity</p>
                 
-                <!-- Search and Filter Section -->
-                <div class="bg-white/95 rounded-lg p-6 shadow-lg backdrop-blur-sm">
-                    <!-- Search Bar -->
-                    <div class="relative mb-6">
-                        <input type="text" 
-                               id="searchInput"
-                               placeholder="Search by name, skills, or keywords..." 
-                               class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-brand-primary focus:ring-2 focus:ring-brand-light text-gray-900">
-                        <button class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-brand-primary" aria-label="Search">
-                            <i class="fas fa-search"></i>
+                <!-- Role Selection Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
+                    <!-- Employer Card -->
+                    <div class="bg-white rounded-xl overflow-hidden shadow-xl transform transition-all duration-300 hover:-translate-y-2">
+                        <div class="p-8">
+                            <div class="w-20 h-20 rounded-full bg-brand-light mx-auto mb-6 flex items-center justify-center">
+                                <i class="fas fa-user-tie text-3xl text-brand-primary"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold text-gray-900 mb-4">I'm Looking to Hire</h3>
+                            <p class="text-gray-600 mb-6">Find reliable and skilled domestic help for your home or workplace</p>
+                            <ul class="text-left mb-8 space-y-2">
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                    <span>Browse verified maid profiles</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                    <span>Pay to unlock contact details</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                    <span>Connect directly with maids</span>
+                                </li>
+                            </ul>
+                            <button onclick="selectUserRole('employer')" class="block w-full bg-brand-primary text-white py-3 px-6 rounded-lg hover:bg-brand-secondary transition-colors text-center font-semibold">
+                                I'm an Employer
                         </button>
+                        </div>
                     </div>
 
-                    <!-- Essential Filters -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <!-- Location Filter -->
-                        <div class="relative">
-                            <select id="locationFilter" class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-brand-primary focus:ring-2 focus:ring-brand-light text-gray-900" aria-label="Select Location">
-                                <option value="">Select Location</option>
-                                <option value="kathmandu">Kathmandu</option>
-                                <option value="lalitpur">Lalitpur</option>
-                                <option value="bhaktapur">Bhaktapur</option>
-                            </select>
+                    <!-- Maid Card -->
+                    <div class="bg-white rounded-xl overflow-hidden shadow-xl transform transition-all duration-300 hover:-translate-y-2">
+                        <div class="p-8">
+                            <div class="w-20 h-20 rounded-full bg-brand-light mx-auto mb-6 flex items-center justify-center">
+                                <i class="fas fa-broom text-3xl text-brand-primary"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold text-gray-900 mb-4">I'm Looking for Work</h3>
+                            <p class="text-gray-600 mb-6">Find employment opportunities as a domestic helper</p>
+                            <ul class="text-left mb-8 space-y-2">
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                    <span>Create your professional profile</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                    <span>Browse available job opportunities</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                    <span>Pay to unlock employer contacts</span>
+                                </li>
+                            </ul>
+                            <button onclick="selectUserRole('maid')" class="block w-full bg-brand-primary text-white py-3 px-6 rounded-lg hover:bg-brand-secondary transition-colors text-center font-semibold">
+                                I'm a Maid
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
                         </div>
 
-                        <!-- Work Type Filter -->
-                        <div class="relative">
-                            <select id="workTypeFilter" class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-brand-primary focus:ring-2 focus:ring-brand-light text-gray-900" aria-label="Select Work Type">
-                                <option value="">Select Work Type</option>
-                                <option value="full-time">Full-time</option>
-                                <option value="part-time">Part-time</option>
-                                <option value="live-in">Live-in</option>
-                            </select>
+    <!-- How It Works Section -->
+    <section class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="section-title text-3xl font-bold text-gray-900">
+                    How It Works
+                </h2>
+                <p class="mt-6 text-lg text-gray-600">
+                    Our simple process connects domestic help with employers
+                </p>
                         </div>
 
-                        <!-- Salary Range Filter -->
-                        <div class="relative">
-                            <select id="salaryFilter" class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-brand-primary focus:ring-2 focus:ring-brand-light text-gray-900" aria-label="Select Salary Range">
-                                <option value="">Select Salary Range</option>
-                                <option value="0-15000">Up to NR 15,000</option>
-                                <option value="15000-25000">NR 15,000 - 25,000</option>
-                                <option value="25000+">NR 25,000+</option>
-                            </select>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                <!-- For Employers -->
+                <div class="bg-gray-50 rounded-xl p-8">
+                    <h3 class="text-2xl font-bold text-brand-primary mb-6 text-center">For Employers</h3>
+                    <div class="space-y-8">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full bg-brand-primary text-white font-bold mr-4">
+                                1
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold text-gray-900 mb-1">Browse Profiles</h4>
+                                <p class="text-gray-600">Search through verified maid profiles that match your requirements</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full bg-brand-primary text-white font-bold mr-4">
+                                2
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold text-gray-900 mb-1">Unlock Contact</h4>
+                                <p class="text-gray-600">Pay a small fee through Khalti to unlock maid contact information</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full bg-brand-primary text-white font-bold mr-4">
+                                3
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold text-gray-900 mb-1">Connect Directly</h4>
+                                <p class="text-gray-600">Contact maids directly to discuss job details and arrange interviews</p>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Get Started Section -->
-                <div class="text-center mt-8">
-                    <p class="text-white/90 mb-4">Ready to find your perfect match?</p>
-                    <a href="auth/select-role.html" 
-                       class="inline-flex items-center justify-center bg-white text-brand-primary px-8 py-4 rounded-lg hover:bg-white/90 transform hover:-translate-y-1 transition-all duration-300 text-center font-semibold">
-                        <i class="fas fa-rocket mr-2"></i>Get Started
+                <!-- For Maids -->
+                <div class="bg-gray-50 rounded-xl p-8">
+                    <h3 class="text-2xl font-bold text-brand-primary mb-6 text-center">For Maids</h3>
+                    <div class="space-y-8">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full bg-brand-primary text-white font-bold mr-4">
+                                1
+                </div>
+                            <div>
+                                <h4 class="text-lg font-semibold text-gray-900 mb-1">Create Profile</h4>
+                                <p class="text-gray-600">Build your professional profile showcasing your skills and experience</p>
+            </div>
+        </div>
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full bg-brand-primary text-white font-bold mr-4">
+                                2
+    </div>
+                            <div>
+                                <h4 class="text-lg font-semibold text-gray-900 mb-1">Browse Jobs</h4>
+                                <p class="text-gray-600">Find job opportunities that match your skills and preferences</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full bg-brand-primary text-white font-bold mr-4">
+                                3
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold text-gray-900 mb-1">Unlock Contact</h4>
+                                <p class="text-gray-600">Pay a small fee through Khalti to unlock employer contact information</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Payment System Section -->
+    <section class="py-16 bg-brand-light">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="section-title text-3xl font-bold text-gray-900">
+                    Secure Contact Unlock System
+                </h2>
+                <p class="mt-6 text-lg text-gray-600">
+                    Our contact unlock system protects both parties and ensures quality connections
+                </p>
+            </div>
+            <div class="bg-white rounded-xl shadow-lg p-8">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-brand-light rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-lock-open text-2xl text-brand-primary"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-900 mb-2">Unlock Contacts</h3>
+                        <p class="text-gray-600">Pay a small fee to unlock contact information and connect directly</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-brand-light rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-shield-alt text-2xl text-brand-primary"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-900 mb-2">Secure Payments</h3>
+                        <p class="text-gray-600">All payments are processed securely through Khalti payment gateway</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-brand-light rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-history text-2xl text-brand-primary"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-900 mb-2">Permanent Access</h3>
+                        <p class="text-gray-600">Once unlocked, you'll always have access to the contact information</p>
+                    </div>
+                </div>
+                <div class="mt-8 text-center">
+                    <a href="auth/register.html" class="inline-flex items-center justify-center bg-brand-primary text-white px-8 py-3 rounded-lg hover:bg-brand-secondary transform hover:-translate-y-1 transition-all duration-300">
+                        Get Started Today
                     </a>
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 
     <!-- Featured Domestic Helpers Section -->
     <section class="py-12 bg-gray-50">
@@ -238,18 +460,17 @@
             <div class="text-center mb-12">
                 <h2 class="section-title text-3xl font-bold text-gray-900">Featured Domestic Helpers</h2>
                 <p class="mt-6 text-lg text-gray-700">
-                    Connect with experienced and reliable domestic helpers in your area
+                    Browse profiles of trusted maids and unlock contacts to hire directly
                 </p>
             </div>
-            <div id="featuredMaids" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div id="featuredMaids" class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <!-- Maid cards will be inserted here -->
             </div>
             <div class="text-center mt-8">
-                <a href="jobs/find-maids.html" 
+                <button onclick="selectUserRole('employer')" 
                    class="inline-flex items-center justify-center bg-brand-primary text-white px-8 py-3 rounded-lg hover:bg-brand-secondary transform hover:-translate-y-1 transition-all duration-300">
-                    <span>View All Profiles</span>
-                    <i class="fas fa-arrow-right ml-2"></i>
-                </a>
+                    <span>Register as Employer <i class="fas fa-arrow-right ml-2"></i></span>
+                </button>
             </div>
         </div>
     </section>
@@ -262,17 +483,16 @@
                     Latest Job Openings
                 </h2>
                 <p class="mt-6 text-lg text-gray-600">
-                    Find the perfect domestic help opportunity
+                    Find and unlock contact details for your perfect job opportunity
                 </p>
             </div>
-            <div id="latestJobsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div id="latestJobsContainer" class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <!-- Jobs will be loaded here dynamically -->
             </div>
             <div class="text-center mt-8">
-                <a href="jobs/find-jobs.html" class="inline-flex items-center justify-center bg-brand-primary text-white px-8 py-3 rounded-lg hover:bg-brand-secondary transform hover:-translate-y-1 transition-all duration-300">
-                    <span>View All Jobs</span>
-                    <i class="fas fa-arrow-right ml-2"></i>
-                </a>
+                <button onclick="selectUserRole('maid')" class="inline-flex items-center justify-center bg-brand-primary text-white px-8 py-3 rounded-lg hover:bg-brand-secondary transform hover:-translate-y-1 transition-all duration-300">
+                    <span>Register as Maid <i class="fas fa-arrow-right ml-2"></i></span>
+                </button>
             </div>
         </div>
     </section>
@@ -285,7 +505,7 @@
                     Why Choose City Maid Services
                 </h2>
                 <p class="mt-6 text-lg text-gray-600">
-                    We make finding domestic help simple, secure, and reliable
+                    We provide a secure platform for direct connections between maids and employers
                 </p>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -294,21 +514,78 @@
                         <i class="fas fa-user-check text-2xl text-brand-primary"></i>
                     </div>
                     <h3 class="text-xl font-semibold text-gray-900 mb-2">Verified Profiles</h3>
-                    <p class="text-gray-600">All domestic helpers are thoroughly verified for your safety</p>
+                    <p class="text-gray-600">All domestic helpers are thoroughly vetted for your safety and peace of mind</p>
                 </div>
                 <div class="text-center p-6">
                     <div class="w-16 h-16 bg-brand-light rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-bolt text-2xl text-brand-primary"></i>
+                        <i class="fas fa-handshake text-2xl text-brand-primary"></i>
                     </div>
-                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Quick Matching</h3>
-                    <p class="text-gray-600">Find the perfect match for your requirements quickly</p>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Direct Connections</h3>
+                    <p class="text-gray-600">Connect directly with maids or employers without intermediaries</p>
                 </div>
                 <div class="text-center p-6">
                     <div class="w-16 h-16 bg-brand-light rounded-full flex items-center justify-center mx-auto mb-4">
                         <i class="fas fa-shield-alt text-2xl text-brand-primary"></i>
                     </div>
-                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Secure Platform</h3>
-                    <p class="text-gray-600">Your data and transactions are always protected</p>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Secure Payments</h3>
+                    <p class="text-gray-600">All contact unlock payments are processed securely through Khalti</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="py-16 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="section-title text-3xl font-bold text-gray-900">
+                    Success Stories
+                </h2>
+                <p class="mt-6 text-lg text-gray-600">
+                    See how our platform has helped connect employers and maids
+                </p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Employer Testimonial -->
+                <div class="bg-white p-8 rounded-xl shadow-md">
+                    <div class="flex items-center mb-6">
+                        <div class="w-16 h-16 rounded-full bg-gray-200 mr-4 flex-shrink-0">
+                            <img src="https://via.placeholder.com/64" alt="Employer" class="w-full h-full rounded-full object-cover">
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900">Ramesh Sharma</h3>
+                            <p class="text-gray-500">Employer</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-700 mb-4">"I found the perfect maid for our home within days. The direct contact feature made it easy to discuss our requirements and schedule interviews without any middlemen. Highly recommended!"</p>
+                    <div class="flex text-yellow-400">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                </div>
+                
+                <!-- Maid Testimonial -->
+                <div class="bg-white p-8 rounded-xl shadow-md">
+                    <div class="flex items-center mb-6">
+                        <div class="w-16 h-16 rounded-full bg-gray-200 mr-4 flex-shrink-0">
+                            <img src="https://via.placeholder.com/64" alt="Maid" class="w-full h-full rounded-full object-cover">
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900">Sunita Tamang</h3>
+                            <p class="text-gray-500">Domestic Helper</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-700 mb-4">"After creating my profile, I received multiple job opportunities. The unlock contact feature helped me connect directly with employers and negotiate fair terms. I found a great job with a good family!"</p>
+                    <div class="flex text-yellow-400">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star-half-alt"></i>
+                    </div>
                 </div>
             </div>
         </div>
@@ -320,14 +597,20 @@
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
                 <div>
                     <h3 class="text-xl font-bold mb-4">City Maid Services</h3>
-                    <p class="text-gray-400">Connecting trusted domestic helpers with employers in your area.</p>
+                    <p class="text-gray-400">Connecting trusted domestic helpers with employers directly through our secure platform.</p>
                 </div>
                 <div>
-                    <h3 class="text-xl font-bold mb-4">Quick Links</h3>
+                    <h3 class="text-xl font-bold mb-4">For Employers</h3>
                     <ul class="space-y-2">
-                        <li><a href="index.html" class="text-gray-400 hover:text-white transition-colors">Home</a></li>
-                        <li><a href="jobs/find-jobs.html" class="text-gray-400 hover:text-white transition-colors">Find Jobs</a></li>
-                        <li><a href="static/about.html" class="text-gray-400 hover:text-white transition-colors">About Us</a></li>
+                        <li><a href="#" onclick="selectUserRole('employer')" class="text-gray-400 hover:text-white transition-colors">Find Maids</a></li>
+                        <li><a href="#" onclick="selectUserRole('employer')" class="text-gray-400 hover:text-white transition-colors">Register as Employer</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold mb-4">For Maids</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" onclick="selectUserRole('maid')" class="text-gray-400 hover:text-white transition-colors">Find Jobs</a></li>
+                        <li><a href="#" onclick="selectUserRole('maid')" class="text-gray-400 hover:text-white transition-colors">Register as Maid</a></li>
                     </ul>
                 </div>
                 <div>
@@ -343,9 +626,8 @@
                             <i class="fas fa-envelope mr-2"></i> info@citymaidservices.com
                         </li>
                     </ul>
-                </div>
-                <div>
-                    <h3 class="text-xl font-bold mb-4">Follow Us</h3>
+                    <div class="mt-4">
+                        <h4 class="text-lg font-medium mb-2">Follow Us</h4>
                     <div class="flex space-x-4">
                         <a href="#" class="text-gray-400 hover:text-white transition-colors">
                             <i class="fab fa-facebook-f text-xl"></i>
@@ -359,6 +641,7 @@
                         <a href="#" class="text-gray-400 hover:text-white transition-colors">
                             <i class="fab fa-linkedin-in text-xl"></i>
                         </a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -367,6 +650,24 @@
             </div>
         </div>
     </footer>
+
+    <!-- Call To Action -->
+    <section class="py-16 bg-gradient-to-r from-brand-primary to-brand-secondary text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-3xl font-bold mb-6">Ready to Get Started?</h2>
+            <p class="text-xl mb-10 max-w-3xl mx-auto">
+                Join our platform today to find the perfect domestic helper or quality job opportunities
+            </p>
+            <div class="flex flex-col sm:flex-row justify-center gap-4">
+                <button onclick="selectUserRole('employer')" class="bg-white text-brand-primary px-8 py-3 rounded-lg hover:bg-gray-100 font-semibold transition-colors">
+                    I'm an Employer
+                </button>
+                <button onclick="selectUserRole('maid')" class="bg-white text-brand-primary px-8 py-3 rounded-lg hover:bg-gray-100 font-semibold transition-colors">
+                    I'm a Maid
+                </button>
+            </div>
+        </div>
+    </section>
 
     <script>
         // Mobile menu functionality
@@ -380,6 +681,37 @@
 
         // Set current year in footer
         document.getElementById('currentYear').textContent = new Date().getFullYear();
+        
+        // Sample job data to use when Supabase tables don't exist
+        const sampleJobs = [
+            {
+                id: 1,
+                title: "Regular House Cleaning",
+                location: "Kathmandu",
+                job_type: "Regular",
+                hourly_rate: 250,
+                description: "Looking for a reliable maid for regular house cleaning in Kathmandu. Duties include sweeping, mopping, dusting, and kitchen cleaning. Must be available 3 days per week.",
+                created_at: new Date().toISOString()
+            },
+            {
+                id: 2,
+                title: "Childcare and Light Cleaning",
+                location: "Lalitpur",
+                job_type: "Full-time",
+                hourly_rate: 300,
+                description: "Need a full-time maid for childcare and light cleaning duties. Experience with children required. Must be patient and caring. Live-in option available.",
+                created_at: new Date().toISOString()
+            },
+            {
+                id: 3,
+                title: "Office Cleaning Service",
+                location: "Bhaktapur",
+                job_type: "Weekly",
+                hourly_rate: 220,
+                description: "Small office looking for a weekly cleaning service. Duties include cleaning common areas, bathrooms, and meeting rooms. Please have prior experience in office cleaning.",
+                created_at: new Date().toISOString()
+            }
+        ];
         
         // Initialize Supabase client
         const SUPABASE_URL = 'https://fdgqqxyyofjnkhswkwcq.supabase.co';
@@ -439,17 +771,51 @@
 
             try {
                 console.log('Fetching jobs from Supabase...');
-                const { data: jobs, error } = await supabaseClient
+                
+                // Try from jobs table first
+                let { data: jobs, error: jobsError } = await supabaseClient
                     .from('jobs')
                     .select('*')
-                    .eq('status', 'active')
                     .order('created_at', { ascending: false })
-                    .limit(6);
+                    .limit(3);
 
-                console.log('Jobs fetch response:', { jobs, error });
+                // If jobs table doesn't exist or has an error, try job_listings
+                if (jobsError || !jobs || jobs.length === 0) {
+                    console.log('Trying job_listings table...');
+                    const { data: jobListings, error: jobListingsError } = await supabaseClient
+                        .from('job_listings')
+                        .select('*')
+                        .order('created_at', { ascending: false })
+                        .limit(3);
+                    
+                    if (!jobListingsError && jobListings && jobListings.length > 0) {
+                        jobs = jobListings;
+                        jobsError = null;
+                    } else {
+                        // Try employer_jobs if job_listings fails
+                        console.log('Trying employer_jobs table...');
+                        const { data: employerJobs, error: employerJobsError } = await supabaseClient
+                            .from('employer_jobs')
+                            .select('*')
+                            .order('created_at', { ascending: false })
+                            .limit(3);
+                        
+                        if (!employerJobsError && employerJobs && employerJobs.length > 0) {
+                            jobs = employerJobs;
+                            jobsError = null;
+                        } else if (!jobs || jobs.length === 0) {
+                            // If all tables fail, use sample data
+                            console.log('No job tables found with data, using sample data');
+                            jobs = sampleJobs;
+                            jobsError = null;
+                        }
+                    }
+                }
 
-                if (error) {
-                    console.error('Error fetching jobs:', error);
+                console.log('Jobs fetch response:', { jobs, error: jobsError });
+
+                if (jobsError) {
+                    console.error('Error fetching jobs:', jobsError);
                     jobsContainer.innerHTML = `
                         <div class="col-span-full text-center py-8">
                             <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -480,10 +846,57 @@
                     return;
                 }
 
-                // Display jobs
-                jobs.forEach(job => {
-                    const jobCard = createJobCard(job);
-                    jobsContainer.appendChild(jobCard);
+                // Display jobs, limited to 3
+                const displayJobs = jobs.slice(0, 3);
+                displayJobs.forEach(job => {
+                    // Use simpler HTML rendering instead of DOM manipulation for more reliable display
+                    const jobCardHTML = `
+                        <div class="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
+                            <div class="relative h-32 bg-gradient-to-r from-brand-primary to-brand-secondary">
+                                <div class="absolute top-4 right-4 bg-white text-brand-primary px-3 py-1 rounded-full text-sm font-medium">
+                                    ${job.job_type ? job.job_type.replace('_', ' ') : 'Full Time'}
+                                </div>
+                                <h3 class="absolute bottom-4 left-4 text-white text-xl font-bold">
+                                    ${job.title || job.job_title || 'No title'}
+                                </h3>
+                            </div>
+                            <div class="p-6">
+                                <div class="flex flex-wrap justify-between gap-4 mb-4">
+                                    <div class="flex items-center text-gray-600">
+                                        <i class="fas fa-clock w-6 text-brand-primary"></i>
+                                        <span>${job.preferred_time || 'Not specified'}</span>
+                                    </div>
+                                    <div class="flex items-center text-gray-600">
+                                        <i class="fas fa-map-marker-alt w-6 text-brand-primary"></i>
+                                        <span>${job.city && job.area ? `${job.city}, ${job.area}` : job.working_location || job.location || 'Location not specified'}</span>
+                                    </div>
+                                </div>
+                                <div class="mb-4">
+                                    <h4 class="font-semibold text-gray-700 mb-2">Required Skills</h4>
+                                    <div class="flex flex-wrap gap-2">
+                                        ${job.required_skills && Array.isArray(job.required_skills) && job.required_skills.length > 0 
+                                            ? job.required_skills.map(skill => 
+                                                `<span class="bg-brand-light text-brand-primary px-3 py-1 rounded-full text-sm font-medium">
+                                                    ${skill}
+                                                </span>`).join('') 
+                                            : '<span class="text-gray-500 text-sm">No skills listed</span>'}
+                                    </div>
+                                </div>
+                                <div class="flex items-center text-gray-600 mb-4">
+                                    <i class="fas fa-money-bill-wave w-6 text-brand-primary"></i>
+                                    <span class="font-semibold">${job.salary_range || job.hourly_rate || job.salary || 'Not specified'}</span>
+                                </div>
+                                <div class="mt-6">
+                                    <a href="#" onclick="selectUserRole('maid')" 
+                                        class="block w-full bg-gradient-to-r from-brand-primary to-brand-secondary text-white px-6 py-3 rounded-lg hover:shadow-lg transition-all duration-300 text-center font-semibold">
+                                        <i class="fas fa-lock mr-1"></i> Register to View
+                                    </a>
+                                    <p class="text-center text-xs text-gray-500 mt-1">Contact details locked</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    jobsContainer.innerHTML += jobCardHTML;
                 });
             } catch (error) {
                 console.error('Error in fetchLatestJobs:', error);
@@ -503,121 +916,6 @@
             }
         }
 
-        // Add the createJobCard function
-        function createJobCard(job) {
-            const card = document.createElement('div');
-            card.className = 'bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300';
-            
-            // Create a header section with a background color
-            const headerSection = document.createElement('div');
-            headerSection.className = 'relative h-32 bg-gradient-to-r from-brand-primary to-brand-secondary';
-            
-            // Add a job type badge
-            const badge = document.createElement('div');
-            badge.className = 'absolute top-4 right-4 bg-white text-brand-primary px-3 py-1 rounded-full text-sm font-medium';
-            badge.textContent = job.job_type ? job.job_type.replace('_', ' ') : 'Full Time';
-            headerSection.appendChild(badge);
-            
-            // Add job title to the header
-            const titleInHeader = document.createElement('h3');
-            titleInHeader.className = 'absolute bottom-4 left-4 text-white text-xl font-bold';
-            titleInHeader.textContent = job.title || 'No title';
-            headerSection.appendChild(titleInHeader);
-            
-            card.appendChild(headerSection);
-            
-            // Create the content section
-            const contentSection = document.createElement('div');
-            contentSection.className = 'p-6';
-            
-            // Create a row for location and time
-            const locationTimeRow = document.createElement('div');
-            locationTimeRow.className = 'flex flex-wrap justify-between gap-4 mb-4';
-            
-            // Time section (now on the left)
-            const timeSection = document.createElement('div');
-            timeSection.className = 'flex items-center text-gray-600';
-            timeSection.innerHTML = `
-                <i class="fas fa-clock w-6 text-brand-primary"></i>
-                <span>${job.preferred_time || 'Not specified'}</span>
-            `;
-            locationTimeRow.appendChild(timeSection);
-            
-            // Location section (now on the right)
-            const locationSection = document.createElement('div');
-            locationSection.className = 'flex items-center text-gray-600';
-            locationSection.innerHTML = `
-                <i class="fas fa-map-marker-alt w-6 text-brand-primary"></i>
-                <span>${job.city && job.area ? `${job.city}, ${job.area}` : job.working_location || 'Location not specified'}</span>
-            `;
-            locationTimeRow.appendChild(locationSection);
-            
-            contentSection.appendChild(locationTimeRow);
-            
-            // Skills section (directly under location and time)
-            const skillsSection = document.createElement('div');
-            skillsSection.className = 'mb-4';
-            
-            const skillsTitle = document.createElement('h4');
-            skillsTitle.className = 'font-semibold text-gray-700 mb-2';
-            skillsTitle.textContent = 'Required Skills';
-            skillsSection.appendChild(skillsTitle);
-            
-            const skillsContainer = document.createElement('div');
-            skillsContainer.className = 'flex flex-wrap gap-2';
-            
-            if (job.required_skills && Array.isArray(job.required_skills) && job.required_skills.length > 0) {
-                job.required_skills.forEach(skill => {
-                    const skillTag = document.createElement('span');
-                    skillTag.className = 'bg-brand-light text-brand-primary px-3 py-1 rounded-full text-sm font-medium';
-                    skillTag.textContent = skill;
-                    skillsContainer.appendChild(skillTag);
-                });
-            } else {
-                const noSkills = document.createElement('span');
-                noSkills.className = 'text-gray-500 text-sm';
-                noSkills.textContent = 'No skills listed';
-                skillsContainer.appendChild(noSkills);
-            }
-            
-            skillsSection.appendChild(skillsContainer);
-            contentSection.appendChild(skillsSection);
-            
-            // Add salary range with icon
-            const salaryDiv = document.createElement('div');
-            salaryDiv.className = 'flex items-center text-gray-600 mb-4';
-            salaryDiv.innerHTML = `
-                <i class="fas fa-money-bill-wave w-6 text-brand-primary"></i>
-                <span class="font-semibold">${job.salary_range || 'Not specified'}</span>
-            `;
-            contentSection.appendChild(salaryDiv);
-            
-            // Add experience
-            const experienceDiv = document.createElement('div');
-            experienceDiv.className = 'flex items-center text-gray-600 mb-4';
-            experienceDiv.innerHTML = `
-                <i class="fas fa-briefcase w-6 text-brand-primary"></i>
-                <span>${job.experience_required || 'Not specified'} experience</span>
-            `;
-            contentSection.appendChild(experienceDiv);
-            
-            // Add view details button
-            const buttonDiv = document.createElement('div');
-            buttonDiv.className = 'mt-6';
-            
-            const viewButton = document.createElement('a');
-            viewButton.href = `jobs/find-jobs.html?id=${job.id}`;
-            viewButton.className = 'block w-full bg-gradient-to-r from-brand-primary to-brand-secondary text-white px-6 py-3 rounded-lg hover:shadow-lg transition-all duration-300 text-center font-semibold';
-            viewButton.textContent = 'View Details';
-            buttonDiv.appendChild(viewButton);
-            
-            contentSection.appendChild(buttonDiv);
-            
-            card.appendChild(contentSection);
-            
-            return card;
-        }
-
         // Load featured maids
         async function loadFeaturedMaids(supabaseClient) {
             console.log('Starting loadFeaturedMaids...');
@@ -632,7 +930,8 @@
                 const { data: maids, error } = await supabaseClient
                     .from('maid_profiles')
                     .select('*')
-                    .order('created_at', { ascending: false });
+                    .order('created_at', { ascending: false })
+                    .limit(3);  // Limit to only 3 maid profiles
                 
                 console.log('Maid profiles fetch response:', { maids, error });
                 
@@ -654,8 +953,9 @@
                 }
 
                 console.log(`Found ${maids.length} maid profiles to display`);
-                // Display each maid profile
-                maids.forEach(maid => {
+                // Display each maid profile, limited to 3
+                const displayMaids = maids.slice(0, 3);
+                displayMaids.forEach(maid => {
                     let photoUrl = 'https://via.placeholder.com/300x300?text=No+Photo';
                     
                     if (maid.profile_photo) {
@@ -684,7 +984,7 @@
                         ).join('')
                         : '';
 
-                    const card = `
+                    const cardHtml = `
                         <div class="bg-white rounded-xl overflow-hidden shadow-[0_1px_3px_0_rgba(0,0,0,0.1),0_1px_2px_-1px_rgba(0,0,0,0.1)] hover:shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-2px_rgba(0,0,0,0.1)] transition-all duration-200 hover:-translate-y-0.5">
                             <div class="relative h-48 overflow-hidden group">
                                 <img src="${photoUrl}" alt="${maid.full_name}" 
@@ -719,15 +1019,16 @@
                                     </div>
                                 </div>
                                 <div class="mt-4">
-                                    <a href="jobs/find-maids.html?highlight=${maid.id}" 
+                                    <a href="#" onclick="selectUserRole('employer')" 
                                         class="block w-full bg-brand-primary text-white py-2 rounded-lg hover:bg-brand-secondary transition-colors text-center">
-                                        View Profile
+                                        <i class="fas fa-lock mr-1"></i> Register to View
                                     </a>
+                                    <p class="text-center text-xs text-gray-500 mt-1">Contact details locked</p>
                                 </div>
                             </div>
                         </div>
                     `;
-                    featuredMaidsContainer.innerHTML += card;
+                    featuredMaidsContainer.innerHTML += cardHtml;
                 });
 
             } catch (error) {
@@ -913,8 +1214,8 @@
 
             // Function to create a maid card
             function createMaidCard(maid, supabaseClient) {
-                const card = document.createElement('div');
-                card.className = 'bg-white rounded-xl overflow-hidden shadow-[0_1px_3px_0_rgba(0,0,0,0.1),0_1px_2px_-1px_rgba(0,0,0,0.1)] hover:shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-2px_rgba(0,0,0,0.1)] transition-all duration-200 hover:-translate-y-0.5';
+                const cardElement = document.createElement('div');
+                cardElement.className = 'bg-white rounded-xl overflow-hidden shadow-[0_1px_3px_0_rgba(0,0,0,0.1),0_1px_2px_-1px_rgba(0,0,0,0.1)] hover:shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-2px_rgba(0,0,0,0.1)] transition-all duration-200 hover:-translate-y-0.5';
                 
                 let photoUrl = 'https://via.placeholder.com/300x300?text=No+Photo';
                 if (maid.profile_photo) {
@@ -936,7 +1237,13 @@
                     ).join('')
                     : '';
 
-                card.innerHTML = `
+                const languagesHtml = maid.languages && Array.isArray(maid.languages)
+                    ? maid.languages.map(lang => 
+                        `<span class="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded">${lang}</span>`
+                    ).join('')
+                    : '';
+
+                const cardHtml = `
                     <div class="relative h-48 overflow-hidden group">
                         <img src="${photoUrl}" alt="${maid.full_name}" 
                             class="w-full h-full object-cover object-[center_30%] transition-transform duration-300 group-hover:scale-110">
@@ -959,56 +1266,29 @@
                         </div>
                         <div class="flex items-center mb-4">
                             <i class="fas fa-money-bill-wave text-gray-500 mr-2"></i>
-                            <span class="text-sm">${maid.expected_salary ? `NR ${maid.expected_salary}` : 'Salary not specified'}</span>
+                            <span class="text-sm">NR ${maid.expected_salary || 'Salary not specified'}</span>
                         </div>
-                        <div class="flex flex-wrap gap-2 mb-4">
+                        <div class="space-y-2">
+                            <div class="flex flex-wrap gap-1">
                             ${skillsHtml}
                         </div>
-                        <a href="jobs/find-maids.html?highlight=${maid.id}" 
-                           class="block w-full text-center bg-brand-primary text-white px-4 py-2 rounded-lg hover:bg-brand-secondary transition-colors">
-                            View Profile
-                        </a>
+                            <div class="flex flex-wrap gap-1">
+                                ${languagesHtml}
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <a href="#" onclick="selectUserRole('employer')" 
+                                class="block w-full bg-brand-primary text-white py-2 rounded-lg hover:bg-brand-secondary transition-colors text-center">
+                                <i class="fas fa-lock mr-1"></i> Register to View
+                            </a>
+                            <p class="text-center text-xs text-gray-500 mt-1">Contact details locked</p>
+                        </div>
                     </div>
                 `;
                 
-                return card;
+                cardElement.innerHTML = cardHtml;
+                return cardElement;
             }
-
-            // Function to update the featured maids section
-            function updateFeaturedMaids(maids, supabaseClient) {
-                const featuredMaidsContainer = document.getElementById('featuredMaids');
-                if (!featuredMaidsContainer) return;
-
-                // Clear existing content
-                featuredMaidsContainer.innerHTML = '';
-
-                // Add filtered maid cards
-                maids.forEach(maid => {
-                    const card = createMaidCard(maid, supabaseClient);
-                    featuredMaidsContainer.appendChild(card);
-                });
-            }
-
-            // Initial search with empty filters
-            updateFilters();
-        });
-
-        // Add this to your existing script section
-        document.addEventListener('DOMContentLoaded', () => {
-            // Update navigation active states
-            const currentPage = document.body.dataset.currentPage;
-            const navLinks = document.querySelectorAll('.nav-link');
-            
-            navLinks.forEach(link => {
-                const linkPage = link.dataset.page;
-                if (linkPage === currentPage) {
-                    link.classList.add('active');
-                } else {
-                    link.classList.remove('active');
-                }
-            });
-
-            // Rest of your existing initialization code...
         });
     </script>
 </body>

@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In - City Maid Services</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        poppins: ['Poppins', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            primary: '#4F46E5',
+                            secondary: '#4338CA',
+                            light: '#EEF2FF',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-poppins bg-gray-50 min-h-screen flex flex-col">
+    <!-- Simple Navigation -->
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20">
+                <div class="flex items-center">
+                    <a href="../index.html" class="text-3xl font-bold text-brand-primary tracking-tight">City<span class="text-brand-secondary"> Maid</span></a>
+                </div>
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="../index.html" class="text-gray-700 hover:text-brand-primary font-medium transition-colors">Back to Home</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="flex-grow flex items-center justify-center px-4 py-12">
+        <div class="max-w-md w-full">
+            <!-- Login Container -->
+            <div class="bg-white rounded-xl shadow-lg p-8">
+                <!-- Role Indicator (hidden by default, shown when role is selected) -->
+                <div id="roleIndicator" class="mb-6 flex items-center justify-center hidden">
+                    <div class="py-2 px-4 rounded-full bg-brand-light text-brand-primary flex items-center">
+                        <i id="roleIcon" class="fas fa-user mr-2"></i>
+                        <span id="roleText">Your Role</span>
+                    </div>
+                </div>
+
+                <h1 class="text-2xl font-bold text-gray-900 mb-2 text-center">Welcome Back</h1>
+                <p class="text-gray-600 text-center mb-6">Sign in to your account to continue</p>
+                
+                <!-- Social Login Buttons -->
+                <div class="space-y-3 mb-6">
+                    <button id="googleLoginBtn" class="w-full flex justify-center items-center py-3 px-4 border border-gray-300 rounded-lg shadow-sm bg-white hover:bg-gray-50 transition-colors">
+                        <img src="https://cdn.jsdelivr.net/npm/simple-icons@v5/icons/google.svg" class="h-5 w-5 mr-3" alt="Google logo">
+                        <span class="text-gray-800 font-medium">Sign in with Google</span>
+                    </button>
+                </div>
+                
+                <div class="relative mb-6">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-gray-300"></div>
+                    </div>
+                    <div class="relative flex justify-center text-sm">
+                        <span class="px-4 bg-white text-gray-500">or continue with email</span>
+                    </div>
+                </div>
+
+                <!-- Login Form -->
+                <form id="loginForm" class="space-y-6">
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700">Email Address</label>
+                        <input type="email" id="email" name="email" required 
+                            class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-primary focus:ring focus:ring-brand-primary focus:ring-opacity-50"
+                            placeholder="Enter your email address">
+                    </div>
+
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                        <input type="password" id="password" name="password" required 
+                            class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-primary focus:ring focus:ring-brand-primary focus:ring-opacity-50"
+                            placeholder="Enter your password">
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <input id="remember" name="remember" type="checkbox" 
+                                class="h-4 w-4 text-brand-primary focus:ring-brand-primary border-gray-300 rounded">
+                            <label for="remember" class="ml-2 block text-sm text-gray-700">
+                                Remember me
+                            </label>
+                        </div>
+
+                        <div class="text-sm">
+                            <a href="forgot-password.html" class="font-medium text-brand-primary hover:text-brand-secondary">
+                                Forgot password?
+                            </a>
+                        </div>
+                    </div>
+
+                    <div>
+                        <button type="submit" id="loginButton"
+                            class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-brand-primary hover:bg-brand-secondary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-primary">
+                            Sign In
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Error message container -->
+                <div id="errorContainer" class="mt-4 hidden">
+                    <div class="bg-red-50 border-l-4 border-red-500 p-4">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-exclamation-circle text-red-500"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-red-700" id="errorMessage"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Register Link -->
+                <div class="mt-6 text-center">
+                    <p class="text-sm text-gray-600">
+                        Don't have an account?
+                        <a href="register.html" id="registerLink" class="font-medium text-brand-primary hover:text-brand-secondary">
+                            Create a free account
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Simple Footer -->
+    <footer class="bg-white mt-auto">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <p class="text-center text-sm text-gray-500">
+                &copy; <span id="currentYear"></span> City Maid Services. All rights reserved.
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // Initialize Supabase client
+        const SUPABASE_URL = 'https://fdgqqxyyofjnkhswkwcq.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZkZ3FxeHl5b2Zqbmtoc3drd2NxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQwMjQyMTMsImV4cCI6MjA1OTYwMDIxM30.YyJLLu3r2a7Mh7ny0ie-YzzLfPh5PdrJJHnBFBxWqVE';
+        const { createClient } = supabase;
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // DOM elements
+        const loginForm = document.getElementById('loginForm');
+        const loginButton = document.getElementById('loginButton');
+        const googleLoginBtn = document.getElementById('googleLoginBtn');
+        const errorContainer = document.getElementById('errorContainer');
+        const errorMessage = document.getElementById('errorMessage');
+        const registerLink = document.getElementById('registerLink');
+        const roleIndicator = document.getElementById('roleIndicator');
+        const roleIcon = document.getElementById('roleIcon');
+        const roleText = document.getElementById('roleText');
+
+        // Set current year in footer
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+        
+        // Get user role from localStorage or URL parameter
+        let userRole = null;
+        
+        // Parse URL parameters to get role type
+        const urlParams = new URLSearchParams(window.location.search);
+        const typeParam = urlParams.get('type');
+        
+        // Check for stored user role in localStorage
+        const storedUserRole = localStorage.getItem('userRole');
+        
+        // Determine role based on URL param or stored role
+        if (typeParam === 'employer' || typeParam === 'maid') {
+            userRole = typeParam;
+        } else if (storedUserRole === 'employer' || storedUserRole === 'maid') {
+            userRole = storedUserRole;
+        }
+
+        // Update UI based on role if available
+        if (userRole) {
+            // Show role indicator
+            roleIndicator.classList.remove('hidden');
+            
+            // Update icon and text based on role
+            if (userRole === 'employer') {
+                roleIcon.className = 'fas fa-user-tie mr-2';
+                roleText.textContent = 'Signing in as Employer';
+            } else {
+                roleIcon.className = 'fas fa-broom mr-2';
+                roleText.textContent = 'Signing in as Maid';
+            }
+            
+            // Update register link to include role
+            registerLink.href = `register.html?type=${userRole}`;
+        } else {
+            // If no role is specified, redirect to home page
+            window.location.href = '../index.html';
+        }
+
+        // Google Sign In
+        googleLoginBtn.addEventListener('click', async () => {
+            try {
+                googleLoginBtn.disabled = true;
+                googleLoginBtn.innerHTML = '<div class="animate-spin h-5 w-5 border-t-2 border-brand-primary rounded-full"></div><span class="ml-2">Connecting...</span>';
+                
+                const { data, error } = await supabaseClient.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: {
+                        redirectTo: `${window.location.origin}/auth/callback.html?type=${userRole}`
+                    }
+                });
+                
+                if (error) throw error;
+                
+                // The redirect happens automatically in the OAuth flow
+            } catch (error) {
+                console.error('Google login error:', error);
+                showError(error.message || 'Failed to sign in with Google. Please try again.');
+                
+                // Reset button
+                googleLoginBtn.disabled = false;
+                googleLoginBtn.innerHTML = '<img src="https://cdn.jsdelivr.net/npm/simple-icons@v5/icons/google.svg" class="h-5 w-5 mr-3" alt="Google logo"><span class="text-gray-800 font-medium">Sign in with Google</span>';
+            }
+        });
+
+        // Form submission handler
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Clear any previous errors
+            hideError();
+            
+            // Get form values
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            // Disable button while logging in
+            loginButton.disabled = true;
+            loginButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Signing in...';
+            
+            try {
+                // Sign in with Supabase
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                    email,
+                    password
+                });
+                
+                if (error) throw error;
+                
+                if (data?.user) {
+                    try {
+                        // Try to get user metadata to determine account type
+                        const { data: userData, error: userError } = await supabaseClient
+                            .from('users')
+                            .select('user_type')
+                            .eq('id', data.user.id)
+                            .single();
+                        
+                        if (!userError && userData?.user_type) {
+                            // If we have user data, check if user is trying to login as the correct account type
+                            if (userRole && userData.user_type !== userRole) {
+                                throw new Error(`This account is registered as a ${userData.user_type}, but you're trying to sign in as a ${userRole}. Please use the correct role or create a new account.`);
+                            }
+                            
+                            // Save user role to localStorage
+                            localStorage.setItem('userRole', userData.user_type);
+                            
+                            // Redirect based on account type
+                            if (userData.user_type === 'maid') {
+                                window.location.href = '../jobs/find-jobs.html';
+                            } else if (userData.user_type === 'employer') {
+                                window.location.href = '../jobs/find-maids.html';
+                            } else {
+                                throw new Error('Invalid account type');
+                            }
+                        } else {
+                            // If users table doesn't exist or no user_type found, use the selected role
+                            if (!userRole) {
+                                throw new Error('Please select a role before logging in');
+                            }
+                            
+                            // Use the role from URL param or localStorage
+                            localStorage.setItem('userRole', userRole);
+                            
+                            // Redirect based on selected role
+                            if (userRole === 'maid') {
+                                window.location.href = '../jobs/find-jobs.html';
+                            } else if (userRole === 'employer') {
+                                window.location.href = '../jobs/find-maids.html';
+                            } else {
+                                throw new Error('Invalid role selection');
+                            }
+                        }
+                    } catch (dbError) {
+                        console.warn('User table error:', dbError);
+                        
+                        // If database error occurred, fall back to using selected role
+                        if (!userRole) {
+                            throw new Error('Please select a role before logging in');
+                        }
+                        
+                        // Use the role from URL param or localStorage
+                        localStorage.setItem('userRole', userRole);
+                        
+                        // Redirect based on selected role
+                        if (userRole === 'maid') {
+                            window.location.href = '../jobs/find-jobs.html';
+                        } else if (userRole === 'employer') {
+                            window.location.href = '../jobs/find-maids.html';
+                        } else {
+                            throw new Error('Invalid role selection');
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showError(error.message || 'Failed to sign in. Please check your credentials and try again.');
+                
+                // Reset button
+                loginButton.disabled = false;
+                loginButton.innerHTML = 'Sign In';
+            }
+        });
+
+        // Helper functions for error handling
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorContainer.classList.remove('hidden');
+        }
+
+        function hideError() {
+            errorMessage.textContent = '';
+            errorContainer.classList.add('hidden');
+        }
+
+        // Check for existing session on page load
+        async function checkSession() {
+            try {
+                const { data: { session }, error } = await supabaseClient.auth.getSession();
+                
+                if (error) throw error;
+                
+                if (session) {
+                    try {
+                        // Try to get user type from database
+                        const { data: userData, error: userError } = await supabaseClient
+                            .from('users')
+                            .select('user_type')
+                            .eq('id', session.user.id)
+                            .single();
+                        
+                        let existingUserRole = null;
+                        
+                        // If users table exists and we got data
+                        if (!userError && userData?.user_type) {
+                            existingUserRole = userData.user_type;
+                            
+                            // Check if the logged-in user has the same role as the selected role
+                            if (userRole && existingUserRole !== userRole) {
+                                // Roles don't match - ask user if they want to proceed with their existing role
+                                if (confirm(`You're already logged in as a ${existingUserRole}, but you selected ${userRole}. Do you want to continue as ${existingUserRole}?`)) {
+                                    // User chose to continue with existing role
+                                    localStorage.setItem('userRole', existingUserRole);
+                                    
+                                    // Redirect based on account type
+                                    redirectToDashboard(existingUserRole);
+                                } else {
+                                    // User wants to use a different role - sign them out
+                                    await supabaseClient.auth.signOut();
+                                    // Keep the page as is, with the selected role
+                                }
+                            } else {
+                                // Roles match or no role was selected - redirect to dashboard
+                                redirectToDashboard(existingUserRole);
+                            }
+                        } else {
+                            // If users table doesn't exist, use stored role from localStorage
+                            existingUserRole = storedUserRole || userRole;
+                            
+                            if (existingUserRole) {
+                                // If we have a role, redirect to appropriate dashboard
+                                localStorage.setItem('userRole', existingUserRole);
+                                redirectToDashboard(existingUserRole);
+                            }
+                            // If no role, stay on login page
+                        }
+                    } catch (dbError) {
+                        console.warn('User table error during session check:', dbError);
+                        
+                        // Fall back to using localStorage or selected role
+                        const fallbackRole = storedUserRole || userRole;
+                        
+                        if (fallbackRole) {
+                            localStorage.setItem('userRole', fallbackRole);
+                            redirectToDashboard(fallbackRole);
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Session check error:', error);
+                // If there's an error checking the session, we'll just continue with the login page
+            }
+        }
+
+        // Helper function to redirect to dashboard based on role
+        function redirectToDashboard(role) {
+            if (role === 'maid') {
+                window.location.href = '../jobs/find-jobs.html';
+            } else if (role === 'employer') {
+                window.location.href = '../jobs/find-maids.html';
+            }
+        }
+
+        // Check session on page load
+        document.addEventListener('DOMContentLoaded', checkSession);
+    </script>
+</body>
+</html> 

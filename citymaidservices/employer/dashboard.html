@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employer Dashboard - City Maid Services</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        poppins: ['Poppins', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            primary: '#4F46E5',
+                            secondary: '#4338CA',
+                            light: '#EEF2FF',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-poppins bg-gray-50">
+    <!-- Navigation Bar -->
+    <nav class="bg-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20">
+                <div class="flex items-center">
+                    <a href="../index.html" class="text-3xl font-bold text-brand-primary tracking-tight">City<span class="text-brand-secondary"> Maid</span></a>
+                </div>
+                <!-- Desktop menu -->
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="../index.html" class="text-gray-700 hover:text-brand-primary font-medium transition-colors">Home</a>
+                    <a href="../jobs/find-maids.html" class="text-gray-700 hover:text-brand-primary font-medium transition-colors">Find Maids</a>
+                    <div class="relative group">
+                        <button id="userMenuBtn" class="flex items-center space-x-2 text-brand-primary">
+                            <i class="fas fa-user-circle text-2xl"></i>
+                            <span class="font-medium">My Account</span>
+                        </button>
+                        <div class="hidden group-hover:block absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg">
+                            <a href="dashboard.html" class="block px-4 py-2 hover:bg-gray-100 text-brand-primary">Dashboard</a>
+                            <a href="profile.html" class="block px-4 py-2 hover:bg-gray-100">Profile</a>
+                            <a href="#" id="signOutBtn" class="block px-4 py-2 hover:bg-gray-100">Sign Out</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Dashboard Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Welcome Section -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900" id="welcomeHeading">Welcome to your Employer Dashboard</h1>
+                    <p class="text-gray-600 mt-1" id="profileMessage">Find and hire maids that match your requirements</p>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="../jobs/find-maids.html" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-brand-primary hover:bg-brand-secondary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-primary">
+                        <i class="fas fa-search mr-2"></i>
+                        Find Maids
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Hired Maids Card -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-semibold text-gray-900">Hired Maids</h2>
+                    <span class="px-3 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800">0 Active</span>
+                </div>
+                <div id="hiredMaidsContainer" class="text-center py-8">
+                    <i class="fas fa-user-tie text-4xl text-gray-300 mb-2"></i>
+                    <p class="text-gray-500">No maids hired yet</p>
+                    <p class="text-sm text-gray-400 mt-1">Hire a maid to see them here</p>
+                </div>
+                <div class="mt-4 pt-4 border-t border-gray-100">
+                    <a href="../jobs/find-maids.html" class="text-brand-primary hover:text-brand-secondary text-sm font-medium">
+                        Find and hire maids <i class="fas fa-arrow-right ml-1"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Job Postings Card -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-semibold text-gray-900">My Job Postings</h2>
+                    <a href="create-job.html" class="text-brand-primary hover:text-brand-secondary text-sm">
+                        <i class="fas fa-plus"></i> Post New
+                    </a>
+                </div>
+                <div id="jobPostingsContainer" class="text-center py-8">
+                    <i class="fas fa-clipboard-list text-4xl text-gray-300 mb-2"></i>
+                    <p class="text-gray-500">No job postings yet</p>
+                    <p class="text-sm text-gray-400 mt-1">Create a job posting to attract maids</p>
+                </div>
+            </div>
+
+            <!-- Activity Summary Card -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">Activity Summary</h2>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="p-3 bg-brand-light rounded-lg">
+                        <p class="text-sm text-gray-600">Profiles Viewed</p>
+                        <p class="text-2xl font-bold text-brand-primary">0</p>
+                    </div>
+                    <div class="p-3 bg-brand-light rounded-lg">
+                        <p class="text-sm text-gray-600">Messages Sent</p>
+                        <p class="text-2xl font-bold text-brand-primary">0</p>
+                    </div>
+                    <div class="p-3 bg-brand-light rounded-lg">
+                        <p class="text-sm text-gray-600">Jobs Posted</p>
+                        <p class="text-2xl font-bold text-brand-primary">0</p>
+                    </div>
+                    <div class="p-3 bg-brand-light rounded-lg">
+                        <p class="text-sm text-gray-600">Contracts</p>
+                        <p class="text-2xl font-bold text-brand-primary">0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Maid Profiles Section -->
+        <div class="mt-8">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-semibold text-gray-900">Recently Added Maids</h2>
+                <a href="../jobs/find-maids.html" class="text-brand-primary hover:text-brand-secondary text-sm font-medium">
+                    View All <i class="fas fa-arrow-right ml-1"></i>
+                </a>
+            </div>
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                <div id="recentMaidsContainer" class="p-6 text-center">
+                    <i class="fas fa-users text-4xl text-gray-300 mb-2"></i>
+                    <p class="text-gray-500">Loading recent maid profiles...</p>
+                    <p class="text-sm text-gray-400 mt-1">Please wait while we fetch the latest profiles</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Supabase client
+        const SUPABASE_URL = 'https://fdgqqxyyofjnkhswkwcq.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZkZ3FxeHl5b2Zqbmtoc3drd2NxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQwMjQyMTMsImV4cCI6MjA1OTYwMDIxM30.YyJLLu3r2a7Mh7ny0ie-YzzLfPh5PdrJJHnBFBxWqVE';
+        const { createClient } = supabase;
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let currentUser = null;
+        let currentProfile = null;
+
+        // Check session and load profile
+        async function initializeDashboard() {
+            try {
+                // Verify that user has the correct role for this page
+                const userRole = localStorage.getItem('userRole');
+                if (userRole !== 'employer') {
+                    // Redirect maids to their dashboard
+                    if (userRole === 'maid') {
+                        window.location.href = '../maid/dashboard.html';
+                        return;
+                    }
+                    
+                    // Set role to employer if not set or invalid
+                    localStorage.setItem('userRole', 'employer');
+                }
+                
+                const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
+                if (sessionError) throw sessionError;
+                
+                if (!session) {
+                    window.location.href = '../auth/login.html?type=employer';
+                    return;
+                }
+
+                currentUser = session.user;
+                await loadProfile();
+                await loadRecentMaids();
+            } catch (error) {
+                console.error('Error initializing dashboard:', error);
+                showError('Error loading dashboard. Please try again.');
+            }
+        }
+
+        // Load existing profile data
+        async function loadProfile() {
+            try {
+                const { data: profile, error } = await supabaseClient
+                    .from('employer_profiles')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .single();
+
+                if (error && error.code !== 'PGRST116') throw error;
+
+                currentProfile = profile || null;
+                updateUIWithProfileData();
+                return profile;
+            } catch (error) {
+                console.error('Error loading profile:', error);
+                showError('Error loading profile data. Please try again.');
+                return null;
+            }
+        }
+
+        // Update UI with profile data
+        function updateUIWithProfileData() {
+            // Update welcome message
+            const welcomeHeading = document.getElementById('welcomeHeading');
+            
+            if (currentProfile && currentProfile.full_name) {
+                welcomeHeading.textContent = `Welcome, ${currentProfile.full_name}!`;
+            }
+        }
+
+        // Load recent maid profiles
+        async function loadRecentMaids() {
+            try {
+                const { data: maids, error } = await supabaseClient
+                    .from('maid_profiles')
+                    .select('id, full_name, work_type, expected_salary, skills, work_location, profile_photo')
+                    .eq('status', 'active')
+                    .eq('is_available', true)
+                    .order('created_at', { ascending: false })
+                    .limit(3);
+
+                if (error) throw error;
+
+                displayRecentMaids(maids);
+            } catch (error) {
+                console.error('Error loading recent maids:', error);
+                const recentMaidsContainer = document.getElementById('recentMaidsContainer');
+                recentMaidsContainer.innerHTML = `
+                    <div class="text-center py-8">
+                        <i class="fas fa-exclamation-circle text-4xl text-red-300 mb-2"></i>
+                        <p class="text-gray-500">Unable to load maid profiles</p>
+                        <p class="text-sm text-gray-400 mt-1">Please try again later</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Display recent maid profiles
+        function displayRecentMaids(maids) {
+            const recentMaidsContainer = document.getElementById('recentMaidsContainer');
+            
+            if (!maids || maids.length === 0) {
+                recentMaidsContainer.innerHTML = `
+                    <div class="text-center py-8">
+                        <i class="fas fa-user-slash text-4xl text-gray-300 mb-2"></i>
+                        <p class="text-gray-500">No maid profiles available at the moment</p>
+                        <p class="text-sm text-gray-400 mt-1">Check back later for new maids</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Create HTML for maid profiles
+            let maidsHTML = `<div class="grid grid-cols-1 md:grid-cols-3 gap-6">`;
+            
+            maids.forEach(maid => {
+                // Get profile photo URL or use placeholder
+                let photoUrl = 'https://via.placeholder.com/150';
+                if (maid.profile_photo) {
+                    const { data } = supabaseClient.storage
+                        .from('profile-photos')
+                        .getPublicUrl(maid.profile_photo);
+                    if (data?.publicUrl) {
+                        photoUrl = data.publicUrl;
+                    }
+                }
+                
+                // Format skills
+                const skillsText = Array.isArray(maid.skills) ? maid.skills.slice(0, 3).join(', ') : '';
+                const hasMoreSkills = Array.isArray(maid.skills) && maid.skills.length > 3;
+                
+                maidsHTML += `
+                    <div class="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow">
+                        <div class="relative h-48 overflow-hidden">
+                            <img src="${photoUrl}" alt="${maid.full_name}" class="w-full h-full object-cover">
+                        </div>
+                        <div class="p-4">
+                            <h3 class="font-semibold text-lg">${maid.full_name}</h3>
+                            <div class="flex flex-wrap gap-1 mt-2">
+                                <span class="px-2 py-1 bg-brand-light text-brand-primary rounded-full text-xs">${maid.work_type}</span>
+                                <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-xs">${maid.work_location}</span>
+                            </div>
+                            <p class="mt-3 text-sm text-gray-600">
+                                <strong>Skills:</strong> ${skillsText}${hasMoreSkills ? '...' : ''}
+                            </p>
+                            <div class="mt-3 flex items-center justify-between">
+                                <span class="text-brand-primary font-semibold">Rs. ${maid.expected_salary}/month</span>
+                                <a href="../jobs/maid-details.html?id=${maid.id}" class="text-brand-primary hover:text-brand-secondary text-sm">
+                                    View Profile
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            maidsHTML += `</div>`;
+            recentMaidsContainer.innerHTML = maidsHTML;
+        }
+
+        // Handle sign out
+        document.getElementById('signOutBtn').addEventListener('click', async function() {
+            try {
+                const { error } = await supabaseClient.auth.signOut();
+                if (error) throw error;
+                window.location.href = '../index.html';
+            } catch (error) {
+                console.error('Error signing out:', error);
+                showError('Error signing out. Please try again.');
+            }
+        });
+
+        // Show success message
+        function showSuccess(message) {
+            const alert = document.createElement('div');
+            alert.className = 'fixed top-4 right-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded z-50';
+            alert.innerHTML = `
+                <span class="block sm:inline">${message}</span>
+            `;
+            document.body.appendChild(alert);
+            setTimeout(() => alert.remove(), 3000);
+        }
+
+        // Show error message
+        function showError(message) {
+            const alert = document.createElement('div');
+            alert.className = 'fixed top-4 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded z-50';
+            alert.innerHTML = `
+                <span class="block sm:inline">${message}</span>
+            `;
+            document.body.appendChild(alert);
+            setTimeout(() => alert.remove(), 3000);
+        }
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', initializeDashboard);
+    </script>
+</body>
+</html> 
