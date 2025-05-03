@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employer Profile - City Maid Services</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        poppins: ['Poppins', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            primary: '#4F46E5',
+                            secondary: '#4338CA',
+                            light: '#EEF2FF',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-poppins bg-gray-50" onload="initProfile()">
+    <!-- Navigation Bar -->
+    <nav class="bg-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20">
+                <div class="flex items-center">
+                    <a href="../index.html" class="text-3xl font-bold text-brand-primary tracking-tight">City<span class="text-brand-secondary"> Maid Services</span></a>
+                </div>
+                <!-- Desktop menu -->
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="../index.html" class="text-gray-700 hover:text-brand-primary font-medium transition-colors">Home</a>
+                    <a href="../jobs/find-maids.html" class="text-gray-700 hover:text-brand-primary font-medium transition-colors">Find Maids</a>
+                    <a href="post-job.html" class="text-gray-700 hover:text-brand-primary font-medium transition-colors">Post a Job</a>
+                    <div class="relative">
+                        <button id="userMenuBtn" class="flex items-center space-x-2 text-gray-700 hover:text-brand-primary focus:outline-none">
+                            <i class="fas fa-user-circle text-2xl"></i>
+                            <span class="font-medium">My Account</span>
+                        </button>
+                        <div id="user-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50 border border-gray-200">
+                            <a href="dashboard.html" class="block px-4 py-2 hover:bg-gray-100">Dashboard</a>
+                            <a href="profile.html" class="block px-4 py-2 hover:bg-gray-100">Profile</a>
+                            <a href="#" id="signOutBtn" class="block px-4 py-2 hover:bg-gray-100">Sign Out</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Profile Content -->
+    <div class="max-w-4xl mx-auto px-4 py-8">
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h1 class="text-2xl font-bold text-gray-900 mb-6">Employer Profile</h1>
+            
+            <form id="profileForm" class="space-y-6">
+                <!-- Basic Information -->
+                <div class="space-y-4">
+                    <h2 class="text-lg font-semibold text-gray-900">Basic Information</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="fullName" class="block text-sm font-medium text-gray-700">Full Name *</label>
+                            <input type="text" id="fullName" name="fullName" required
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary">
+                        </div>
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-gray-700">Email *</label>
+                            <input type="email" id="email" name="email" required readonly
+                                class="mt-1 block w-full rounded-md border-gray-300 bg-gray-100 shadow-sm">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Information -->
+                <div class="space-y-4">
+                    <h2 class="text-lg font-semibold text-gray-900">Contact Information</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="phone" class="block text-sm font-medium text-gray-700">Phone Number *</label>
+                            <input type="tel" id="phone" name="phone" required
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary">
+                        </div>
+                        <div>
+                            <label for="address" class="block text-sm font-medium text-gray-700">Address</label>
+                            <input type="text" id="address" name="address"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Company Information -->
+                <div class="space-y-4">
+                    <h2 class="text-lg font-semibold text-gray-900">Company Information</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="companyName" class="block text-sm font-medium text-gray-700">Company Name</label>
+                            <input type="text" id="companyName" name="companyName"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary">
+                        </div>
+                        <div>
+                            <label for="companyWebsite" class="block text-sm font-medium text-gray-700">Company Website</label>
+                            <input type="url" id="companyWebsite" name="companyWebsite"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="flex justify-end">
+                    <button type="submit" class="bg-brand-primary text-white px-6 py-2 rounded-lg hover:bg-brand-secondary transition-colors">
+                        Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Supabase client
+        const supabaseUrl = 'https://fdgqqxyyofjnkhswkwcq.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZkZ3FxeHl5b2Zqbmtoc3drd2NxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQwMjQyMTMsImV4cCI6MjA1OTYwMDIxM30.YyJLLu3r2a7Mh7ny0ie-YzzLfPh5PdrJJHnBFBxWqVE';
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+        // Initialize profile page
+        async function initProfile() {
+            try {
+                // Check session
+                const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
+                if (sessionError || !session) {
+                    window.location.href = '../auth/login.html?redirect=employer/profile.html&type=employer';
+                    return;
+                }
+
+                // Get user profile
+                const { data: profile, error: profileError } = await supabaseClient
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', session.user.id)
+                    .single();
+
+                if (profileError) {
+                    console.error('Profile error:', profileError);
+                    showError('Error loading profile. Please try again.');
+                    return;
+                }
+
+                // Fill form with profile data
+                document.getElementById('fullName').value = profile.full_name || '';
+                document.getElementById('email').value = session.user.email;
+                document.getElementById('phone').value = profile.phone || '';
+                document.getElementById('address').value = profile.address || '';
+                document.getElementById('companyName').value = profile.company_name || '';
+                document.getElementById('companyWebsite').value = profile.company_website || '';
+
+                // Initialize navigation
+                initNavigation();
+            } catch (error) {
+                console.error('Error initializing profile:', error);
+                showError('Error loading profile. Please try again.');
+            }
+        }
+
+        // Handle form submission
+        document.getElementById('profileForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            try {
+                // Check session
+                const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
+                if (sessionError || !session) {
+                    window.location.href = '../auth/login.html?redirect=employer/profile.html&type=employer';
+                    return;
+                }
+
+                // Collect form data
+                const formData = {
+                    full_name: document.getElementById('fullName').value,
+                    phone: document.getElementById('phone').value,
+                    address: document.getElementById('address').value,
+                    company_name: document.getElementById('companyName').value,
+                    company_website: document.getElementById('companyWebsite').value,
+                    updated_at: new Date().toISOString()
+                };
+
+                // Update profile
+                const { error: updateError } = await supabaseClient
+                    .from('profiles')
+                    .update(formData)
+                    .eq('id', session.user.id);
+
+                if (updateError) {
+                    console.error('Update error:', updateError);
+                    showError('Error updating profile. Please try again.');
+                    return;
+                }
+
+                showSuccess('Profile updated successfully!');
+            } catch (error) {
+                console.error('Error updating profile:', error);
+                showError('Error updating profile. Please try again.');
+            }
+        });
+
+        // Initialize navigation functionality
+        function initNavigation() {
+            // User menu dropdown
+            const userMenuBtn = document.getElementById('userMenuBtn');
+            const userDropdown = document.getElementById('user-dropdown');
+            
+            if (userMenuBtn && userDropdown) {
+                // Ensure dropdown is hidden by default
+                userDropdown.classList.add('hidden');
+                
+                userMenuBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    userDropdown.classList.toggle('hidden');
+                });
+                
+                // Close dropdown when clicking elsewhere
+                document.addEventListener('click', (e) => {
+                    if (!userDropdown.contains(e.target) && !userMenuBtn.contains(e.target)) {
+                        userDropdown.classList.add('hidden');
+                    }
+                });
+                
+                // Close dropdown when clicking on a dropdown item
+                userDropdown.querySelectorAll('a').forEach(link => {
+                    link.addEventListener('click', () => {
+                        userDropdown.classList.add('hidden');
+                    });
+                });
+            }
+            
+            // Sign out functionality
+            const signOutBtn = document.getElementById('signOutBtn');
+            if (signOutBtn) {
+                signOutBtn.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    try {
+                        await supabaseClient.auth.signOut();
+                        window.location.href = '../index.html';
+                    } catch (error) {
+                        console.error('Error signing out:', error);
+                        showError('Error signing out. Please try again.');
+                    }
+                });
+            }
+        }
+
+        // Show success message
+        function showSuccess(message) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+            toast.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas fa-check-circle mr-2"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 5000);
+        }
+
+        // Show error message
+        function showError(message) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+            toast.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas fa-exclamation-circle mr-2"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 5000);
+        }
+    </script>
+</body>
+</html> 

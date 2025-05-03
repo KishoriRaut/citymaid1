@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maid Profiles - Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../config.js"></script>
+    <script src="admin-auth.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        poppins: ['Poppins', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            primary: '#4F46E5',
+                            secondary: '#4338CA',
+                            light: '#EEF2FF',
+                        },
+                        admin: {
+                            sidebar: '#1E293B',
+                            highlight: '#334155'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-poppins bg-gray-100">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-admin-sidebar text-white">
+            <div class="p-6 border-b border-admin-highlight">
+                <a href="dashboard.html" class="flex items-center space-x-2">
+                    <span class="text-2xl font-bold">City Maid</span>
+                    <span class="bg-brand-primary text-white text-xs px-2 py-1 rounded">Admin</span>
+                </a>
+            </div>
+            <nav class="mt-6 px-6 py-4">
+                <p class="text-xs font-semibold text-gray-400 mb-4 uppercase">Main</p>
+                <ul class="space-y-3">
+                    <li>
+                        <a href="dashboard.html" class="flex items-center space-x-2 px-3 py-2 text-gray-300 hover:bg-admin-highlight rounded-lg">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="users.html" class="flex items-center space-x-2 px-3 py-2 text-gray-300 hover:bg-admin-highlight rounded-lg">
+                            <i class="fas fa-users"></i>
+                            <span>Users</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="maids.html" class="flex items-center space-x-2 px-3 py-2 bg-admin-highlight rounded-lg">
+                            <i class="fas fa-broom"></i>
+                            <span>Maid Profiles</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="jobs.html" class="flex items-center space-x-2 px-3 py-2 text-gray-300 hover:bg-admin-highlight rounded-lg">
+                            <i class="fas fa-briefcase"></i>
+                            <span>Job Listings</span>
+                        </a>
+                    </li>
+                </ul>
+
+                <p class="text-xs font-semibold text-gray-400 mb-4 mt-8 uppercase">Management</p>
+                <ul class="space-y-3">
+                    <li>
+                        <a href="transactions.html" class="flex items-center space-x-2 px-3 py-2 text-gray-300 hover:bg-admin-highlight rounded-lg">
+                            <i class="fas fa-money-bill-wave"></i>
+                            <span>Transactions</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="settings.html" class="flex items-center space-x-2 px-3 py-2 text-gray-300 hover:bg-admin-highlight rounded-lg">
+                            <i class="fas fa-cog"></i>
+                            <span>Settings</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="absolute bottom-0 w-64 p-6 border-t border-admin-highlight">
+                <a href="#" id="logoutBtn" class="flex items-center text-gray-300 hover:text-white">
+                    <i class="fas fa-sign-out-alt mr-2"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-y-auto">
+            <!-- Header -->
+            <header class="bg-white shadow-sm">
+                <div class="flex justify-between items-center px-6 py-4">
+                    <h1 class="text-xl font-semibold text-gray-800">Maid Profiles</h1>
+                    <div class="flex items-center space-x-4">
+                        <button class="relative p-1 rounded-full text-gray-500 hover:text-gray-700 focus:outline-none">
+                            <span class="sr-only">View notifications</span>
+                            <i class="fas fa-bell text-xl"></i>
+                            <span class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500"></span>
+                        </button>
+                        <div class="flex items-center">
+                            <span class="mr-2 text-sm font-medium text-gray-700" id="adminName">Admin</span>
+                            <img class="h-8 w-8 rounded-full bg-gray-200" src="https://via.placeholder.com/32" alt="Admin avatar">
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Maid Profiles Content -->
+            <div class="p-6">
+                <!-- Filters & Actions -->
+                <div class="bg-white rounded-lg shadow mb-6 p-4">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
+                        <div class="flex items-center space-x-2">
+                            <select id="statusFilter" class="rounded-md border-gray-300 text-sm" aria-label="Filter by status">
+                                <option value="">All Status</option>
+                                <option value="pending">Pending</option>
+                                <option value="approved">Approved</option>
+                                <option value="rejected">Rejected</option>
+                                <option value="suspended">Suspended</option>
+                            </select>
+                            <select id="experienceFilter" class="rounded-md border-gray-300 text-sm" aria-label="Filter by experience">
+                                <option value="">All Experience</option>
+                                <option value="beginner">Beginner (0-1 years)</option>
+                                <option value="intermediate">Intermediate (1-3 years)</option>
+                                <option value="expert">Expert (3+ years)</option>
+                            </select>
+                            <button id="applyFilters" class="bg-brand-primary text-white px-3 py-2 rounded text-sm hover:bg-brand-secondary">
+                                Apply Filters
+                            </button>
+                        </div>
+                        <div class="flex space-x-2">
+                            <div class="relative">
+                                <input type="text" id="searchMaids" placeholder="Search maids..." class="rounded-md border-gray-300 pr-8 text-sm">
+                                <button class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400" aria-label="Search">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Maid Profiles Table -->
+                <div class="bg-white rounded-lg shadow">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-800">Maid Profiles</h2>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full bg-white">
+                            <thead class="bg-gray-50 text-gray-600 text-sm">
+                                <tr>
+                                    <th class="py-3 px-4 text-left">ID</th>
+                                    <th class="py-3 px-4 text-left">Name</th>
+                                    <th class="py-3 px-4 text-left">Experience</th>
+                                    <th class="py-3 px-4 text-left">Location</th>
+                                    <th class="py-3 px-4 text-left">Status</th>
+                                    <th class="py-3 px-4 text-left">Created</th>
+                                    <th class="py-3 px-4 text-left">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="maidsTableBody" class="text-gray-700 text-sm">
+                                <tr>
+                                    <td colspan="7" class="py-4 px-4 text-center text-gray-500">
+                                        <i class="fas fa-spinner fa-spin mr-2"></i> Loading maid profiles...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Pagination -->
+                    <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+                        <div class="text-sm text-gray-500">
+                            Showing <span id="startCount">0</span> to <span id="endCount">0</span> of <span id="totalMaids">0</span> profiles
+                        </div>
+                        <div class="flex space-x-2">
+                            <button id="prevPage" class="px-3 py-1 rounded-md border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-50" aria-label="Previous page">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <button id="nextPage" class="px-3 py-1 rounded-md border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-50" aria-label="Next page">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- View Profile Modal -->
+    <div id="profileModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg w-full max-w-2xl p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold" id="modalTitle">Maid Profile</h3>
+                <button id="closeModal" class="text-gray-500 hover:text-gray-700" aria-label="Close modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="space-y-6">
+                <!-- Profile Header -->
+                <div class="flex items-start space-x-4">
+                    <div class="w-24 h-24 rounded-full bg-gray-200 overflow-hidden">
+                        <img id="profileImage" src="https://via.placeholder.com/96" alt="Profile" class="w-full h-full object-cover">
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="text-xl font-semibold" id="profileName">Loading...</h4>
+                        <p class="text-gray-600" id="profileLocation">Loading...</p>
+                        <div class="flex space-x-2 mt-2">
+                            <span id="profileStatus" class="px-2 py-1 rounded-full text-xs"></span>
+                            <span id="profileExperience" class="px-2 py-1 rounded-full text-xs"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profile Details -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h5 class="font-medium text-gray-700 mb-2">Contact Information</h5>
+                        <div class="space-y-2">
+                            <p><span class="text-gray-500">Email:</span> <span id="profileEmail">Loading...</span></p>
+                            <p><span class="text-gray-500">Phone:</span> <span id="profilePhone">Loading...</span></p>
+                        </div>
+                    </div>
+                    <div>
+                        <h5 class="font-medium text-gray-700 mb-2">Availability</h5>
+                        <div class="space-y-2">
+                            <p><span class="text-gray-500">Hours:</span> <span id="profileHours">Loading...</span></p>
+                            <p><span class="text-gray-500">Days:</span> <span id="profileDays">Loading...</span></p>
+                        </div>
+                    </div>
+                    <div>
+                        <h5 class="font-medium text-gray-700 mb-2">Skills</h5>
+                        <div id="profileSkills" class="flex flex-wrap gap-2">
+                            <!-- Skills will be added here -->
+                        </div>
+                    </div>
+                    <div>
+                        <h5 class="font-medium text-gray-700 mb-2">Certifications</h5>
+                        <div id="profileCertifications" class="space-y-2">
+                            <!-- Certifications will be added here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profile Description -->
+                <div>
+                    <h5 class="font-medium text-gray-700 mb-2">About</h5>
+                    <p id="profileDescription" class="text-gray-600">Loading...</p>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex justify-end space-x-2 mt-6">
+                    <button id="rejectBtn" class="px-4 py-2 border border-red-300 text-red-600 rounded-md hover:bg-red-50">
+                        Reject
+                    </button>
+                    <button id="approveBtn" class="px-4 py-2 bg-brand-primary text-white rounded-md hover:bg-brand-secondary">
+                        Approve
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Supabase client
+        const supabaseUrl = 'https://fdgqqxyyofjnkhswkwcq.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZkZ3FxeHl5b2Zqbmtoc3drd2NxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQwMjQyMTMsImV4cCI6MjA1OTYwMDIxM30.YyJLLu3r2a7Mh7ny0ie-YzzLfPh5PdrJJHnBFBxWqVE';
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+        // Pagination variables
+        let currentPage = 1;
+        const pageSize = 10;
+        let totalCount = 0;
+
+        // Filter values
+        let filters = {
+            status: '',
+            experience: '',
+            search: ''
+        };
+
+        // Fetch maid profiles with pagination and filters
+        async function fetchMaidProfiles() {
+            try {
+                const startIndex = (currentPage - 1) * pageSize;
+                
+                let query = supabaseClient
+                    .from('maid_profiles')
+                    .select('*', { count: 'exact' });
+                
+                // Apply filters
+                if (filters.status) {
+                    query = query.eq('status', filters.status);
+                }
+                
+                if (filters.experience) {
+                    query = query.eq('experience_level', filters.experience);
+                }
+                
+                if (filters.search) {
+                    query = query.or(`full_name.ilike.%${filters.search}%,location.ilike.%${filters.search}%`);
+                }
+                
+                // Add pagination
+                const { data: profiles, error, count } = await query
+                    .range(startIndex, startIndex + pageSize - 1)
+                    .order('created_at', { ascending: false });
+                
+                if (error) throw error;
+                
+                totalCount = count || 0;
+                
+                // Update pagination display
+                document.getElementById('startCount').textContent = totalCount === 0 ? 0 : startIndex + 1;
+                document.getElementById('endCount').textContent = Math.min(startIndex + pageSize, totalCount);
+                document.getElementById('totalMaids').textContent = totalCount;
+                
+                // Update navigation buttons
+                document.getElementById('prevPage').disabled = currentPage === 1;
+                document.getElementById('nextPage').disabled = startIndex + pageSize >= totalCount;
+                
+                // Render profiles
+                renderMaidProfiles(profiles || []);
+            } catch (error) {
+                console.error("Error fetching maid profiles:", error);
+                document.getElementById('maidsTableBody').innerHTML = `
+                    <tr>
+                        <td colspan="7" class="py-4 px-4 text-center text-red-500">
+                            Error loading maid profiles: ${error.message}
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        // Render maid profiles in table
+        function renderMaidProfiles(profiles) {
+            const tableBody = document.getElementById('maidsTableBody');
+            
+            if (profiles.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="py-4 px-4 text-center text-gray-500">
+                            No maid profiles found
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tableBody.innerHTML = profiles.map(profile => `
+                <tr class="border-b border-gray-100 hover:bg-gray-50">
+                    <td class="py-3 px-4">${profile.id.substring(0, 8)}...</td>
+                    <td class="py-3 px-4">${profile.full_name || 'N/A'}</td>
+                    <td class="py-3 px-4">${profile.experience_level || 'N/A'}</td>
+                    <td class="py-3 px-4">${profile.location || 'N/A'}</td>
+                    <td class="py-3 px-4">
+                        <span class="px-2 py-1 rounded-full text-xs ${getStatusBadgeColor(profile.status)}">
+                            ${profile.status || 'Unknown'}
+                        </span>
+                    </td>
+                    <td class="py-3 px-4">${formatDate(profile.created_at)}</td>
+                    <td class="py-3 px-4">
+                        <div class="flex space-x-2">
+                            <button class="text-blue-600 hover:text-blue-800" onclick="viewProfile('${profile.id}')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="text-red-600 hover:text-red-800" onclick="deleteProfile('${profile.id}')">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // View profile details
+        async function viewProfile(profileId) {
+            try {
+                const { data: profile, error } = await supabaseClient
+                    .from('maid_profiles')
+                    .select('*')
+                    .eq('id', profileId)
+                    .single();
+                
+                if (error) throw error;
+                
+                // Update modal content
+                document.getElementById('profileName').textContent = profile.full_name || 'N/A';
+                document.getElementById('profileLocation').textContent = profile.location || 'N/A';
+                document.getElementById('profileEmail').textContent = profile.email || 'N/A';
+                document.getElementById('profilePhone').textContent = profile.phone || 'N/A';
+                document.getElementById('profileDescription').textContent = profile.description || 'No description available';
+                
+                // Update status and experience badges
+                const statusBadge = document.getElementById('profileStatus');
+                statusBadge.className = `px-2 py-1 rounded-full text-xs ${getStatusBadgeColor(profile.status)}`;
+                statusBadge.textContent = profile.status || 'Unknown';
+                
+                const experienceBadge = document.getElementById('profileExperience');
+                experienceBadge.className = `px-2 py-1 rounded-full text-xs ${getExperienceBadgeColor(profile.experience_level)}`;
+                experienceBadge.textContent = profile.experience_level || 'Unknown';
+                
+                // Update skills
+                const skillsContainer = document.getElementById('profileSkills');
+                skillsContainer.innerHTML = (profile.skills || []).map(skill => `
+                    <span class="px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs">
+                        ${skill}
+                    </span>
+                `).join('');
+                
+                // Update certifications
+                const certsContainer = document.getElementById('profileCertifications');
+                certsContainer.innerHTML = (profile.certifications || []).map(cert => `
+                    <div class="flex items-center">
+                        <i class="fas fa-certificate text-green-500 mr-2"></i>
+                        <span>${cert}</span>
+                    </div>
+                `).join('');
+                
+                // Update availability
+                document.getElementById('profileHours').textContent = profile.available_hours || 'N/A';
+                document.getElementById('profileDays').textContent = profile.available_days || 'N/A';
+                
+                // Show modal
+                document.getElementById('profileModal').classList.remove('hidden');
+                
+                // Set up action buttons
+                document.getElementById('approveBtn').onclick = () => approveProfile(profileId);
+                document.getElementById('rejectBtn').onclick = () => rejectProfile(profileId);
+            } catch (error) {
+                console.error("Error fetching profile details:", error);
+                alert(`Error fetching profile details: ${error.message}`);
+            }
+        }
+
+        // Approve profile
+        async function approveProfile(profileId) {
+            try {
+                const { error } = await supabaseClient
+                    .from('maid_profiles')
+                    .update({ status: 'approved' })
+                    .eq('id', profileId);
+                
+                if (error) throw error;
+                
+                // Record activity
+                await supabaseClient.from('activity_logs').insert({
+                    action_type: 'approve',
+                    object_type: 'maid_profile',
+                    object_id: profileId,
+                    description: `Approved maid profile #${profileId}`
+                });
+                
+                // Close modal and refresh
+                document.getElementById('profileModal').classList.add('hidden');
+                fetchMaidProfiles();
+            } catch (error) {
+                console.error("Error approving profile:", error);
+                alert(`Error approving profile: ${error.message}`);
+            }
+        }
+
+        // Reject profile
+        async function rejectProfile(profileId) {
+            try {
+                const { error } = await supabaseClient
+                    .from('maid_profiles')
+                    .update({ status: 'rejected' })
+                    .eq('id', profileId);
+                
+                if (error) throw error;
+                
+                // Record activity
+                await supabaseClient.from('activity_logs').insert({
+                    action_type: 'reject',
+                    object_type: 'maid_profile',
+                    object_id: profileId,
+                    description: `Rejected maid profile #${profileId}`
+                });
+                
+                // Close modal and refresh
+                document.getElementById('profileModal').classList.add('hidden');
+                fetchMaidProfiles();
+            } catch (error) {
+                console.error("Error rejecting profile:", error);
+                alert(`Error rejecting profile: ${error.message}`);
+            }
+        }
+
+        // Delete profile
+        async function deleteProfile(profileId) {
+            if (!confirm('Are you sure you want to delete this profile? This action cannot be undone.')) {
+                return;
+            }
+            
+            try {
+                const { error } = await supabaseClient
+                    .from('maid_profiles')
+                    .delete()
+                    .eq('id', profileId);
+                
+                if (error) throw error;
+                
+                // Record activity
+                await supabaseClient.from('activity_logs').insert({
+                    action_type: 'delete',
+                    object_type: 'maid_profile',
+                    object_id: profileId,
+                    description: `Deleted maid profile #${profileId}`
+                });
+                
+                // Refresh profiles
+                fetchMaidProfiles();
+            } catch (error) {
+                console.error("Error deleting profile:", error);
+                alert(`Error deleting profile: ${error.message}`);
+            }
+        }
+
+        // Helper functions
+        function getStatusBadgeColor(status) {
+            switch (status) {
+                case 'approved':
+                    return 'bg-green-100 text-green-800';
+                case 'pending':
+                    return 'bg-yellow-100 text-yellow-800';
+                case 'rejected':
+                    return 'bg-red-100 text-red-800';
+                case 'suspended':
+                    return 'bg-gray-100 text-gray-800';
+                default:
+                    return 'bg-gray-100 text-gray-800';
+            }
+        }
+
+        function getExperienceBadgeColor(experience) {
+            switch (experience) {
+                case 'beginner':
+                    return 'bg-blue-100 text-blue-800';
+                case 'intermediate':
+                    return 'bg-purple-100 text-purple-800';
+                case 'expert':
+                    return 'bg-indigo-100 text-indigo-800';
+                default:
+                    return 'bg-gray-100 text-gray-800';
+            }
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', () => {
+            protectAdminPage(() => {
+                fetchMaidProfiles();
+            });
+            
+            // Event listeners for pagination
+            document.getElementById('prevPage').addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    fetchMaidProfiles();
+                }
+            });
+            
+            document.getElementById('nextPage').addEventListener('click', () => {
+                if ((currentPage * pageSize) < totalCount) {
+                    currentPage++;
+                    fetchMaidProfiles();
+                }
+            });
+            
+            // Filter event listeners
+            document.getElementById('applyFilters').addEventListener('click', () => {
+                filters.status = document.getElementById('statusFilter').value;
+                filters.experience = document.getElementById('experienceFilter').value;
+                currentPage = 1;
+                fetchMaidProfiles();
+            });
+            
+            // Search functionality
+            document.getElementById('searchMaids').addEventListener('keyup', (e) => {
+                if (e.key === 'Enter') {
+                    filters.search = e.target.value.trim();
+                    currentPage = 1;
+                    fetchMaidProfiles();
+                }
+            });
+            
+            // Modal close button
+            document.getElementById('closeModal').addEventListener('click', () => {
+                document.getElementById('profileModal').classList.add('hidden');
+            });
+        });
+    </script>
+</body>
+</html> 

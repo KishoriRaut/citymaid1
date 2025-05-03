@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Listings - Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../config.js"></script>
+    <script src="admin-auth.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        poppins: ['Poppins', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            primary: '#4F46E5',
+                            secondary: '#4338CA',
+                            light: '#EEF2FF',
+                        },
+                        admin: {
+                            sidebar: '#1E293B',
+                            highlight: '#334155'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-poppins bg-gray-100">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-admin-sidebar text-white">
+            <div class="p-6 border-b border-admin-highlight">
+                <a href="dashboard.html" class="flex items-center space-x-2">
+                    <span class="text-2xl font-bold">City Maid</span>
+                    <span class="bg-brand-primary text-white text-xs px-2 py-1 rounded">Admin</span>
+                </a>
+            </div>
+            <nav class="mt-6 px-6 py-4">
+                <p class="text-xs font-semibold text-gray-400 mb-4 uppercase">Main</p>
+                <ul class="space-y-3">
+                    <li>
+                        <a href="dashboard.html" class="flex items-center space-x-2 px-3 py-2 text-gray-300 hover:bg-admin-highlight rounded-lg">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="users.html" class="flex items-center space-x-2 px-3 py-2 text-gray-300 hover:bg-admin-highlight rounded-lg">
+                            <i class="fas fa-users"></i>
+                            <span>Users</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="maids.html" class="flex items-center space-x-2 px-3 py-2 text-gray-300 hover:bg-admin-highlight rounded-lg">
+                            <i class="fas fa-broom"></i>
+                            <span>Maid Profiles</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="jobs.html" class="flex items-center space-x-2 px-3 py-2 bg-admin-highlight rounded-lg">
+                            <i class="fas fa-briefcase"></i>
+                            <span>Job Listings</span>
+                        </a>
+                    </li>
+                </ul>
+
+                <p class="text-xs font-semibold text-gray-400 mb-4 mt-8 uppercase">Management</p>
+                <ul class="space-y-3">
+                    <li>
+                        <a href="transactions.html" class="flex items-center space-x-2 px-3 py-2 text-gray-300 hover:bg-admin-highlight rounded-lg">
+                            <i class="fas fa-money-bill-wave"></i>
+                            <span>Transactions</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="settings.html" class="flex items-center space-x-2 px-3 py-2 text-gray-300 hover:bg-admin-highlight rounded-lg">
+                            <i class="fas fa-cog"></i>
+                            <span>Settings</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="absolute bottom-0 w-64 p-6 border-t border-admin-highlight">
+                <a href="#" id="logoutBtn" class="flex items-center text-gray-300 hover:text-white">
+                    <i class="fas fa-sign-out-alt mr-2"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-y-auto">
+            <!-- Header -->
+            <header class="bg-white shadow-sm">
+                <div class="flex justify-between items-center px-6 py-4">
+                    <h1 class="text-xl font-semibold text-gray-800">Job Listings</h1>
+                    <div class="flex items-center space-x-4">
+                        <button class="relative p-1 rounded-full text-gray-500 hover:text-gray-700 focus:outline-none">
+                            <span class="sr-only">View notifications</span>
+                            <i class="fas fa-bell text-xl"></i>
+                            <span class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500"></span>
+                        </button>
+                        <div class="flex items-center">
+                            <span class="mr-2 text-sm font-medium text-gray-700" id="adminName">Admin</span>
+                            <img class="h-8 w-8 rounded-full bg-gray-200" src="https://via.placeholder.com/32" alt="Admin avatar">
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Job Listings Content -->
+            <div class="p-6">
+                <!-- Filters & Actions -->
+                <div class="bg-white rounded-lg shadow mb-6 p-4">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
+                        <div class="flex items-center space-x-2">
+                            <select id="statusFilter" class="rounded-md border-gray-300 text-sm" aria-label="Filter by status">
+                                <option value="">All Status</option>
+                                <option value="pending">Pending</option>
+                                <option value="approved">Approved</option>
+                                <option value="rejected">Rejected</option>
+                                <option value="filled">Filled</option>
+                            </select>
+                            <select id="typeFilter" class="rounded-md border-gray-300 text-sm" aria-label="Filter by type">
+                                <option value="">All Types</option>
+                                <option value="regular">Regular</option>
+                                <option value="one-time">One-time</option>
+                                <option value="weekly">Weekly</option>
+                                <option value="monthly">Monthly</option>
+                            </select>
+                            <button id="applyFilters" class="bg-brand-primary text-white px-3 py-2 rounded text-sm hover:bg-brand-secondary">
+                                Apply Filters
+                            </button>
+                        </div>
+                        <div class="flex space-x-2">
+                            <div class="relative">
+                                <input type="text" id="searchJobs" placeholder="Search jobs..." class="rounded-md border-gray-300 pr-8 text-sm">
+                                <button class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400" aria-label="Search">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Job Listings Table -->
+                <div class="bg-white rounded-lg shadow">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-800">Job Listings</h2>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full bg-white">
+                            <thead class="bg-gray-50 text-gray-600 text-sm">
+                                <tr>
+                                    <th class="py-3 px-4 text-left">ID</th>
+                                    <th class="py-3 px-4 text-left">Title</th>
+                                    <th class="py-3 px-4 text-left">Type</th>
+                                    <th class="py-3 px-4 text-left">Location</th>
+                                    <th class="py-3 px-4 text-left">Status</th>
+                                    <th class="py-3 px-4 text-left">Created</th>
+                                    <th class="py-3 px-4 text-left">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="jobsTableBody" class="text-gray-700 text-sm">
+                                <tr>
+                                    <td colspan="7" class="py-4 px-4 text-center text-gray-500">
+                                        <i class="fas fa-spinner fa-spin mr-2"></i> Loading job listings...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Pagination -->
+                    <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+                        <div class="text-sm text-gray-500">
+                            Showing <span id="startCount">0</span> to <span id="endCount">0</span> of <span id="totalJobs">0</span> listings
+                        </div>
+                        <div class="flex space-x-2">
+                            <button id="prevPage" class="px-3 py-1 rounded-md border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-50" aria-label="Previous page">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <button id="nextPage" class="px-3 py-1 rounded-md border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-50" aria-label="Next page">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- View Job Modal -->
+    <div id="jobModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg w-full max-w-2xl p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold" id="modalTitle">Job Listing</h3>
+                <button id="closeModal" class="text-gray-500 hover:text-gray-700" aria-label="Close modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="space-y-6">
+                <!-- Job Header -->
+                <div>
+                    <h4 class="text-xl font-semibold" id="jobTitle">Loading...</h4>
+                    <div class="flex items-center space-x-4 mt-2">
+                        <span class="flex items-center text-gray-600">
+                            <i class="fas fa-map-marker-alt mr-2 text-brand-primary"></i>
+                            <span id="jobLocation">Loading...</span>
+                        </span>
+                        <span class="flex items-center text-gray-600">
+                            <i class="fas fa-clock mr-2 text-brand-primary"></i>
+                            <span id="jobType">Loading...</span>
+                        </span>
+                        <span class="flex items-center text-gray-600">
+                            <i class="fas fa-dollar-sign mr-2 text-brand-primary"></i>
+                            <span id="jobRate">Loading...</span>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Job Details -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h5 class="font-medium text-gray-700 mb-2">Employer Information</h5>
+                        <div class="space-y-2">
+                            <p><span class="text-gray-500">Name:</span> <span id="employerName">Loading...</span></p>
+                            <p><span class="text-gray-500">Email:</span> <span id="employerEmail">Loading...</span></p>
+                            <p><span class="text-gray-500">Phone:</span> <span id="employerPhone">Loading...</span></p>
+                        </div>
+                    </div>
+                    <div>
+                        <h5 class="font-medium text-gray-700 mb-2">Job Requirements</h5>
+                        <div id="jobRequirements" class="space-y-2">
+                            <!-- Requirements will be added here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Job Description -->
+                <div>
+                    <h5 class="font-medium text-gray-700 mb-2">Description</h5>
+                    <p id="jobDescription" class="text-gray-600">Loading...</p>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex justify-end space-x-2 mt-6">
+                    <button id="rejectBtn" class="px-4 py-2 border border-red-300 text-red-600 rounded-md hover:bg-red-50">
+                        Reject
+                    </button>
+                    <button id="approveBtn" class="px-4 py-2 bg-brand-primary text-white rounded-md hover:bg-brand-secondary">
+                        Approve
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Supabase client
+        const supabaseUrl = 'https://fdgqqxyyofjnkhswkwcq.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZkZ3FxeHl5b2Zqbmtoc3drd2NxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQwMjQyMTMsImV4cCI6MjA1OTYwMDIxM30.YyJLLu3r2a7Mh7ny0ie-YzzLfPh5PdrJJHnBFBxWqVE';
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+        // Pagination variables
+        let currentPage = 1;
+        const pageSize = 10;
+        let totalCount = 0;
+
+        // Filter values
+        let filters = {
+            status: '',
+            type: '',
+            search: ''
+        };
+
+        // Fetch job listings with pagination and filters
+        async function fetchJobListings() {
+            try {
+                const startIndex = (currentPage - 1) * pageSize;
+                
+                let query = supabaseClient
+                    .from('job_listings')
+                    .select('*, employer:employers(*)', { count: 'exact' });
+                
+                // Apply filters
+                if (filters.status) {
+                    query = query.eq('status', filters.status);
+                }
+                
+                if (filters.type) {
+                    query = query.eq('job_type', filters.type);
+                }
+                
+                if (filters.search) {
+                    query = query.or(`title.ilike.%${filters.search}%,location.ilike.%${filters.search}%`);
+                }
+                
+                // Add pagination
+                const { data: jobs, error, count } = await query
+                    .range(startIndex, startIndex + pageSize - 1)
+                    .order('created_at', { ascending: false });
+                
+                if (error) throw error;
+                
+                totalCount = count || 0;
+                
+                // Update pagination display
+                document.getElementById('startCount').textContent = totalCount === 0 ? 0 : startIndex + 1;
+                document.getElementById('endCount').textContent = Math.min(startIndex + pageSize, totalCount);
+                document.getElementById('totalJobs').textContent = totalCount;
+                
+                // Update navigation buttons
+                document.getElementById('prevPage').disabled = currentPage === 1;
+                document.getElementById('nextPage').disabled = startIndex + pageSize >= totalCount;
+                
+                // Render jobs
+                renderJobListings(jobs || []);
+            } catch (error) {
+                console.error("Error fetching job listings:", error);
+                document.getElementById('jobsTableBody').innerHTML = `
+                    <tr>
+                        <td colspan="7" class="py-4 px-4 text-center text-red-500">
+                            Error loading job listings: ${error.message}
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        // Render job listings in table
+        function renderJobListings(jobs) {
+            const tableBody = document.getElementById('jobsTableBody');
+            
+            if (jobs.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="py-4 px-4 text-center text-gray-500">
+                            No job listings found
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tableBody.innerHTML = jobs.map(job => `
+                <tr class="border-b border-gray-100 hover:bg-gray-50">
+                    <td class="py-3 px-4">${job.id.substring(0, 8)}...</td>
+                    <td class="py-3 px-4">${job.title || 'N/A'}</td>
+                    <td class="py-3 px-4">${job.job_type || 'N/A'}</td>
+                    <td class="py-3 px-4">${job.location || 'N/A'}</td>
+                    <td class="py-3 px-4">
+                        <span class="px-2 py-1 rounded-full text-xs ${getStatusBadgeColor(job.status)}">
+                            ${job.status || 'Unknown'}
+                        </span>
+                    </td>
+                    <td class="py-3 px-4">${formatDate(job.created_at)}</td>
+                    <td class="py-3 px-4">
+                        <div class="flex space-x-2">
+                            <button class="text-blue-600 hover:text-blue-800" onclick="viewJob('${job.id}')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="text-red-600 hover:text-red-800" onclick="deleteJob('${job.id}')">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // View job details
+        async function viewJob(jobId) {
+            try {
+                const { data: job, error } = await supabaseClient
+                    .from('job_listings')
+                    .select('*, employer:employers(*)')
+                    .eq('id', jobId)
+                    .single();
+                
+                if (error) throw error;
+                
+                // Update modal content
+                document.getElementById('jobTitle').textContent = job.title || 'N/A';
+                document.getElementById('jobLocation').textContent = job.location || 'N/A';
+                document.getElementById('jobType').textContent = job.job_type || 'N/A';
+                document.getElementById('jobRate').textContent = `₹${job.hourly_rate || 0}/hour`;
+                document.getElementById('jobDescription').textContent = job.description || 'No description available';
+                
+                // Update employer information
+                if (job.employer) {
+                    document.getElementById('employerName').textContent = job.employer.full_name || 'N/A';
+                    document.getElementById('employerEmail').textContent = job.employer.email || 'N/A';
+                    document.getElementById('employerPhone').textContent = job.employer.phone || 'N/A';
+                }
+                
+                // Update requirements
+                const requirementsContainer = document.getElementById('jobRequirements');
+                requirementsContainer.innerHTML = (job.requirements || []).map(req => `
+                    <div class="flex items-center">
+                        <i class="fas fa-check text-green-500 mr-2"></i>
+                        <span>${req}</span>
+                    </div>
+                `).join('');
+                
+                // Show modal
+                document.getElementById('jobModal').classList.remove('hidden');
+                
+                // Set up action buttons
+                document.getElementById('approveBtn').onclick = () => approveJob(jobId);
+                document.getElementById('rejectBtn').onclick = () => rejectJob(jobId);
+            } catch (error) {
+                console.error("Error fetching job details:", error);
+                alert(`Error fetching job details: ${error.message}`);
+            }
+        }
+
+        // Approve job
+        async function approveJob(jobId) {
+            try {
+                const { error } = await supabaseClient
+                    .from('job_listings')
+                    .update({ status: 'approved' })
+                    .eq('id', jobId);
+                
+                if (error) throw error;
+                
+                // Record activity
+                await supabaseClient.from('activity_logs').insert({
+                    action_type: 'approve',
+                    object_type: 'job_listing',
+                    object_id: jobId,
+                    description: `Approved job listing #${jobId}`
+                });
+                
+                // Close modal and refresh
+                document.getElementById('jobModal').classList.add('hidden');
+                fetchJobListings();
+            } catch (error) {
+                console.error("Error approving job:", error);
+                alert(`Error approving job: ${error.message}`);
+            }
+        }
+
+        // Reject job
+        async function rejectJob(jobId) {
+            try {
+                const { error } = await supabaseClient
+                    .from('job_listings')
+                    .update({ status: 'rejected' })
+                    .eq('id', jobId);
+                
+                if (error) throw error;
+                
+                // Record activity
+                await supabaseClient.from('activity_logs').insert({
+                    action_type: 'reject',
+                    object_type: 'job_listing',
+                    object_id: jobId,
+                    description: `Rejected job listing #${jobId}`
+                });
+                
+                // Close modal and refresh
+                document.getElementById('jobModal').classList.add('hidden');
+                fetchJobListings();
+            } catch (error) {
+                console.error("Error rejecting job:", error);
+                alert(`Error rejecting job: ${error.message}`);
+            }
+        }
+
+        // Delete job
+        async function deleteJob(jobId) {
+            if (!confirm('Are you sure you want to delete this job listing? This action cannot be undone.')) {
+                return;
+            }
+            
+            try {
+                const { error } = await supabaseClient
+                    .from('job_listings')
+                    .delete()
+                    .eq('id', jobId);
+                
+                if (error) throw error;
+                
+                // Record activity
+                await supabaseClient.from('activity_logs').insert({
+                    action_type: 'delete',
+                    object_type: 'job_listing',
+                    object_id: jobId,
+                    description: `Deleted job listing #${jobId}`
+                });
+                
+                // Refresh listings
+                fetchJobListings();
+            } catch (error) {
+                console.error("Error deleting job:", error);
+                alert(`Error deleting job: ${error.message}`);
+            }
+        }
+
+        // Helper functions
+        function getStatusBadgeColor(status) {
+            switch (status) {
+                case 'approved':
+                    return 'bg-green-100 text-green-800';
+                case 'pending':
+                    return 'bg-yellow-100 text-yellow-800';
+                case 'rejected':
+                    return 'bg-red-100 text-red-800';
+                case 'filled':
+                    return 'bg-blue-100 text-blue-800';
+                default:
+                    return 'bg-gray-100 text-gray-800';
+            }
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', () => {
+            protectAdminPage(() => {
+                fetchJobListings();
+            });
+            
+            // Event listeners for pagination
+            document.getElementById('prevPage').addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    fetchJobListings();
+                }
+            });
+            
+            document.getElementById('nextPage').addEventListener('click', () => {
+                if ((currentPage * pageSize) < totalCount) {
+                    currentPage++;
+                    fetchJobListings();
+                }
+            });
+            
+            // Filter event listeners
+            document.getElementById('applyFilters').addEventListener('click', () => {
+                filters.status = document.getElementById('statusFilter').value;
+                filters.type = document.getElementById('typeFilter').value;
+                currentPage = 1;
+                fetchJobListings();
+            });
+            
+            // Search functionality
+            document.getElementById('searchJobs').addEventListener('keyup', (e) => {
+                if (e.key === 'Enter') {
+                    filters.search = e.target.value.trim();
+                    currentPage = 1;
+                    fetchJobListings();
+                }
+            });
+            
+            // Modal close button
+            document.getElementById('closeModal').addEventListener('click', () => {
+                document.getElementById('jobModal').classList.add('hidden');
+            });
+        });
+    </script>
+</body>
+</html> 

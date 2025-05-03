@@ -47,9 +47,6 @@
                     <a href="find-maids.html" class="nav-link active" data-page="find-maids">Find Maids</a>
                     <a href="find-jobs.html" class="nav-link" data-page="find-jobs" id="find-jobs-link">Find Jobs</a>
                     <a href="../employer/post-job.html" class="nav-link employer-only" data-page="post-job">Post a Job</a>
-                    <a href="../employer/dashboard.html" class="nav-link employer-only" data-page="dashboard">Dashboard</a>
-                    <a href="../employer/edit-job.html" class="nav-link employer-only" data-page="edit-job">Edit Job Post</a>
-                    <a href="../employer/post-job.html" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 font-semibold transition-colors ml-2">Post a Job</a>
                     
                     <!-- Auth links: shown when not logged in -->
                     <div id="auth-links">
@@ -67,6 +64,7 @@
                         <div class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50" id="user-dropdown">
                             <a href="../employer/dashboard.html" class="block px-4 py-2 hover:bg-gray-100 employer-only">Dashboard</a>
                             <a href="../employer/profile.html" class="block px-4 py-2 hover:bg-gray-100 employer-only">Profile</a>
+                            <a href="../employer/edit-job.html" class="block px-4 py-2 hover:bg-gray-100 employer-only">Edit Job Post</a>
                             <a href="../maid/dashboard.html" class="block px-4 py-2 hover:bg-gray-100 maid-only">Dashboard</a>
                             <a href="../maid/profile.html" class="block px-4 py-2 hover:bg-gray-100 maid-only">Profile</a>
                             <a href="#" id="signOutBtn" class="block px-4 py-2 hover:bg-gray-100">Sign Out</a>
@@ -97,9 +95,6 @@
                     <a href="find-maids.html" class="block nav-link active" data-page="find-maids">Find Maids</a>
                     <a href="find-jobs.html" class="block nav-link" data-page="find-jobs" id="mobile-find-jobs-link">Find Jobs</a>
                     <a href="../employer/post-job.html" class="block nav-link employer-only" data-page="post-job">Post a Job</a>
-                    <a href="../employer/dashboard.html" class="block nav-link employer-only" data-page="dashboard">Dashboard</a>
-                    <a href="../employer/edit-job.html" class="block nav-link employer-only" data-page="edit-job">Edit Job Post</a>
-                    <a href="../employer/post-job.html" class="block text-white bg-green-600 py-2 px-4 rounded-lg font-medium hover:bg-green-700 mt-2">Post a Job</a>
                     
                     <!-- Mobile auth links -->
                     <div class="pt-4 border-t border-gray-200" id="mobile-auth-links">
@@ -110,6 +105,7 @@
                     <div class="pt-4 border-t border-gray-200 hidden" id="mobile-user-menu">
                         <a href="../employer/dashboard.html" class="block text-gray-700 hover:text-brand-primary font-medium transition-colors mt-4 employer-only">Dashboard</a>
                         <a href="../employer/profile.html" class="block text-gray-700 hover:text-brand-primary font-medium transition-colors mt-4 employer-only">Profile</a>
+                        <a href="../employer/edit-job.html" class="block text-gray-700 hover:text-brand-primary font-medium transition-colors mt-4 employer-only">Edit Job Post</a>
                         <a href="../maid/dashboard.html" class="block text-gray-700 hover:text-brand-primary font-medium transition-colors mt-4 maid-only">Dashboard</a>
                         <a href="../maid/profile.html" class="block text-gray-700 hover:text-brand-primary font-medium transition-colors mt-4 maid-only">Profile</a>
                         <a href="#" id="mobile-sign-out" class="block text-gray-700 hover:text-brand-primary font-medium transition-colors mt-4">Sign Out</a>
@@ -326,9 +322,23 @@
                 document.getElementById('mobile-auth-links').classList.add('hidden');
                 document.getElementById('mobile-user-menu').classList.remove('hidden');
                 
-                // Set user role display
-                const roleDisplayText = userRole === 'employer' ? 'Employer' : 'Maid';
-                document.getElementById('user-role-display').textContent = roleDisplayText;
+                // Get user name from session or localStorage instead of role
+                let displayName = 'My Account';
+                
+                // Try to get user display name from Supabase session
+                if (session.user && session.user.user_metadata) {
+                    if (session.user.user_metadata.full_name) {
+                        displayName = session.user.user_metadata.full_name;
+                    } else if (session.user.user_metadata.name) {
+                        displayName = session.user.user_metadata.name;
+                    } else if (session.user.email) {
+                        // Use email if no name is available, but only show part before @
+                        displayName = session.user.email.split('@')[0];
+                    }
+                }
+                
+                // Set display name in the account menu
+                document.getElementById('user-role-display').textContent = displayName;
             } else {
                 // No active session, ensure login buttons are visible
                 document.getElementById('auth-links').classList.remove('hidden');
