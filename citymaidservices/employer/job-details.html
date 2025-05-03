@@ -388,9 +388,9 @@
                 document.getElementById('transportation').textContent = job.transportation === true ? 'Yes' : (job.transportation === false ? 'No' : 'Not specified');
                 document.getElementById('experienceRequired').textContent = job.experience_required || 'Not specified';
                 document.getElementById('skillsRequired').textContent = job.required_skills ? job.required_skills.join(', ') : 'None specified';
-                document.getElementById('languageRequirements').textContent = job.language_requirements || 'None specified';
-                document.getElementById('educationRequired').textContent = job.education_required || 'Not specified';
-                document.getElementById('ageRange').textContent = job.age_range || 'Not specified';
+                document.getElementById('languageRequirements').textContent = job.languages ? job.languages.join(', ') : 'None specified';
+                document.getElementById('educationRequired').textContent = job.education_level || 'Not specified';
+                document.getElementById('ageRange').textContent = job.age_preference || 'Not specified';
                 document.getElementById('jobDescription').textContent = job.description || 'No description available';
                 document.getElementById('agePreference').textContent = job.age_preference || 'No preference';
                 document.getElementById('genderPreference').textContent = job.gender_preference || 'No preference';
@@ -427,6 +427,9 @@
 
                 // Log the job data for debugging
                 console.log('Job data:', job);
+                console.log('Age preference:', job.age_preference);
+                console.log('Languages:', job.languages);
+                console.log('Education level:', job.education_level);
                 console.log('Employer ID:', job.employer_id);
 
                 // Initialize navigation
