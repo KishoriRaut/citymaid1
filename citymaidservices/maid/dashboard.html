@@ -39,15 +39,15 @@
                 <div class="hidden md:flex items-center space-x-6">
                     <a href="../index.html" class="text-gray-700 hover:text-brand-primary font-medium transition-colors">Home</a>
                     <a href="../jobs/find-jobs.html" class="text-gray-700 hover:text-brand-primary font-medium transition-colors">Find Jobs</a>
-                    <div class="relative group">
-                        <button id="userMenuBtn" class="flex items-center space-x-2 text-brand-primary">
+                    <div class="relative">
+                        <button id="userMenuBtn" class="flex items-center space-x-2 text-gray-700 hover:text-brand-primary transition-colors duration-200">
                             <i class="fas fa-user-circle text-2xl"></i>
-                            <span class="font-medium">My Account</span>
+                            <span class="font-medium" id="user-role-display">My Account</span>
                         </button>
-                        <div class="hidden group-hover:block absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg">
-                            <a href="dashboard.html" class="block px-4 py-2 hover:bg-gray-100 text-brand-primary">Dashboard</a>
-                            <a href="profile.html" class="block px-4 py-2 hover:bg-gray-100">Profile</a>
-                            <a href="#" id="signOutBtn" class="block px-4 py-2 hover:bg-gray-100">Sign Out</a>
+                        <div id="user-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200">
+                            <a href="dashboard.html" class="block px-4 py-2 hover:bg-gray-100 text-brand-primary transition-colors duration-200">Dashboard</a>
+                            <a href="profile.html" class="block px-4 py-2 hover:bg-gray-100 transition-colors duration-200">Profile</a>
+                            <a href="#" id="signOutBtn" class="block px-4 py-2 hover:bg-gray-100 transition-colors duration-200">Sign Out</a>
                         </div>
                     </div>
                 </div>
@@ -61,13 +61,13 @@
         <div class="bg-white rounded-lg shadow-md p-6 mb-8">
             <div class="flex items-center justify-between">
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-900" id="welcomeHeading">Welcome to your Dashboard</h1>
-                    <p class="text-gray-600 mt-1" id="profileCompletionMessage">Complete your profile to start receiving job inquiries</p>
+                    <h1 class="text-2xl font-bold text-gray-900" id="welcomeHeading">Welcome, <span id="maidFullName">Maid</span>!</h1>
+                    <p class="text-gray-600 mt-1" id="welcomeSubtext">Manage your profile and job applications from your dashboard.</p>
                 </div>
                 <div class="flex space-x-4">
-                    <a href="profile.html" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-brand-primary hover:bg-brand-secondary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-primary">
+                    <a href="profile.html" id="updateProfileBtn" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-brand-primary hover:bg-brand-secondary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-primary">
                         <i class="fas fa-user-edit mr-2"></i>
-                        Update Profile
+                        Profile
                     </a>
                 </div>
             </div>
@@ -82,6 +82,7 @@
                     <span id="profileStatus" class="px-3 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">Incomplete</span>
                 </div>
                 <div class="space-y-4">
+                    <p class="text-sm text-gray-600" id="profileCompletionMessage">Complete your profile to start receiving job inquiries</p>
                     <div class="flex justify-between items-center">
                         <span class="text-sm text-gray-600">Profile Visibility</span>
                         <label class="relative inline-flex items-center cursor-pointer">
@@ -89,53 +90,54 @@
                             <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-brand-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-primary"></div>
                         </label>
                     </div>
+                </div>
+            </div>
+
+            <!-- Profile Views Card -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-semibold text-gray-900">Profile Views</h2>
+                    <i class="fas fa-eye text-brand-primary text-xl"></i>
+                </div>
+                <div class="space-y-4">
                     <div class="flex justify-between items-center">
-                        <span class="text-sm text-gray-600">Availability Status</span>
-                        <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" id="availabilityToggle" class="sr-only peer" aria-label="Toggle availability status">
-                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-brand-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
-                        </label>
+                        <div>
+                            <p class="text-3xl font-bold text-brand-primary" id="totalProfileViews">0</p>
+                            <p class="text-sm text-gray-600">Total Views</p>
+                        </div>
+                        <div>
+                            <p class="text-3xl font-bold text-green-500" id="weeklyProfileViews">0</p>
+                            <p class="text-sm text-gray-600">This Week</p>
+                        </div>
                     </div>
-                    <div class="pt-2">
-                        <a href="profile.html" class="text-brand-primary hover:text-brand-secondary text-sm font-medium">
-                            Complete your profile <i class="fas fa-arrow-right ml-1"></i>
-                        </a>
+                    <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div class="h-full bg-brand-primary rounded-full" id="profileViewsProgress" style="width: 0%"></div>
                     </div>
+                    <p class="text-sm text-gray-500">Compared to last week: <span id="profileViewsChange" class="text-green-500">+0%</span></p>
                 </div>
             </div>
 
-            <!-- Recent Jobs Card -->
+            <!-- Unlock Contact Stats Card -->
             <div class="bg-white rounded-lg shadow-md p-6">
-                <h2 class="text-lg font-semibold text-gray-900 mb-4">Job Inquiries</h2>
-                <div id="recentJobsContainer">
-                    <div class="text-center py-8">
-                        <i class="fas fa-inbox text-4xl text-gray-300 mb-2"></i>
-                        <p class="text-gray-500">No inquiries yet</p>
-                        <p class="text-sm text-gray-400 mt-1">Complete your profile to start receiving inquiries</p>
-                    </div>
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-semibold text-gray-900">Contact Unlocks</h2>
+                    <i class="fas fa-unlock text-brand-primary text-xl"></i>
                 </div>
-            </div>
-
-            <!-- Account Statistics Card -->
-            <div class="bg-white rounded-lg shadow-md p-6">
-                <h2 class="text-lg font-semibold text-gray-900 mb-4">Account Statistics</h2>
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="p-3 bg-brand-light rounded-lg">
-                        <p class="text-sm text-gray-600">Profile Views</p>
-                        <p class="text-2xl font-bold text-brand-primary">0</p>
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-3xl font-bold text-brand-primary" id="totalContactUnlocks">0</p>
+                            <p class="text-sm text-gray-600">Total Unlocks</p>
+                        </div>
+                        <div>
+                            <p class="text-3xl font-bold text-green-500" id="monthlyContactUnlocks">0</p>
+                            <p class="text-sm text-gray-600">This Month</p>
+                        </div>
                     </div>
-                    <div class="p-3 bg-brand-light rounded-lg">
-                        <p class="text-sm text-gray-600">Jobs Applied</p>
-                        <p class="text-2xl font-bold text-brand-primary">0</p>
+                    <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div class="h-full bg-brand-primary rounded-full" id="contactUnlocksProgress" style="width: 0%"></div>
                     </div>
-                    <div class="p-3 bg-brand-light rounded-lg">
-                        <p class="text-sm text-gray-600">Jobs Completed</p>
-                        <p class="text-2xl font-bold text-brand-primary">0</p>
-                    </div>
-                    <div class="p-3 bg-brand-light rounded-lg">
-                        <p class="text-sm text-gray-600">Rating</p>
-                        <p class="text-2xl font-bold text-brand-primary">N/A</p>
-                    </div>
+                    <p class="text-sm text-gray-500">Conversion rate: <span id="contactUnlockRate" class="text-green-500">0%</span></p>
                 </div>
             </div>
         </div>
@@ -189,6 +191,7 @@
 
                 currentUser = session.user;
                 await loadProfile();
+                await loadProfileStats();
                 updateUIWithProfileData();
             } catch (error) {
                 console.error('Error initializing dashboard:', error);
@@ -199,69 +202,248 @@
         // Load existing profile data
         async function loadProfile() {
             try {
-                const { data: profile, error } = await supabaseClient
+                if (!currentUser || !currentUser.id) {
+                    console.error('No current user found');
+                    showError('Please sign in to access your profile');
+                    return null;
+                }
+
+                console.log('Starting to load profile for user:', currentUser.id);
+                
+                // Get the maid profile
+                const { data: maidProfile, error: maidError } = await supabaseClient
                     .from('maid_profiles')
-                    .select('*')
+                    .select('full_name, is_active')
                     .eq('user_id', currentUser.id)
                     .single();
 
-                if (error && error.code !== 'PGRST116') throw error;
+                console.log('Maid profile fetch result:', { 
+                    data: maidProfile, 
+                    error: maidError,
+                    errorCode: maidError?.code,
+                    errorMessage: maidError?.message,
+                    errorDetails: maidError?.details
+                });
 
-                currentProfile = profile || null;
-                return profile;
+                if (maidError) {
+                    if (maidError.code === 'PGRST116') {
+                        console.log('No maid profile found, creating default profile');
+                        // Create a default profile if none exists
+                        const { data: newProfile, error: createError } = await supabaseClient
+                            .from('maid_profiles')
+                            .insert([
+                                {
+                                    user_id: currentUser.id,
+                                    full_name: currentUser.email?.split('@')[0] || 'Maid',
+                                    is_active: false,
+                                    age_group: '18-25',
+                                    gender: 'Female',
+                                    nationality: 'Nepali',
+                                    education: 'High School',
+                                    documents: 'None',
+                                    email: currentUser.email,
+                                    phone: '0000000000',
+                                    address: 'Not specified',
+                                    emergency_contact: 'Not specified',
+                                    service_type: 'Regular House Cleaning',
+                                    work_type: 'Regular',
+                                    work_location: 'Kathmandu',
+                                    expected_salary: 15000,
+                                    available_from: new Date().toISOString(),
+                                    accommodation_preference: 'not_required',
+                                    food_preference: 'not_required',
+                                    transportation_preference: 'not_required',
+                                    working_hours: '9-5',
+                                    working_days: 'mon-sat',
+                                    language: 'Nepali',
+                                    about: 'Experienced in household work and looking for new opportunities.',
+                                    created_at: new Date().toISOString(),
+                                    updated_at: new Date().toISOString()
+                                }
+                            ])
+                            .select()
+                            .single();
+
+                        if (createError) {
+                            console.error('Error creating default profile:', createError);
+                            throw new Error(`Error creating profile: ${createError.message}`);
+                        }
+
+                        currentProfile = newProfile;
+                        return currentProfile;
+                    } else {
+                        console.error('Error fetching maid profile:', maidError);
+                        throw new Error(`Error fetching profile: ${maidError.message}`);
+                    }
+                }
+
+                // Set the current profile
+                currentProfile = maidProfile || {
+                    full_name: currentUser.email?.split('@')[0] || 'Maid',
+                    is_active: false,
+                    age_group: '18-25',
+                    gender: 'Female',
+                    nationality: 'Nepali',
+                    education: 'High School',
+                    documents: 'None',
+                    email: currentUser.email,
+                    phone: '0000000000',
+                    address: 'Not specified',
+                    emergency_contact: 'Not specified',
+                    service_type: 'Regular House Cleaning',
+                    work_type: 'Regular',
+                    work_location: 'Kathmandu',
+                    expected_salary: 15000,
+                    available_from: new Date().toISOString(),
+                    accommodation_preference: 'not_required',
+                    food_preference: 'not_required',
+                    transportation_preference: 'not_required',
+                    working_hours: '9-5',
+                    working_days: 'mon-sat',
+                    language: 'Nepali',
+                    about: 'Experienced in household work and looking for new opportunities.',
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                };
+
+                console.log('Successfully loaded profile:', currentProfile);
+                return currentProfile;
             } catch (error) {
-                console.error('Error loading profile:', error);
-                showError('Error loading profile data. Please try again.');
+                console.error('Error in loadProfile:', error);
+                console.error('Error details:', {
+                    message: error.message,
+                    code: error.code,
+                    details: error.details,
+                    stack: error.stack
+                });
+                showError(`Error loading profile data: ${error.message}`);
                 return null;
+            }
+        }
+
+        // Load profile statistics
+        async function loadProfileStats() {
+            try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if (!session) return;
+
+                // Get profile views
+                const { data: viewsData, error: viewsError } = await supabaseClient
+                    .from('profile_views')
+                    .select('*')
+                    .eq('profile_id', session.user.id);
+
+                if (!viewsError && viewsData) {
+                    const totalViews = viewsData.length;
+                    const weeklyViews = viewsData.filter(view => {
+                        const viewDate = new Date(view.created_at);
+                        const weekAgo = new Date();
+                        weekAgo.setDate(weekAgo.getDate() - 7);
+                        return viewDate >= weekAgo;
+                    }).length;
+
+                    document.getElementById('totalProfileViews').textContent = totalViews;
+                    document.getElementById('weeklyProfileViews').textContent = weeklyViews;
+                    
+                    // Calculate progress (assuming 100 views is max for demo)
+                    const progress = Math.min((totalViews / 100) * 100, 100);
+                    document.getElementById('profileViewsProgress').style.width = `${progress}%`;
+                }
+
+                // Get contact unlocks
+                const { data: unlocksData, error: unlocksError } = await supabaseClient
+                    .from('contact_unlocks')
+                    .select('*')
+                    .eq('profile_id', session.user.id);
+
+                if (!unlocksError && unlocksData) {
+                    const totalUnlocks = unlocksData.length;
+                    const monthlyUnlocks = unlocksData.filter(unlock => {
+                        const unlockDate = new Date(unlock.created_at);
+                        const monthAgo = new Date();
+                        monthAgo.setMonth(monthAgo.getMonth() - 1);
+                        return unlockDate >= monthAgo;
+                    }).length;
+
+                    document.getElementById('totalContactUnlocks').textContent = totalUnlocks;
+                    document.getElementById('monthlyContactUnlocks').textContent = monthlyUnlocks;
+                    
+                    // Calculate conversion rate
+                    const views = parseInt(document.getElementById('totalProfileViews').textContent);
+                    const conversionRate = views > 0 ? ((totalUnlocks / views) * 100).toFixed(1) : 0;
+                    document.getElementById('contactUnlockRate').textContent = `${conversionRate}%`;
+                    
+                    // Calculate progress (assuming 50 unlocks is max for demo)
+                    const progress = Math.min((totalUnlocks / 50) * 100, 100);
+                    document.getElementById('contactUnlocksProgress').style.width = `${progress}%`;
+                }
+            } catch (error) {
+                console.error('Error loading profile stats:', error);
             }
         }
 
         // Update UI with profile data
         function updateUIWithProfileData() {
-            // Update welcome message
-            const welcomeHeading = document.getElementById('welcomeHeading');
-            const profileCompletionMessage = document.getElementById('profileCompletionMessage');
-            const profileStatus = document.getElementById('profileStatus');
-            const profileVisibilityToggle = document.getElementById('profileVisibilityToggle');
-            const availabilityToggle = document.getElementById('availabilityToggle');
-
-            if (currentProfile) {
-                welcomeHeading.textContent = `Welcome, ${currentProfile.full_name || 'Maid'}!`;
+            try {
+                console.log('Updating UI with profile data:', currentProfile);
                 
-                // Update profile completion message
-                if (isProfileComplete()) {
-                    profileCompletionMessage.textContent = 'Your profile is complete and ready to be viewed by employers';
-                    profileStatus.textContent = 'Complete';
-                    profileStatus.classList.remove('bg-yellow-100', 'text-yellow-800');
-                    profileStatus.classList.add('bg-green-100', 'text-green-800');
+                // Get all required elements
+                const elements = {
+                    welcomeHeading: document.getElementById('welcomeHeading'),
+                    maidFullName: document.getElementById('maidFullName'),
+                    welcomeSubtext: document.getElementById('welcomeSubtext'),
+                    profileCompletionMessage: document.getElementById('profileCompletionMessage'),
+                    profileStatus: document.getElementById('profileStatus'),
+                    profileVisibilityToggle: document.getElementById('profileVisibilityToggle')
+                };
+
+                // Check if any required element is missing
+                const missingElements = Object.entries(elements)
+                    .filter(([_, element]) => !element)
+                    .map(([name]) => name);
+
+                if (missingElements.length > 0) {
+                    console.error('Missing UI elements:', missingElements);
+                    return;
+                }
+
+                if (currentProfile) {
+                    // Set the maid's full name from the profile
+                    const displayName = currentProfile.full_name || 'Maid';
+                    elements.maidFullName.textContent = displayName;
+                    elements.welcomeHeading.textContent = `Welcome, ${displayName}!`;
+                    elements.welcomeSubtext.textContent = 'Manage your profile and job applications from your dashboard.';
+                    
+                    // Update profile completion message and status
+                    if (isProfileComplete()) {
+                        elements.profileCompletionMessage.textContent = 'Your profile is complete and ready to be viewed by employers';
+                        elements.profileStatus.textContent = 'Complete';
+                        elements.profileStatus.classList.remove('bg-yellow-100', 'text-yellow-800');
+                        elements.profileStatus.classList.add('bg-green-100', 'text-green-800');
+                    } else {
+                        elements.profileCompletionMessage.textContent = 'Complete your profile to increase your chances of finding jobs';
+                        elements.profileStatus.textContent = 'Incomplete';
+                        elements.profileStatus.classList.remove('bg-green-100', 'text-green-800');
+                        elements.profileStatus.classList.add('bg-yellow-100', 'text-yellow-800');
+                    }
+
+                    // Set toggle states
+                    if (elements.profileVisibilityToggle) {
+                        elements.profileVisibilityToggle.checked = currentProfile.is_active;
+                        elements.profileVisibilityToggle.addEventListener('change', toggleProfileVisibility);
+                    }
                 } else {
-                    profileCompletionMessage.textContent = 'Complete your profile to increase your chances of finding jobs';
-                    profileStatus.textContent = 'Incomplete';
+                    elements.welcomeHeading.textContent = 'Welcome to your Dashboard';
+                    elements.welcomeSubtext.textContent = 'Manage your profile and job applications from your dashboard.';
+                    elements.maidFullName.textContent = 'Maid';
+                    elements.profileCompletionMessage.textContent = 'Please complete your profile to start receiving job inquiries';
+                    elements.profileStatus.textContent = 'Not Started';
+                    elements.profileStatus.classList.remove('bg-green-100', 'text-green-800');
+                    elements.profileStatus.classList.add('bg-red-100', 'text-red-800');
                 }
-
-                // Set toggle states
-                if (profileVisibilityToggle) {
-                    profileVisibilityToggle.checked = currentProfile.status === 'active';
-                }
-                
-                if (availabilityToggle) {
-                    availabilityToggle.checked = currentProfile.is_available !== false; // Default to true if not set
-                }
-
-                // Add event listeners to toggles
-                if (profileVisibilityToggle) {
-                    profileVisibilityToggle.addEventListener('change', toggleProfileVisibility);
-                }
-                
-                if (availabilityToggle) {
-                    availabilityToggle.addEventListener('change', toggleAvailability);
-                }
-            } else {
-                welcomeHeading.textContent = 'Welcome to your Dashboard';
-                profileCompletionMessage.textContent = 'Please complete your profile to start receiving job inquiries';
-                profileStatus.textContent = 'Not Started';
-                profileStatus.classList.remove('bg-green-100', 'text-green-800');
-                profileStatus.classList.add('bg-red-100', 'text-red-800');
+            } catch (error) {
+                console.error('Error in updateUIWithProfileData:', error);
+                showError(`Error updating UI: ${error.message}`);
             }
         }
 
@@ -270,11 +452,10 @@
             if (!currentProfile) return false;
             
             const requiredFields = [
-                'full_name', 'age_group', 'gender', 'marital_status', 
+                'full_name', 'age_group', 'gender', 
                 'nationality', 'education', 'email', 'phone', 
                 'address', 'emergency_contact', 'work_type', 
-                'expected_salary', 'work_location', 'skills', 
-                'languages', 'additional_notes'
+                'expected_salary', 'work_location', 'about'
             ];
             
             return requiredFields.every(field => {
@@ -300,70 +481,29 @@
                 // Show loading state
                 toggle.disabled = true;
 
-                const newStatus = this.checked ? 'active' : 'inactive';
+                const newStatus = this.checked;
                 const { error } = await supabaseClient
                     .from('maid_profiles')
-                    .update({ status: newStatus })
+                    .update({ is_active: newStatus })
                     .eq('user_id', currentUser.id);
 
                 if (error) throw error;
 
-                currentProfile.status = newStatus;
+                currentProfile.is_active = newStatus;
                 toggle.disabled = false;
 
-                showSuccess(`Profile is now ${newStatus === 'active' ? 'public' : 'private'}`);
+                showSuccess(`Profile is now ${newStatus ? 'public' : 'private'}`);
             } catch (error) {
                 console.error('Error toggling profile visibility:', error);
                 
                 // Restore toggle state
                 const toggle = document.getElementById('profileVisibilityToggle');
                 if (toggle) {
-                    toggle.checked = currentProfile?.status === 'active';
+                    toggle.checked = currentProfile?.is_active;
                     toggle.disabled = false;
                 }
 
                 showError(`Failed to update profile visibility: ${error.message}`);
-            }
-        }
-        
-        // Add availability toggle functionality
-        async function toggleAvailability() {
-            try {
-                if (!currentProfile) {
-                    showError('Please complete your profile first');
-                    this.checked = false;
-                    return;
-                }
-
-                const toggle = document.getElementById('availabilityToggle');
-                if (!toggle) return;
-
-                // Show loading state
-                toggle.disabled = true;
-
-                const newAvailability = this.checked;
-                const { error } = await supabaseClient
-                    .from('maid_profiles')
-                    .update({ is_available: newAvailability })
-                    .eq('user_id', currentUser.id);
-
-                if (error) throw error;
-
-                currentProfile.is_available = newAvailability;
-                toggle.disabled = false;
-
-                showSuccess(`You are now marked as ${newAvailability ? 'available' : 'engaged'}`);
-            } catch (error) {
-                console.error('Error toggling availability:', error);
-                
-                // Restore toggle state
-                const toggle = document.getElementById('availabilityToggle');
-                if (toggle) {
-                    toggle.checked = currentProfile?.is_available !== false;
-                    toggle.disabled = false;
-                }
-
-                showError(`Failed to update availability status: ${error.message}`);
             }
         }
 
@@ -379,30 +519,135 @@
             }
         });
 
+        // Show error message
+        function showError(message) {
+            console.error('Showing error message:', message);
+            const alert = document.createElement('div');
+            alert.className = 'fixed top-4 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded z-50 flex items-center justify-between min-w-[300px]';
+            alert.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas fa-exclamation-circle mr-2"></i>
+                    <span class="block sm:inline">${message}</span>
+                </div>
+                <button class="ml-4 text-red-700 hover:text-red-900" onclick="this.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            document.body.appendChild(alert);
+            
+            // Only auto-remove after 10 seconds
+            setTimeout(() => {
+                if (alert.parentElement) {
+                    alert.remove();
+                }
+            }, 10000);
+        }
+
         // Show success message
         function showSuccess(message) {
             const alert = document.createElement('div');
-            alert.className = 'fixed top-4 right-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded z-50';
+            alert.className = 'fixed top-4 right-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded z-50 flex items-center justify-between min-w-[300px]';
             alert.innerHTML = `
-                <span class="block sm:inline">${message}</span>
+                <div class="flex items-center">
+                    <i class="fas fa-check-circle mr-2"></i>
+                    <span class="block sm:inline">${message}</span>
+                </div>
+                <button class="ml-4 text-green-700 hover:text-green-900" onclick="this.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
             `;
             document.body.appendChild(alert);
-            setTimeout(() => alert.remove(), 3000);
+            
+            // Only auto-remove after 5 seconds
+            setTimeout(() => {
+                if (alert.parentElement) {
+                    alert.remove();
+                }
+            }, 5000);
         }
 
-        // Show error message
-        function showError(message) {
-            const alert = document.createElement('div');
-            alert.className = 'fixed top-4 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded z-50';
-            alert.innerHTML = `
-                <span class="block sm:inline">${message}</span>
-            `;
-            document.body.appendChild(alert);
-            setTimeout(() => alert.remove(), 3000);
-        }
+        // Add click handler for Profile button
+        document.getElementById('updateProfileBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+            // Check if profile exists
+            if (!currentProfile) {
+                showError('Please complete your profile first');
+                return;
+            }
+            
+            // Save current profile data to localStorage before navigating
+            try {
+                localStorage.setItem('currentProfile', JSON.stringify(currentProfile));
+                // Navigate to profile page
+                window.location.href = 'profile.html';
+            } catch (error) {
+                console.error('Error saving profile data:', error);
+                showError('Error preparing profile data. Please try again.');
+            }
+        });
 
         // Initialize the page
         document.addEventListener('DOMContentLoaded', initializeDashboard);
+
+        // Add click handler for user menu button
+        document.getElementById('userMenuBtn').addEventListener('click', function(e) {
+            e.stopPropagation();
+            const dropdown = document.getElementById('user-dropdown');
+            dropdown.classList.toggle('hidden');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            const dropdown = document.getElementById('user-dropdown');
+            const menuBtn = document.getElementById('userMenuBtn');
+            if (!dropdown.contains(e.target) && !menuBtn.contains(e.target)) {
+                dropdown.classList.add('hidden');
+            }
+        });
+
+        // Close dropdown when selecting an option
+        document.querySelectorAll('#user-dropdown a').forEach(link => {
+            link.addEventListener('click', function() {
+                document.getElementById('user-dropdown').classList.add('hidden');
+            });
+        });
+
+        // Initialize navigation
+        function initNavigation(session) {
+            // Show/hide auth and user menus
+            document.getElementById('auth-links').classList.add('hidden');
+            document.getElementById('user-menu').classList.remove('hidden');
+            
+            // Get user profile and role
+            supabaseClient
+                .from('profiles')
+                .select('full_name, role')
+                .eq('id', session.user.id)
+                .single()
+                .then(({ data: profile, error: profileError }) => {
+                    if (profile) {
+                        // Update the display name in the desktop menu
+                        const displayName = profile.full_name || session.user.email?.split('@')[0] || 'My Account';
+                        document.getElementById('user-role-display').textContent = displayName;
+                        
+                        // Show/hide role-specific elements
+                        const maidElements = document.querySelectorAll('.maid-only');
+                        const employerElements = document.querySelectorAll('.employer-only');
+                        
+                        if (profile.role === 'maid') {
+                            maidElements.forEach(el => el.classList.remove('hidden'));
+                            employerElements.forEach(el => el.classList.add('hidden'));
+                        } else if (profile.role === 'employer') {
+                            maidElements.forEach(el => el.classList.add('hidden'));
+                            employerElements.forEach(el => el.classList.remove('hidden'));
+                        }
+                    } else {
+                        // If no profile exists, use email or default
+                        const displayName = session.user.email?.split('@')[0] || 'My Account';
+                        document.getElementById('user-role-display').textContent = displayName;
+                    }
+                });
+        }
     </script>
 </body>
 </html> 
