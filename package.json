@@ -1,30 +1,17 @@
 {
-  "name": "citymaid-services",
+  "name": "citymaid",
   "version": "1.0.0",
-  "description": "City Maid Services - Domestic Helper Platform",
-  "main": "index.js",
+  "description": "City Maid Services Platform",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tailwindcss -i ./src/input.css -o ./citymaidservices/css/tailwind.css",
-    "watch": "tailwindcss -i ./src/input.css -o ./citymaidservices/css/tailwind.css --watch"
+    "build": "tailwindcss -i ./src/input.css -o ./citymaidservices/dist/output.css --minify",
+    "watch": "tailwindcss -i ./src/input.css -o ./citymaidservices/dist/output.css --watch"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/KishoriRaut/maid-service-hub.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/KishoriRaut/maid-service-hub/issues"
-  },
-  "homepage": "https://github.com/KishoriRaut/maid-service-hub#readme",
   "devDependencies": {
-    "autoprefixer": "^10.4.14",
-    "postcss": "^8.4.24",
-    "tailwindcss": "^3.3.2"
-  },
-  "directories": {
-    "doc": "docs"
+    "@tailwindcss/aspect-ratio": "^0.4.2",
+    "@tailwindcss/forms": "^0.5.7",
+    "@tailwindcss/typography": "^0.5.10",
+    "autoprefixer": "^10.4.17",
+    "postcss": "^8.4.35",
+    "tailwindcss": "^3.4.1"
   }
 }

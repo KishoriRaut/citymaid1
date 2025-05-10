@@ -2,6 +2,7 @@
 module.exports = {
   content: [
     "./citymaidservices/**/*.{html,js}",
+    "./src/**/*.{html,js}"
   ],
   theme: {
     extend: {
@@ -30,5 +31,9 @@ module.exports = {
       }
     }
   },
-  plugins: [],
+  plugins: [
+    require('@tailwindcss/forms'),
+    require('@tailwindcss/typography'),
+    require('@tailwindcss/aspect-ratio'),
+  ],
 } 
