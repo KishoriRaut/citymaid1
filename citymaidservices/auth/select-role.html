@@ -3,132 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Select Your Role - City Maid Services</title>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        poppins: ['Poppins', 'sans-serif'],
-                    },
-                    colors: {
-                        brand: {
-                            primary: '#4F46E5',
-                            secondary: '#4338CA',
-                            light: '#EEF2FF',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+    <title>Select Role - CityMaid</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="../assets/styles.css" rel="stylesheet">
 </head>
-<body class="font-poppins bg-gray-50 min-h-screen flex flex-col">
-    <!-- Navigation Bar Simplified -->
-    <nav class="bg-white shadow-lg">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-20">
-                <div class="flex items-center">
-                    <a href="../index.html" class="text-3xl font-bold text-brand-primary tracking-tight">City<span class="text-brand-secondary"> Maid Services</span></a>
-                </div>
-                <div class="hidden md:flex items-center space-x-6">
-                    <a href="../index.html" class="text-gray-700 hover:text-brand-primary font-medium transition-colors">Home</a>
-                    <a href="login.html" class="text-gray-700 hover:text-brand-primary font-medium transition-colors">Sign In</a>
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Main Content -->
-    <div class="flex-grow flex items-center justify-center px-4 py-12">
-        <div class="max-w-4xl w-full">
-            <h1 class="text-3xl font-bold text-center text-gray-900 mb-8">Select Your Role</h1>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <!-- Maid Card -->
-                <div class="bg-white rounded-xl overflow-hidden shadow-xl hover:shadow-2xl transition-shadow duration-300 relative group">
-                    <div class="relative h-48 md:h-56 lg:h-64 overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?ixlib=rb-1.2.1&auto=format&fit=crop&w=900&q=80" alt="Maid Role" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-60"></div>
-                        <div class="absolute bottom-0 left-0 right-0 p-6">
-                            <h2 class="text-white text-2xl font-bold mb-2">I'm a Domestic Helper</h2>
-                            <p class="text-white text-sm md:text-base">Create your profile and find jobs</p>
-                        </div>
-                    </div>
-                    <div class="p-6">
-                        <ul class="space-y-3 mb-6">
-                            <li class="flex items-start">
-                                <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
-                                <span>Create a professional profile to showcase your skills</span>
-                            </li>
-                            <li class="flex items-start">
-                                <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
-                                <span>Browse and apply to job postings</span>
-                            </li>
-                            <li class="flex items-start">
-                                <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
-                                <span>Connect with potential employers</span>
-                            </li>
-                        </ul>
-                        <a href="register.html?type=maid" class="block w-full bg-brand-primary hover:bg-brand-secondary text-white text-center py-3 px-6 rounded-lg font-medium transition-colors duration-300">
-                            Register as Domestic Helper
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Employer Card -->
-                <div class="bg-white rounded-xl overflow-hidden shadow-xl hover:shadow-2xl transition-shadow duration-300 relative group">
-                    <div class="relative h-48 md:h-56 lg:h-64 overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1557804506-669a67965ba0?ixlib=rb-1.2.1&auto=format&fit=crop&w=900&q=80" alt="Employer Role" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-60"></div>
-                        <div class="absolute bottom-0 left-0 right-0 p-6">
-                            <h2 class="text-white text-2xl font-bold mb-2">I'm an Employer</h2>
-                            <p class="text-white text-sm md:text-base">Hire reliable domestic helpers</p>
-                        </div>
-                    </div>
-                    <div class="p-6">
-                        <ul class="space-y-3 mb-6">
-                            <li class="flex items-start">
-                                <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
-                                <span>Post job requirements and find the perfect match</span>
-                            </li>
-                            <li class="flex items-start">
-                                <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
-                                <span>Browse verified domestic helper profiles</span>
-                            </li>
-                            <li class="flex items-start">
-                                <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
-                                <span>Manage hiring process efficiently</span>
-                            </li>
-                        </ul>
-                        <a href="register.html?type=employer" class="block w-full bg-brand-primary hover:bg-brand-secondary text-white text-center py-3 px-6 rounded-lg font-medium transition-colors duration-300">
-                            Register as Employer
-                        </a>
-                    </div>
-                </div>
+<body class="bg-brand-light min-h-screen flex items-center justify-center">
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-md mx-auto">
+            <!-- Logo -->
+            <div class="text-center mb-8">
+                <a href="../index.html" class="text-3xl font-bold text-gradient">CITYMAID</a>
             </div>
 
-            <div class="text-center mt-8">
-                <p class="text-gray-600">
-                    Already have an account?
-                    <a href="login.html" class="text-brand-primary hover:text-brand-secondary font-medium">
-                        Sign in
+            <!-- Select Role Card -->
+            <div class="card p-8">
+                <h2 class="text-2xl font-semibold text-center mb-6">Choose Your Role</h2>
+                <p class="text-text-muted text-center mb-8">Select how you want to use CityMaid</p>
+                
+                <div class="space-y-4">
+                    <a href="register.html?type=employer" class="block">
+                        <div class="card p-6 hover:shadow-lg transition-all cursor-pointer">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-12 h-12 rounded-full bg-brand-mint flex items-center justify-center">
+                                    <i class="fas fa-user-tie text-brand-primary text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold text-lg">I'm an Employer</h3>
+                                    <p class="text-text-muted text-sm">I want to hire cleaning services</p>
+                                </div>
+                            </div>
+                        </div>
                     </a>
-                </p>
+
+                    <a href="register.html?type=maid" class="block">
+                        <div class="card p-6 hover:shadow-lg transition-all cursor-pointer">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-12 h-12 rounded-full bg-brand-mint flex items-center justify-center">
+                                    <i class="fas fa-broom text-brand-primary text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold text-lg">I'm a Maid</h3>
+                                    <p class="text-text-muted text-sm">I want to offer cleaning services</p>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="mt-8 text-center">
+                    <p class="text-sm text-text-muted">
+                        Already have an account? 
+                        <a href="login.html" class="text-brand-primary hover:text-brand-hover font-medium">Sign in</a>
+                    </p>
+                </div>
             </div>
         </div>
     </div>
-
-    <!-- Simple Footer -->
-    <footer class="bg-white mt-auto">
-        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-            <p class="text-center text-sm text-gray-500">
-                &copy; 2024 City Maid Services. All rights reserved.
-            </p>
-        </div>
-    </footer>
 </body>
 </html> 

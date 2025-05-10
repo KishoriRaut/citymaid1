@@ -1,10 +1,12 @@
 {
-  "name": "github-cloned-website-city-maid",
+  "name": "citymaid-services",
   "version": "1.0.0",
-  "description": "��#\u0000 \u0000m\u0000a\u0000i\u0000d\u0000-\u0000s\u0000e\u0000r\u0000v\u0000i\u0000c\u0000e\u0000-\u0000h\u0000u\u0000b\u0000\r\u0000 \u0000",
+  "description": "City Maid Services - Domestic Helper Platform",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tailwindcss -i ./src/input.css -o ./citymaidservices/css/tailwind.css",
+    "watch": "tailwindcss -i ./src/input.css -o ./citymaidservices/css/tailwind.css --watch"
   },
   "repository": {
     "type": "git",
@@ -18,8 +20,11 @@
   },
   "homepage": "https://github.com/KishoriRaut/maid-service-hub#readme",
   "devDependencies": {
-    "autoprefixer": "^10.4.21",
-    "postcss": "^8.5.3",
-    "tailwindcss": "^4.1.4"
+    "autoprefixer": "^10.4.14",
+    "postcss": "^8.4.24",
+    "tailwindcss": "^3.3.2"
+  },
+  "directories": {
+    "doc": "docs"
   }
 }

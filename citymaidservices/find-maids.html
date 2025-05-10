@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Maids - City Maid Services</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Helvetica Neue', 'Segoe UI', 'Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        whatsapp: {
+                            primary: '#25D366',    // WhatsApp Green
+                            secondary: '#128C7E',  // WhatsApp Teal
+                            dark: '#075E54',       // WhatsApp Dark Green
+                            light: '#F0F2F5',      // WhatsApp Background
+                            text: {
+                                primary: '#111B21',   // WhatsApp Dark Text
+                                secondary: '#667781', // WhatsApp Secondary Text
+                                light: '#FFFFFF',     // White text
+                            }
+                        }
+                    },
+                    boxShadow: {
+                        'whatsapp': '0 1px 3px rgba(0, 0, 0, 0.1)',
+                        'whatsapp-hover': '0 2px 4px rgba(0, 0, 0, 0.15)',
+                    },
+                    borderRadius: {
+                        'whatsapp': '8px',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-whatsapp-light min-h-screen">
+    <!-- Navigation Bar -->
+    <nav class="bg-white shadow-whatsapp sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="index.html" class="text-2xl font-semibold text-whatsapp-primary">CITYMAID</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="index.html" class="text-whatsapp-text-primary hover:text-whatsapp-primary transition-colors">
+                        <i class="fas fa-home mr-1"></i> Home
+                    </a>
+                    <a href="find-maids.html" class="text-whatsapp-text-primary hover:text-whatsapp-primary transition-colors">
+                        <i class="fas fa-search mr-1"></i> Find Maids
+                    </a>
+                    <a href="maid/create-profile.html" class="text-whatsapp-text-primary hover:text-whatsapp-primary transition-colors">
+                        <i class="fas fa-user-plus mr-1"></i> Create Profile
+                    </a>
+                    <a href="auth/login.html" class="bg-whatsapp-primary text-white px-4 py-2 rounded-whatsapp text-sm font-medium hover:bg-whatsapp-secondary transition-colors">
+                        <i class="fas fa-sign-in-alt mr-1"></i> Login
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Search and Filter Section -->
+    <div class="bg-white shadow-whatsapp">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <!-- Search Input -->
+                <div class="md:col-span-2">
+                    <div class="relative">
+                        <input type="text" id="searchInput" placeholder="Search by name, skills, or location..." 
+                               class="w-full px-4 py-2 border border-gray-300 rounded-whatsapp focus:outline-none focus:ring-2 focus:ring-whatsapp-primary focus:border-transparent">
+                        <i class="fas fa-search absolute right-3 top-3 text-whatsapp-text-secondary"></i>
+                    </div>
+                </div>
+                
+                <!-- Location Filter -->
+                <div>
+                    <label for="locationFilter" class="sr-only">Filter by Location</label>
+                    <select id="locationFilter" class="w-full px-4 py-2 border border-gray-300 rounded-whatsapp focus:outline-none focus:ring-2 focus:ring-whatsapp-primary focus:border-transparent">
+                        <option value="">All Locations</option>
+                        <option value="Kathmandu">Kathmandu</option>
+                        <option value="Lalitpur">Lalitpur</option>
+                        <option value="Bhaktapur">Bhaktapur</option>
+                    </select>
+                </div>
+                
+                <!-- Skills Filter -->
+                <div>
+                    <label for="skillsFilter" class="sr-only">Filter by Skills</label>
+                    <select id="skillsFilter" class="w-full px-4 py-2 border border-gray-300 rounded-whatsapp focus:outline-none focus:ring-2 focus:ring-whatsapp-primary focus:border-transparent">
+                        <option value="">All Skills</option>
+                        <option value="House Cleaning">House Cleaning</option>
+                        <option value="Cooking">Cooking</option>
+                        <option value="Child Care">Child Care</option>
+                        <option value="Elderly Care">Elderly Care</option>
+                        <option value="Laundry">Laundry</option>
+                        <option value="Pet Care">Pet Care</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Back Button (hidden by default) -->
+        <div id="backButton" class="mb-6 hidden">
+            <button onclick="showSearchResults()" class="text-whatsapp-primary hover:text-whatsapp-secondary transition-colors flex items-center">
+                <i class="fas fa-arrow-left mr-2"></i>
+                Back to Search Results
+            </button>
+        </div>
+
+        <!-- Search Results Section -->
+        <div id="searchResults">
+            <!-- Results Count -->
+            <div class="mb-6">
+                <p class="text-whatsapp-text-secondary" id="resultsCount">Loading profiles...</p>
+            </div>
+
+            <!-- Profiles Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="profilesGrid">
+                <!-- Loading State -->
+                <div class="col-span-full text-center py-8">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-whatsapp-primary mx-auto"></div>
+                    <p class="mt-4 text-whatsapp-text-secondary">Loading profiles...</p>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="mt-8 flex justify-center" id="pagination">
+                <!-- Pagination will be added dynamically -->
+            </div>
+        </div>
+
+        <!-- Full Profile View (hidden by default) -->
+        <div id="fullProfileView" class="hidden">
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <!-- Profile content will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Supabase client
+        const supabaseUrl = 'https://fdgqqxyyofjnkhswkwcq.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZkZ3FxeHl5b2Zqbmtoc3drd2NxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQwMjQyMTMsImV4cCI6MjA1OTYwMDIxM30.YyJLLu3r2a7Mh7ny0ie-YzzLfPh5PdrJJHnBFBxWqVE';
+        const { createClient } = supabase;
+        const supabaseClient = createClient(supabaseUrl, supabaseKey);
+
+        // State variables
+        let currentPage = 1;
+        const profilesPerPage = 9;
+        let totalProfiles = 0;
+        let allProfiles = [];
+
+        // DOM Elements
+        const searchInput = document.getElementById('searchInput');
+        const locationFilter = document.getElementById('locationFilter');
+        const skillsFilter = document.getElementById('skillsFilter');
+        const profilesGrid = document.getElementById('profilesGrid');
+        const resultsCount = document.getElementById('resultsCount');
+        const pagination = document.getElementById('pagination');
+        const searchResults = document.getElementById('searchResults');
+        const fullProfileView = document.getElementById('fullProfileView');
+        const backButton = document.getElementById('backButton');
+
+        // Load profiles
+        async function loadProfiles() {
+            try {
+                let query = supabaseClient
+                    .from('maid_profiles')
+                    .select('*', { count: 'exact' });
+
+                // Apply filters
+                const searchTerm = searchInput.value.toLowerCase();
+                const location = locationFilter.value;
+                const skill = skillsFilter.value;
+
+                if (searchTerm) {
+                    query = query.or(`full_name.ilike.%${searchTerm}%,skills.cs.{${searchTerm}},major_city.ilike.%${searchTerm}%`);
+                }
+
+                if (location) {
+                    query = query.eq('major_city', location);
+                }
+
+                if (skill) {
+                    query = query.contains('skills', [skill]);
+                }
+
+                // Get total count
+                const { count, error: countError } = await query;
+                if (countError) throw countError;
+                totalProfiles = count;
+
+                // Apply pagination
+                const from = (currentPage - 1) * profilesPerPage;
+                const to = from + profilesPerPage - 1;
+                query = query.range(from, to);
+
+                // Execute query
+                const { data: profiles, error } = await query;
+                if (error) throw error;
+
+                allProfiles = profiles;
+                displayProfiles(profiles);
+                updatePagination();
+                updateResultsCount();
+            } catch (error) {
+                console.error('Error loading profiles:', error);
+                profilesGrid.innerHTML = `
+                    <div class="col-span-full text-center py-8">
+                        <p class="text-red-500">Error loading profiles. Please try again later.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Display profiles
+        function displayProfiles(profiles) {
+            if (!profiles || profiles.length === 0) {
+                profilesGrid.innerHTML = `
+                    <div class="col-span-full text-center py-8">
+                        <p class="text-whatsapp-text-secondary">No profiles found matching your criteria.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            profilesGrid.innerHTML = profiles.map(profile => `
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                    <!-- Profile Header with Image -->
+                    <div class="relative h-72 bg-gradient-to-br from-whatsapp-primary/10 to-whatsapp-secondary/10">
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <i class="fas fa-user-circle text-whatsapp-primary/20 text-9xl"></i>
+                        </div>
+                        ${profile.profile_photo ? `
+                            <div class="absolute inset-0">
+                                <img src="${profile.profile_photo}" 
+                                     alt="${profile.full_name || 'Profile Photo'}"
+                                     class="w-full h-full object-cover object-center"
+                                     style="object-position: top center;"
+                                     onerror="this.onerror=null; this.style.display='none'; this.parentElement.previousElementSibling.style.display='flex';"
+                                     onload="this.parentElement.previousElementSibling.style.display='none';">
+                            </div>
+                        ` : ''}
+                        <!-- Location Badge -->
+                        <div class="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-sm text-whatsapp-text-primary shadow-sm">
+                            <i class="fas fa-map-marker-alt text-whatsapp-primary mr-1"></i>
+                            ${profile.major_city || 'Location not specified'}
+                        </div>
+                        <!-- Preferred Time Badge -->
+                        <div class="absolute bottom-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-sm text-whatsapp-text-primary shadow-sm">
+                            <i class="fas fa-clock text-whatsapp-primary mr-1"></i>
+                            ${profile.preferred_time || 'Flexible'}
+                        </div>
+                    </div>
+
+                    <!-- Profile Content -->
+                    <div class="p-6">
+                        <!-- Name and Key Info -->
+                        <div class="mb-4">
+                            <h3 class="text-xl font-semibold text-whatsapp-text-primary mb-2">${profile.full_name || 'Anonymous'}</h3>
+                            <div class="flex items-center justify-between text-sm">
+                                <div class="flex items-center text-whatsapp-text-primary">
+                                    <i class="fas fa-user text-whatsapp-primary mr-1"></i>
+                                    ${profile.age_group || 'Not specified'}
+                                </div>
+                                ${profile.education ? `
+                                    <div class="flex items-center text-whatsapp-text-primary">
+                                        <i class="fas fa-graduation-cap text-whatsapp-primary mr-1"></i>
+                                        ${profile.education}
+                                    </div>
+                                ` : ''}
+                                <div class="flex items-center text-whatsapp-text-primary">
+                                    <i class="fas fa-rupee-sign text-whatsapp-primary mr-1"></i>
+                                    ${profile.expected_salary || 'Negotiable'}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Key Skills -->
+                        <div class="mb-4">
+                            <div class="flex flex-wrap gap-2">
+                                ${profile.skills?.slice(0, 4).map(skill => `
+                                    <span class="bg-whatsapp-primary/10 text-whatsapp-primary px-3 py-1 rounded-full text-sm font-medium">
+                                        ${skill}
+                                    </span>
+                                `).join('') || 'No skills listed'}
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="pt-4 border-t border-whatsapp-light">
+                            <a href="find-maids.html" 
+                               class="w-full bg-whatsapp-primary text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-whatsapp-secondary transition-colors flex items-center justify-center">
+                                <span>View Full Profile</span>
+                                <i class="fas fa-arrow-right ml-2"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Update pagination
+        function updatePagination() {
+            const totalPages = Math.ceil(totalProfiles / profilesPerPage);
+            let paginationHTML = '';
+
+            if (totalPages > 1) {
+                paginationHTML = `
+                    <div class="flex space-x-2">
+                        <button onclick="changePage(${currentPage - 1})" 
+                                class="px-4 py-2 border border-gray-300 rounded-whatsapp ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-whatsapp-light'}"
+                                ${currentPage === 1 ? 'disabled' : ''}>
+                            Previous
+                        </button>
+                        <span class="px-4 py-2 text-whatsapp-text-secondary">
+                            Page ${currentPage} of ${totalPages}
+                        </span>
+                        <button onclick="changePage(${currentPage + 1})"
+                                class="px-4 py-2 border border-gray-300 rounded-whatsapp ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : 'hover:bg-whatsapp-light'}"
+                                ${currentPage === totalPages ? 'disabled' : ''}>
+                            Next
+                        </button>
+                    </div>
+                `;
+            }
+
+            pagination.innerHTML = paginationHTML;
+        }
+
+        // Update results count
+        function updateResultsCount() {
+            resultsCount.textContent = `Showing ${allProfiles.length} of ${totalProfiles} profiles`;
+        }
+
+        // Change page
+        function changePage(newPage) {
+            if (newPage < 1 || newPage > Math.ceil(totalProfiles / profilesPerPage)) return;
+            currentPage = newPage;
+            loadProfiles();
+        }
+
+        // Event listeners
+        searchInput.addEventListener('input', debounce(() => {
+            currentPage = 1;
+            loadProfiles();
+        }, 300));
+
+        locationFilter.addEventListener('change', () => {
+            currentPage = 1;
+            loadProfiles();
+        });
+
+        skillsFilter.addEventListener('change', () => {
+            currentPage = 1;
+            loadProfiles();
+        });
+
+        // Debounce function
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // Check for profile ID in URL on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const profileId = urlParams.get('id');
+            
+            if (profileId) {
+                showFullProfile(profileId);
+            } else {
+                loadProfiles();
+            }
+        });
+
+        // Show full profile view
+        async function showFullProfile(profileId) {
+            try {
+                // Check if user is authenticated
+                const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
+                
+                if (!user) {
+                    // Store the intended destination
+                    localStorage.setItem('redirectAfterAuth', `find-maids.html?id=${profileId}`);
+                    // Redirect to login page with employer role
+                    window.location.href = 'auth/login.html?role=employer';
+                    return;
+                }
+
+                // Get user profile to check role
+                const { data: profile, error: profileError } = await supabaseClient
+                    .from('profiles')
+                    .select('role')
+                    .eq('id', user.id)
+                    .single();
+
+                if (profileError || !profile) {
+                    // If no profile exists, redirect to registration with employer role
+                    window.location.href = 'auth/register.html?role=employer';
+                    return;
+                }
+
+                if (profile.role !== 'employer') {
+                    // If user is not an employer, redirect to login with employer role
+                    localStorage.setItem('redirectAfterAuth', `find-maids.html?id=${profileId}`);
+                    window.location.href = 'auth/login.html?role=employer';
+                    return;
+                }
+
+                // If user is authenticated as employer, proceed with showing profile
+                const { data: maidProfile, error } = await supabaseClient
+                    .from('maid_profiles')
+                    .select('*')
+                    .eq('id', profileId)
+                    .single();
+
+                if (error) throw error;
+
+                // Hide search results and show full profile
+                searchResults.classList.add('hidden');
+                fullProfileView.classList.remove('hidden');
+                backButton.classList.remove('hidden');
+
+                // Update URL without reloading
+                window.history.pushState({}, '', `find-maids.html?id=${profileId}`);
+
+                // Display full profile
+                fullProfileView.querySelector('.bg-white').innerHTML = `
+                    <!-- Profile Header -->
+                    <div class="relative h-96 bg-gradient-to-br from-whatsapp-primary/10 to-whatsapp-secondary/10">
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <i class="fas fa-user-circle text-whatsapp-primary/20 text-9xl"></i>
+                        </div>
+                        ${maidProfile.profile_photo ? `
+                            <div class="absolute inset-0">
+                                <img src="${maidProfile.profile_photo}" 
+                                     alt="${maidProfile.full_name || 'Profile Photo'}"
+                                     class="w-full h-full object-cover object-center"
+                                     style="object-position: top center;"
+                                     onerror="this.onerror=null; this.style.display='none'; this.parentElement.previousElementSibling.style.display='flex';"
+                                     onload="this.parentElement.previousElementSibling.style.display='none';">
+                            </div>
+                        ` : ''}
+                        <!-- Location Badge -->
+                        <div class="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-sm text-whatsapp-text-primary shadow-sm">
+                            <i class="fas fa-map-marker-alt text-whatsapp-primary mr-1"></i>
+                            ${maidProfile.major_city || 'Location not specified'}
+                        </div>
+                        <!-- Preferred Time Badge -->
+                        <div class="absolute bottom-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-sm text-whatsapp-text-primary shadow-sm">
+                            <i class="fas fa-clock text-whatsapp-primary mr-1"></i>
+                            ${maidProfile.preferred_time || 'Flexible'}
+                        </div>
+                    </div>
+
+                    <!-- Profile Content -->
+                    <div class="p-8">
+                        <!-- Name and Key Info -->
+                        <div class="mb-6">
+                            <h2 class="text-2xl font-semibold text-whatsapp-text-primary mb-4">${maidProfile.full_name || 'Anonymous'}</h2>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="flex items-center text-whatsapp-text-primary">
+                                    <i class="fas fa-user text-whatsapp-primary mr-2"></i>
+                                    <span>${maidProfile.age_group || 'Not specified'}</span>
+                                </div>
+                                ${maidProfile.education ? `
+                                    <div class="flex items-center text-whatsapp-text-primary">
+                                        <i class="fas fa-graduation-cap text-whatsapp-primary mr-2"></i>
+                                        <span>${maidProfile.education}</span>
+                                    </div>
+                                ` : ''}
+                                <div class="flex items-center text-whatsapp-text-primary">
+                                    <i class="fas fa-rupee-sign text-whatsapp-primary mr-2"></i>
+                                    <span>${maidProfile.expected_salary || 'Negotiable'}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Skills Section -->
+                        <div class="mb-6">
+                            <h3 class="text-lg font-semibold text-whatsapp-text-primary mb-3">Skills</h3>
+                            <div class="flex flex-wrap gap-2">
+                                ${maidProfile.skills?.map(skill => `
+                                    <span class="bg-whatsapp-primary/10 text-whatsapp-primary px-3 py-1 rounded-full text-sm font-medium">
+                                        ${skill}
+                                    </span>
+                                `).join('') || 'No skills listed'}
+                            </div>
+                        </div>
+
+                        <!-- Experience Section -->
+                        ${maidProfile.experience ? `
+                            <div class="mb-6">
+                                <h3 class="text-lg font-semibold text-whatsapp-text-primary mb-3">Experience</h3>
+                                <p class="text-whatsapp-text-secondary">${maidProfile.experience}</p>
+                            </div>
+                        ` : ''}
+
+                        <!-- Contact Section -->
+                        <div class="pt-6 border-t border-whatsapp-light">
+                            <button onclick="unlockContact('${maidProfile.id}')" 
+                                    class="w-full bg-whatsapp-primary text-white px-6 py-3 rounded-lg text-base font-medium hover:bg-whatsapp-secondary transition-colors flex items-center justify-center">
+                                <i class="fas fa-unlock-alt mr-2"></i>
+                                Unlock Contact Information
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Error loading profile:', error);
+                fullProfileView.querySelector('.bg-white').innerHTML = `
+                    <div class="p-8 text-center">
+                        <p class="text-red-500">Error loading profile. Please try again later.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Show search results
+        function showSearchResults() {
+            searchResults.classList.remove('hidden');
+            fullProfileView.classList.add('hidden');
+            backButton.classList.add('hidden');
+            window.history.pushState({}, '', 'find-maids.html');
+            loadProfiles();
+        }
+    </script>
+</body>
+</html> 

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="50" height="50" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#25D366;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#128C7E;stop-opacity:1" />
+        </linearGradient>
+    </defs>
+
+    <!-- Main Circle -->
+    <circle cx="25" cy="25" r="24" fill="url(#grad1)"/>
+    
+    <!-- Network S -->
+    <path d="M20 15C20 15 18 17 18 20C18 23 20 25 20 25C20 25 18 27 18 30C18 33 20 35 20 35" 
+          stroke="white" 
+          stroke-width="3" 
+          stroke-linecap="round"
+          fill="none"/>
+    
+    <!-- Network Elements -->
+    <circle cx="32" cy="20" r="3" stroke="white" stroke-width="2" fill="none"/>
+    <circle cx="32" cy="30" r="3" stroke="white" stroke-width="2" fill="none"/>
+    <path d="M32 20L32 30" stroke="white" stroke-width="2" stroke-linecap="round"/>
+    <path d="M25 25L32 20" stroke="white" stroke-width="2" stroke-linecap="round"/>
+    <path d="M25 25L32 30" stroke="white" stroke-width="2" stroke-linecap="round"/>
+</svg> 

@@ -3,1316 +3,469 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${BRAND_CONFIG.SHORT_NAME} - Find Reliable Domestic Help</title>
-    <!-- Load Google Fonts first -->
+    <title>City Maid Services - Find Reliable Domestic Help</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Then load other resources -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <!-- Add Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- Load Brand Configuration -->
     <script src="config.js"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     fontFamily: {
-                        sans: ['Poppins', 'sans-serif'],
-                        poppins: ['Poppins', 'sans-serif'],
+                        sans: ['Helvetica Neue', 'Segoe UI', 'Inter', 'sans-serif'],
                     },
-                    
                     colors: {
-                        brand: {
-                            primary: '#4F46E5',
-                            secondary: '#4338CA',
-                            light: '#EEF2FF',
+                        whatsapp: {
+                            primary: '#25D366',    // WhatsApp Green
+                            secondary: '#128C7E',  // WhatsApp Teal
+                            dark: '#075E54',       // WhatsApp Dark Green
+                            light: '#F0F2F5',      // WhatsApp Background
+                            text: {
+                                primary: '#111B21',   // WhatsApp Dark Text
+                                secondary: '#667781', // WhatsApp Secondary Text
+                                light: '#FFFFFF',     // White text
+                            }
                         }
+                    },
+                    boxShadow: {
+                        'whatsapp': '0 1px 3px rgba(0, 0, 0, 0.1)',
+                        'whatsapp-hover': '0 2px 4px rgba(0, 0, 0, 0.15)',
+                    },
+                    borderRadius: {
+                        'whatsapp': '8px',
                     }
                 }
             }
         }
     </script>
-    <style type="text/tailwindcss">
-        @layer base {
-            html {
-                font-family: 'Poppins', sans-serif;
-            }
-        }
-        
-        @layer utilities {
-            .profile-image {
-                @apply aspect-[3/4] object-cover object-[center_15%];
-            }
-            
-            .card-shadow {
-                @apply shadow-[0_1px_3px_0_rgba(0,0,0,0.1),0_1px_2px_-1px_rgba(0,0,0,0.1)] transition-all duration-200;
-            }
-            
-            .card-shadow:hover {
-                @apply shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-2px_rgba(0,0,0,0.1)] -translate-y-0.5;
-            }
-
-            .section-title {
-                @apply relative inline-block pb-4;
-            }
-
-            .section-title::after {
-                content: '';
-                @apply absolute bottom-0 left-1/2 -translate-x-1/2 w-20 h-[3px] bg-gradient-to-r from-brand-primary to-brand-secondary rounded-sm;
-            }
-
-            .badge {
-                @apply bg-gradient-to-r from-brand-primary to-brand-secondary px-4 py-2 rounded-full text-white font-medium text-sm leading-5;
-            }
-
-            .truncate-2 {
-                display: -webkit-box;
-                -webkit-line-clamp: 2;
-                -webkit-box-orient: vertical;
-                @apply overflow-hidden;
-            }
-
-            .nav-link {
-                @apply text-gray-700 hover:text-brand-primary font-medium transition-colors;
-            }
-
-            .nav-link.active {
-                @apply text-brand-primary font-semibold;
-            }
-        }
-    </style>
-    <script>
-        // Update brand names after DOM loads
-        document.addEventListener('DOMContentLoaded', function() {
-            // Update page title
-            document.title = `${BRAND_CONFIG.SHORT_NAME} - Find Reliable Domestic Help`;
-
-            // Update header logo
-            const headerLogo = document.querySelector('.flex.items-center a');
-            if (headerLogo) {
-                headerLogo.innerHTML = BRAND_CONFIG.SHORT_NAME;
-            }
-
-            // Update any other brand references
-            const brandReferences = document.querySelectorAll('.text-brand-primary');
-            brandReferences.forEach(element => {
-                if (element.textContent.includes('City Maid Services')) {
-                    element.textContent = BRAND_CONFIG.SHORT_NAME;
-                }
-            });
-
-            // Check if user has selected a role in localStorage
-            checkUserRole();
-        });
-
-        // Function to check if user has a role stored
-        function checkUserRole() {
-            const userRole = localStorage.getItem('userRole');
-            
-            // If a role is stored, update the navigation and content visibility
-            if (userRole) {
-                updateUIForRole(userRole);
-            }
-        }
-
-        // Function to save the user role and redirect
-        function selectUserRole(role) {
-            // Save role to localStorage
-            localStorage.setItem('userRole', role);
-            
-            // Redirect to login page with the role as a parameter
-            window.location.href = `auth/login.html?type=${role}`;
-        }
-
-        // Function to update UI based on selected role
-        function updateUIForRole(role) {
-            // Get navigation links
-            const findMaidsLink = document.querySelector('a[href="jobs/find-maids.html"]');
-            const findJobsLink = document.querySelector('a[href="jobs/find-jobs.html"]');
-            
-            // Also update mobile navigation
-            const mobileFindMaidsLink = document.querySelector('a.block[href="jobs/find-maids.html"]');
-            const mobileFindJobsLink = document.querySelector('a.block[href="jobs/find-jobs.html"]');
-            
-            // Hide inappropriate links based on role
-            if (role === 'employer') {
-                // Employers should see Find Maids and not Find Jobs
-                if (findJobsLink) findJobsLink.classList.add('hidden');
-                if (mobileFindJobsLink) mobileFindJobsLink.classList.add('hidden');
-                
-                // Show employer-appropriate links
-                if (findMaidsLink) {
-                    findMaidsLink.classList.remove('hidden');
-                    findMaidsLink.classList.add('font-bold', 'text-brand-primary');
-                }
-                if (mobileFindMaidsLink) {
-                    mobileFindMaidsLink.classList.remove('hidden');
-                    mobileFindMaidsLink.classList.add('font-bold', 'text-brand-primary');
-                }
-            } else if (role === 'maid') {
-                // Maids should see Find Jobs and not Find Maids
-                if (findMaidsLink) findMaidsLink.classList.add('hidden');
-                if (mobileFindMaidsLink) mobileFindMaidsLink.classList.add('hidden');
-                
-                // Show maid-appropriate links
-                if (findJobsLink) {
-                    findJobsLink.classList.remove('hidden');
-                    findJobsLink.classList.add('font-bold', 'text-brand-primary');
-                }
-                if (mobileFindJobsLink) {
-                    mobileFindJobsLink.classList.remove('hidden');
-                    mobileFindJobsLink.classList.add('font-bold', 'text-brand-primary');
-                }
-            }
-            
-            // Also update featured sections based on role
-            const featuredMaidsSection = document.querySelector('section:has(#featuredMaids)');
-            const latestJobsSection = document.querySelector('section:has(#latestJobsContainer)');
-            
-            if (featuredMaidsSection && latestJobsSection) {
-                if (role === 'employer') {
-                    // Employers see featured maids but not jobs
-                    featuredMaidsSection.classList.remove('hidden');
-                    latestJobsSection.classList.add('hidden');
-                } else if (role === 'maid') {
-                    // Maids see latest jobs but not featured maids
-                    featuredMaidsSection.classList.add('hidden');
-                    latestJobsSection.classList.remove('hidden');
-                }
-            }
-        }
-
-        // Function to sign out
-        async function signOut() {
-            try {
-                const { error } = await supabaseClient.auth.signOut();
-                if (error) throw error;
-                window.location.href = 'index.html';
-            } catch (error) {
-                console.error('Error signing out:', error);
-                showError('Error signing out. Please try again.');
-            }
-        }
-        
-        // Add event listener for sign out button
-        const signOutBtn = document.getElementById('signOutBtn');
-        if (signOutBtn) {
-            signOutBtn.addEventListener('click', signOut);
-        }
-    </script>
 </head>
-<body class="font-poppins" data-current-page="home">
+<body class="font-sans bg-whatsapp-light text-whatsapp-text-primary">
     <!-- Navigation Bar -->
-    <nav class="bg-white shadow-lg sticky top-0 z-50">
+    <nav class="bg-white shadow-whatsapp sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-20">
+            <div class="flex justify-between h-16">
                 <div class="flex items-center">
-                    <a href="index.html" class="text-3xl font-bold text-brand-primary tracking-tight">City<span class="text-brand-secondary"> Maid</span></a>
+                    <a href="index.html" class="text-2xl font-semibold text-whatsapp-primary">CITYMAID</a>
                 </div>
-                <!-- Mobile menu button -->
-                <div class="flex items-center md:hidden">
-                    <button id="mobileMenuBtn" class="text-gray-700 hover:text-brand-primary focus:outline-none" aria-label="Open menu">
-                        <i class="fas fa-bars text-2xl"></i>
-                    </button>
-                </div>
-                <!-- Desktop menu -->
-                <div class="hidden md:flex items-center space-x-6">
-                    <a href="index.html" class="nav-link active" data-page="home">Home</a>
-                </div>
-            </div>
-        </div>
-        <!-- Mobile menu panel -->
-        <div id="mobileMenu" class="hidden md:hidden fixed inset-0 bg-black bg-opacity-50 z-50">
-            <div class="fixed inset-y-0 right-0 max-w-xs w-full bg-white shadow-xl">
-                <div class="flex items-center justify-between p-4 border-b">
-                    <div class="flex items-center space-x-4">
-                        <button onclick="window.history.back()" class="text-gray-500 hover:text-gray-700" aria-label="Go back">
-                            <i class="fas fa-arrow-left text-xl"></i>
-                        </button>
-                        <a href="../index.html" class="text-gray-500 hover:text-gray-700" aria-label="Go to homepage">
-                            <i class="fas fa-home text-xl"></i>
-                        </a>
-                    </div>
-                    <h2 class="text-xl font-semibold text-gray-900">Menu</h2>
-                    <button id="closeMobileMenu" class="text-gray-500 hover:text-gray-700" aria-label="Close menu">
-                        <i class="fas fa-times text-2xl"></i>
-                    </button>
-                </div>
-                <div class="p-4 space-y-4">
-                    <a href="index.html" class="block nav-link active" data-page="home">Home</a>
-                    <div class="pt-4 border-t border-gray-200">
-                        <p class="text-gray-700 font-medium mb-2">I want to:</p>
-                        <a href="#" onclick="selectUserRole('employer')" class="block text-gray-700 hover:text-brand-primary font-medium transition-colors mb-2">
-                            <i class="fas fa-user-tie mr-2"></i> Hire a Maid
-                        </a>
-                        <a href="#" onclick="selectUserRole('maid')" class="block text-gray-700 hover:text-brand-primary font-medium transition-colors mb-2">
-                            <i class="fas fa-broom mr-2"></i> Find Work as a Maid
-                        </a>
-                    </div>
+                <div class="flex items-center space-x-4">
+                    <a href="index.html" class="text-whatsapp-text-primary hover:text-whatsapp-primary transition-colors">
+                        <i class="fas fa-home mr-1"></i> Home
+                    </a>
+                    <a href="find-maids.html" class="text-whatsapp-text-primary hover:text-whatsapp-primary transition-colors">
+                        <i class="fas fa-search mr-1"></i> Find Maids
+                    </a>
+                    <a href="maid/create-profile.html" class="text-whatsapp-text-primary hover:text-whatsapp-primary transition-colors">
+                        <i class="fas fa-user-plus mr-1"></i> Create Profile
+                    </a>
+                    <a href="auth/login.html" class="bg-whatsapp-primary text-white px-4 py-2 rounded-whatsapp text-sm font-medium hover:bg-whatsapp-secondary transition-colors">
+                        <i class="fas fa-sign-in-alt mr-1"></i> Login
+                    </a>
                 </div>
             </div>
         </div>
     </nav>
 
-    <!-- Hero Section with Role Selection -->
-    <div class="bg-gradient-to-r from-brand-primary to-brand-secondary">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-            <div class="max-w-3xl mx-auto text-center">
-                <h1 class="text-4xl md:text-5xl font-bold mb-6 text-white">Find Your Perfect Match</h1>
-                <p class="text-xl mb-10 text-white/90">Connect with trusted domestic help or find the perfect job opportunity</p>
-                
-                <!-- Role Selection Cards -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
-                    <!-- Employer Card -->
-                    <div class="bg-white rounded-xl overflow-hidden shadow-xl transform transition-all duration-300 hover:-translate-y-2">
-                        <div class="p-8">
-                            <div class="w-20 h-20 rounded-full bg-brand-light mx-auto mb-6 flex items-center justify-center">
-                                <i class="fas fa-user-tie text-3xl text-brand-primary"></i>
-                            </div>
-                            <h3 class="text-2xl font-bold text-gray-900 mb-4">I'm Looking to Hire</h3>
-                            <p class="text-gray-600 mb-6">Find reliable and skilled domestic help for your home or workplace</p>
-                            <ul class="text-left mb-8 space-y-2">
-                                <li class="flex items-start">
-                                    <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
-                                    <span>Browse verified maid profiles</span>
-                                </li>
-                                <li class="flex items-start">
-                                    <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
-                                    <span>Pay to unlock contact details</span>
-                                </li>
-                                <li class="flex items-start">
-                                    <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
-                                    <span>Connect directly with maids</span>
-                                </li>
-                            </ul>
-                            <button onclick="selectUserRole('employer')" class="block w-full bg-brand-primary text-white py-3 px-6 rounded-lg hover:bg-brand-secondary transition-colors text-center font-semibold">
-                                I'm an Employer
-                        </button>
-                        </div>
-                    </div>
-
-                    <!-- Maid Card -->
-                    <div class="bg-white rounded-xl overflow-hidden shadow-xl transform transition-all duration-300 hover:-translate-y-2">
-                        <div class="p-8">
-                            <div class="w-20 h-20 rounded-full bg-brand-light mx-auto mb-6 flex items-center justify-center">
-                                <i class="fas fa-broom text-3xl text-brand-primary"></i>
-                            </div>
-                            <h3 class="text-2xl font-bold text-gray-900 mb-4">I'm Looking for Work</h3>
-                            <p class="text-gray-600 mb-6">Find employment opportunities as a domestic helper</p>
-                            <ul class="text-left mb-8 space-y-2">
-                                <li class="flex items-start">
-                                    <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
-                                    <span>Create your professional profile</span>
-                                </li>
-                                <li class="flex items-start">
-                                    <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
-                                    <span>Browse available job opportunities</span>
-                                </li>
-                                <li class="flex items-start">
-                                    <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
-                                    <span>Pay to unlock employer contacts</span>
-                                </li>
-                            </ul>
-                            <button onclick="selectUserRole('maid')" class="block w-full bg-brand-primary text-white py-3 px-6 rounded-lg hover:bg-brand-secondary transition-colors text-center font-semibold">
-                                I'm a Maid
-                            </button>
-                        </div>
-                    </div>
+    <!-- Hero Section -->
+    <div class="bg-gradient-to-r from-whatsapp-primary to-whatsapp-secondary">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+            <div class="text-center">
+                <h1 class="text-4xl md:text-5xl font-semibold text-white mb-4">Find Reliable Domestic Help</h1>
+                <p class="text-lg text-white/90 mb-8">Connect with professional maids and housekeepers in your area</p>
+                <div class="flex justify-center space-x-4">
+                    <a href="#find-maid" class="bg-white text-whatsapp-primary px-6 py-3 rounded-whatsapp text-base font-medium hover:bg-whatsapp-light transition-colors">Find a Maid</a>
+                    <a href="maid/create-profile.html" class="bg-whatsapp-dark text-white px-6 py-3 rounded-whatsapp text-base font-medium hover:bg-opacity-90 transition-colors">Work as a Maid</a>
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- Skills Categories Section -->
+    <div class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-semibold text-whatsapp-text-primary mb-4">Find Maids by Skills</h2>
+                <p class="text-whatsapp-text-secondary">Browse maids based on their expertise and experience</p>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <!-- House Cleaning -->
+                <a href="#browse-profiles?skill=house-cleaning" class="group">
+                    <div class="bg-whatsapp-light rounded-whatsapp p-6 text-center hover:shadow-whatsapp-hover transition-all duration-200">
+                        <div class="w-16 h-16 bg-whatsapp-primary rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-whatsapp-secondary transition-colors">
+                            <i class="fas fa-broom text-white text-2xl"></i>
                         </div>
+                        <h3 class="text-lg font-semibold text-whatsapp-text-primary mb-2">House Cleaning</h3>
+                        <p class="text-whatsapp-text-secondary text-sm">Regular and deep cleaning services</p>
+                    </div>
+                </a>
+
+                <!-- Cooking -->
+                <a href="#browse-profiles?skill=cooking" class="group">
+                    <div class="bg-whatsapp-light rounded-whatsapp p-6 text-center hover:shadow-whatsapp-hover transition-all duration-200">
+                        <div class="w-16 h-16 bg-whatsapp-primary rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-whatsapp-secondary transition-colors">
+                            <i class="fas fa-utensils text-white text-2xl"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-whatsapp-text-primary mb-2">Cooking</h3>
+                        <p class="text-whatsapp-text-secondary text-sm">Home-cooked meals and meal prep</p>
+                    </div>
+                </a>
+
+                <!-- Child Care -->
+                <a href="#browse-profiles?skill=child-care" class="group">
+                    <div class="bg-whatsapp-light rounded-whatsapp p-6 text-center hover:shadow-whatsapp-hover transition-all duration-200">
+                        <div class="w-16 h-16 bg-whatsapp-primary rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-whatsapp-secondary transition-colors">
+                            <i class="fas fa-baby text-white text-2xl"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-whatsapp-text-primary mb-2">Child Care</h3>
+                        <p class="text-whatsapp-text-secondary text-sm">Professional child care services</p>
+                    </div>
+                </a>
+
+                <!-- Elderly Care -->
+                <a href="#browse-profiles?skill=elderly-care" class="group">
+                    <div class="bg-whatsapp-light rounded-whatsapp p-6 text-center hover:shadow-whatsapp-hover transition-all duration-200">
+                        <div class="w-16 h-16 bg-whatsapp-primary rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-whatsapp-secondary transition-colors">
+                            <i class="fas fa-user-nurse text-white text-2xl"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-whatsapp-text-primary mb-2">Elderly Care</h3>
+                        <p class="text-whatsapp-text-secondary text-sm">Compassionate elderly care</p>
+                    </div>
+                </a>
+
+                <!-- Laundry -->
+                <a href="#browse-profiles?skill=laundry" class="group">
+                    <div class="bg-whatsapp-light rounded-whatsapp p-6 text-center hover:shadow-whatsapp-hover transition-all duration-200">
+                        <div class="w-16 h-16 bg-whatsapp-primary rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-whatsapp-secondary transition-colors">
+                            <i class="fas fa-tshirt text-white text-2xl"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-whatsapp-text-primary mb-2">Laundry</h3>
+                        <p class="text-whatsapp-text-secondary text-sm">Washing, ironing, and folding</p>
+                    </div>
+                </a>
+
+                <!-- Pet Care -->
+                <a href="#browse-profiles?skill=pet-care" class="group">
+                    <div class="bg-whatsapp-light rounded-whatsapp p-6 text-center hover:shadow-whatsapp-hover transition-all duration-200">
+                        <div class="w-16 h-16 bg-whatsapp-primary rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-whatsapp-secondary transition-colors">
+                            <i class="fas fa-paw text-white text-2xl"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-whatsapp-text-primary mb-2">Pet Care</h3>
+                        <p class="text-whatsapp-text-secondary text-sm">Pet sitting and care services</p>
+                    </div>
+                </a>
+
+                <!-- Gardening -->
+                <a href="#browse-profiles?skill=gardening" class="group">
+                    <div class="bg-whatsapp-light rounded-whatsapp p-6 text-center hover:shadow-whatsapp-hover transition-all duration-200">
+                        <div class="w-16 h-16 bg-whatsapp-primary rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-whatsapp-secondary transition-colors">
+                            <i class="fas fa-leaf text-white text-2xl"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-whatsapp-text-primary mb-2">Gardening</h3>
+                        <p class="text-whatsapp-text-secondary text-sm">Plant care and maintenance</p>
+                    </div>
+                </a>
+
+                <!-- All Skills -->
+                <a href="#browse-profiles" class="group">
+                    <div class="bg-whatsapp-light rounded-whatsapp p-6 text-center hover:shadow-whatsapp-hover transition-all duration-200">
+                        <div class="w-16 h-16 bg-whatsapp-primary rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-whatsapp-secondary transition-colors">
+                            <i class="fas fa-th-large text-white text-2xl"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-whatsapp-text-primary mb-2">All Skills</h3>
+                        <p class="text-whatsapp-text-secondary text-sm">View all available skills</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Featured Maid Profiles Section -->
+    <div class="py-20 bg-gradient-to-b from-white to-whatsapp-light">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-semibold text-whatsapp-text-primary mb-4">Featured Maid Profiles</h2>
+                <p class="text-whatsapp-text-secondary">Find reliable and professional domestic helpers</p>
+            </div>
+
+            <!-- Profile Categories -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                <a href="maid/create-profile.html" class="bg-whatsapp-light p-6 rounded-whatsapp shadow-whatsapp hover:shadow-whatsapp-hover transition-all duration-200">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 bg-whatsapp-primary rounded-full flex items-center justify-center">
+                            <i class="fas fa-user-plus text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-whatsapp-text-primary">Create Profile</h3>
+                            <p class="text-whatsapp-text-secondary">Start your journey as a professional maid</p>
+                        </div>
+                    </div>
+                </a>
+                <a href="find-maids.html" class="bg-whatsapp-light p-6 rounded-whatsapp shadow-whatsapp hover:shadow-whatsapp-hover transition-all duration-200">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 bg-whatsapp-primary rounded-full flex items-center justify-center">
+                            <i class="fas fa-user-circle text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-whatsapp-text-primary">View Profile</h3>
+                            <p class="text-whatsapp-text-secondary">Check your existing profile</p>
+                        </div>
+                    </div>
+                </a>
+                <a href="#browse-profiles" class="bg-whatsapp-light p-6 rounded-whatsapp shadow-whatsapp hover:shadow-whatsapp-hover transition-all duration-200">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 bg-whatsapp-primary rounded-full flex items-center justify-center">
+                            <i class="fas fa-search text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-whatsapp-text-primary">Browse Profiles</h3>
+                            <p class="text-whatsapp-text-secondary">Find the perfect maid for your needs</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Featured Profiles Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="featuredProfiles">
+                <!-- Profile cards will be dynamically loaded here -->
+                <div class="text-center py-8">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-whatsapp-primary mx-auto"></div>
+                    <p class="mt-4 text-whatsapp-text-secondary">Loading profiles...</p>
+                </div>
+            </div>
+
+            <!-- Login Prompt Modal -->
+            <div id="loginPromptModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+                <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+                    <div class="text-center mb-6">
+                        <h3 class="text-xl font-semibold text-whatsapp-text-primary mb-2">Sign in to View Full Profiles</h3>
+                        <p class="text-whatsapp-text-secondary">Create an account or sign in to view complete maid profiles and contact information.</p>
+                    </div>
+                    <div class="space-y-4">
+                        <a href="auth/login.html" class="block w-full bg-whatsapp-primary text-white text-center py-3 rounded-lg hover:bg-whatsapp-secondary transition-colors">
+                            Sign In
+                        </a>
+                        <a href="auth/register.html" class="block w-full bg-white text-whatsapp-primary border border-whatsapp-primary text-center py-3 rounded-lg hover:bg-whatsapp-light transition-colors">
+                            Create Account
+                        </a>
+                    </div>
+                    <button onclick="closeLoginPrompt()" class="mt-4 text-whatsapp-text-secondary hover:text-whatsapp-text-primary w-full">
+                        Continue Browsing
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- How It Works Section -->
-    <section class="py-16 bg-white">
+    <div id="how-it-works" class="py-20 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-12">
-                <h2 class="section-title text-3xl font-bold text-gray-900">
-                    How It Works
-                </h2>
-                <p class="mt-6 text-lg text-gray-600">
-                    Our simple process connects domestic help with employers
-                </p>
-                        </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
-                <!-- For Employers -->
-                <div class="bg-gray-50 rounded-xl p-8">
-                    <h3 class="text-2xl font-bold text-brand-primary mb-6 text-center">For Employers</h3>
-                    <div class="space-y-8">
-                        <div class="flex items-start">
-                            <div class="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full bg-brand-primary text-white font-bold mr-4">
-                                1
-                            </div>
-                            <div>
-                                <h4 class="text-lg font-semibold text-gray-900 mb-1">Browse Profiles</h4>
-                                <p class="text-gray-600">Search through verified maid profiles that match your requirements</p>
-                            </div>
-                        </div>
-                        <div class="flex items-start">
-                            <div class="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full bg-brand-primary text-white font-bold mr-4">
-                                2
-                            </div>
-                            <div>
-                                <h4 class="text-lg font-semibold text-gray-900 mb-1">Unlock Contact</h4>
-                                <p class="text-gray-600">Pay a small fee through Khalti to unlock maid contact information</p>
-                            </div>
-                        </div>
-                        <div class="flex items-start">
-                            <div class="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full bg-brand-primary text-white font-bold mr-4">
-                                3
-                            </div>
-                            <div>
-                                <h4 class="text-lg font-semibold text-gray-900 mb-1">Connect Directly</h4>
-                                <p class="text-gray-600">Contact maids directly to discuss job details and arrange interviews</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- For Maids -->
-                <div class="bg-gray-50 rounded-xl p-8">
-                    <h3 class="text-2xl font-bold text-brand-primary mb-6 text-center">For Maids</h3>
-                    <div class="space-y-8">
-                        <div class="flex items-start">
-                            <div class="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full bg-brand-primary text-white font-bold mr-4">
-                                1
-                </div>
-                            <div>
-                                <h4 class="text-lg font-semibold text-gray-900 mb-1">Create Profile</h4>
-                                <p class="text-gray-600">Build your professional profile showcasing your skills and experience</p>
-            </div>
-        </div>
-                        <div class="flex items-start">
-                            <div class="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full bg-brand-primary text-white font-bold mr-4">
-                                2
-    </div>
-                            <div>
-                                <h4 class="text-lg font-semibold text-gray-900 mb-1">Browse Jobs</h4>
-                                <p class="text-gray-600">Find job opportunities that match your skills and preferences</p>
-                            </div>
-                        </div>
-                        <div class="flex items-start">
-                            <div class="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full bg-brand-primary text-white font-bold mr-4">
-                                3
-                            </div>
-                            <div>
-                                <h4 class="text-lg font-semibold text-gray-900 mb-1">Unlock Contact</h4>
-                                <p class="text-gray-600">Pay a small fee through Khalti to unlock employer contact information</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Payment System Section -->
-    <section class="py-16 bg-brand-light">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-12">
-                <h2 class="section-title text-3xl font-bold text-gray-900">
-                    Secure Contact Unlock System
-                </h2>
-                <p class="mt-6 text-lg text-gray-600">
-                    Our contact unlock system protects both parties and ensures quality connections
-                </p>
-            </div>
-            <div class="bg-white rounded-xl shadow-lg p-8">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <div class="text-center">
-                        <div class="w-16 h-16 bg-brand-light rounded-full flex items-center justify-center mx-auto mb-4">
-                            <i class="fas fa-lock-open text-2xl text-brand-primary"></i>
-                        </div>
-                        <h3 class="text-xl font-semibold text-gray-900 mb-2">Unlock Contacts</h3>
-                        <p class="text-gray-600">Pay a small fee to unlock contact information and connect directly</p>
-                    </div>
-                    <div class="text-center">
-                        <div class="w-16 h-16 bg-brand-light rounded-full flex items-center justify-center mx-auto mb-4">
-                            <i class="fas fa-shield-alt text-2xl text-brand-primary"></i>
-                        </div>
-                        <h3 class="text-xl font-semibold text-gray-900 mb-2">Secure Payments</h3>
-                        <p class="text-gray-600">All payments are processed securely through Khalti payment gateway</p>
-                    </div>
-                    <div class="text-center">
-                        <div class="w-16 h-16 bg-brand-light rounded-full flex items-center justify-center mx-auto mb-4">
-                            <i class="fas fa-history text-2xl text-brand-primary"></i>
-                        </div>
-                        <h3 class="text-xl font-semibold text-gray-900 mb-2">Permanent Access</h3>
-                        <p class="text-gray-600">Once unlocked, you'll always have access to the contact information</p>
-                    </div>
-                </div>
-                <div class="mt-8 text-center">
-                    <a href="auth/register.html" class="inline-flex items-center justify-center bg-brand-primary text-white px-8 py-3 rounded-lg hover:bg-brand-secondary transform hover:-translate-y-1 transition-all duration-300">
-                        Get Started Today
-                    </a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Featured Domestic Helpers Section -->
-    <section class="py-12 bg-gray-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-12">
-                <h2 class="section-title text-3xl font-bold text-gray-900">Featured Domestic Helpers</h2>
-                <p class="mt-6 text-lg text-gray-700">
-                    Browse profiles of trusted maids and unlock contacts to hire directly
-                </p>
-            </div>
-            <div id="featuredMaids" class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <!-- Maid cards will be inserted here -->
-            </div>
-            <div class="text-center mt-8">
-                <button onclick="selectUserRole('employer')" 
-                   class="inline-flex items-center justify-center bg-brand-primary text-white px-8 py-3 rounded-lg hover:bg-brand-secondary transform hover:-translate-y-1 transition-all duration-300">
-                    <span>Register as Employer <i class="fas fa-arrow-right ml-2"></i></span>
-                </button>
-            </div>
-        </div>
-    </section>
-
-    <!-- Latest Jobs Section -->
-    <section class="py-16 bg-brand-light">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-12">
-                <h2 class="section-title text-3xl font-bold text-gray-900">
-                    Latest Job Openings
-                </h2>
-                <p class="mt-6 text-lg text-gray-600">
-                    Find and unlock contact details for your perfect job opportunity
-                </p>
-            </div>
-            <div id="latestJobsContainer" class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <!-- Jobs will be loaded here dynamically -->
-            </div>
-            <div class="text-center mt-8">
-                <button onclick="selectUserRole('maid')" class="inline-flex items-center justify-center bg-brand-primary text-white px-8 py-3 rounded-lg hover:bg-brand-secondary transform hover:-translate-y-1 transition-all duration-300">
-                    <span>Register as Maid <i class="fas fa-arrow-right ml-2"></i></span>
-                </button>
-            </div>
-        </div>
-    </section>
-
-    <!-- Features Section -->
-    <section class="py-16 bg-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-12">
-                <h2 class="section-title text-3xl font-bold text-gray-900">
-                    Why Choose City Maid Services
-                </h2>
-                <p class="mt-6 text-lg text-gray-600">
-                    We provide a secure platform for direct connections between maids and employers
-                </p>
-            </div>
+            <h2 class="text-3xl font-semibold text-center mb-12">How It Works</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="text-center p-6">
-                    <div class="w-16 h-16 bg-brand-light rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-user-check text-2xl text-brand-primary"></i>
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-whatsapp-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-search text-white text-2xl"></i>
                     </div>
-                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Verified Profiles</h3>
-                    <p class="text-gray-600">All domestic helpers are thoroughly vetted for your safety and peace of mind</p>
+                    <h3 class="text-xl font-semibold mb-2">Search</h3>
+                    <p class="text-whatsapp-text-secondary">Browse through verified maid profiles in your area</p>
                 </div>
-                <div class="text-center p-6">
-                    <div class="w-16 h-16 bg-brand-light rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-handshake text-2xl text-brand-primary"></i>
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-whatsapp-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-comments text-white text-2xl"></i>
                     </div>
-                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Direct Connections</h3>
-                    <p class="text-gray-600">Connect directly with maids or employers without intermediaries</p>
+                    <h3 class="text-xl font-semibold mb-2">Connect</h3>
+                    <p class="text-whatsapp-text-secondary">Contact maids directly through WhatsApp</p>
                 </div>
-                <div class="text-center p-6">
-                    <div class="w-16 h-16 bg-brand-light rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-shield-alt text-2xl text-brand-primary"></i>
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-whatsapp-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-check-circle text-white text-2xl"></i>
                     </div>
-                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Secure Payments</h3>
-                    <p class="text-gray-600">All contact unlock payments are processed securely through Khalti</p>
+                    <h3 class="text-xl font-semibold mb-2">Hire</h3>
+                    <p class="text-whatsapp-text-secondary">Interview and hire the perfect maid for your needs</p>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
 
     <!-- Testimonials Section -->
-    <section class="py-16 bg-gray-50">
+    <div id="testimonials" class="py-20 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-12">
-                <h2 class="section-title text-3xl font-bold text-gray-900">
-                    Success Stories
-                </h2>
-                <p class="mt-6 text-lg text-gray-600">
-                    See how our platform has helped connect employers and maids
-                </p>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <!-- Employer Testimonial -->
-                <div class="bg-white p-8 rounded-xl shadow-md">
-                    <div class="flex items-center mb-6">
-                        <div class="w-16 h-16 rounded-full bg-gray-200 mr-4 flex-shrink-0">
-                            <img src="https://via.placeholder.com/64" alt="Employer" class="w-full h-full rounded-full object-cover">
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-semibold text-gray-900">Ramesh Sharma</h3>
-                            <p class="text-gray-500">Employer</p>
+            <h2 class="text-3xl font-semibold text-center mb-12">What Our Users Say</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-whatsapp shadow-whatsapp">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-whatsapp-primary rounded-full flex items-center justify-center text-white font-semibold">S</div>
+                        <div class="ml-4">
+                            <h3 class="font-semibold">Sarah Johnson</h3>
+                            <p class="text-whatsapp-text-secondary">Homeowner</p>
                         </div>
                     </div>
-                    <p class="text-gray-700 mb-4">"I found the perfect maid for our home within days. The direct contact feature made it easy to discuss our requirements and schedule interviews without any middlemen. Highly recommended!"</p>
-                    <div class="flex text-yellow-400">
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                    </div>
+                    <p class="text-whatsapp-text-primary">"Found an amazing maid through CityMaid. The verification process gave me peace of mind, and the direct WhatsApp contact made communication easy."</p>
                 </div>
-                
-                <!-- Maid Testimonial -->
-                <div class="bg-white p-8 rounded-xl shadow-md">
-                    <div class="flex items-center mb-6">
-                        <div class="w-16 h-16 rounded-full bg-gray-200 mr-4 flex-shrink-0">
-                            <img src="https://via.placeholder.com/64" alt="Maid" class="w-full h-full rounded-full object-cover">
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-semibold text-gray-900">Sunita Tamang</h3>
-                            <p class="text-gray-500">Domestic Helper</p>
+                <div class="bg-white p-6 rounded-whatsapp shadow-whatsapp">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-whatsapp-primary rounded-full flex items-center justify-center text-white font-semibold">M</div>
+                        <div class="ml-4">
+                            <h3 class="font-semibold">Maria Garcia</h3>
+                            <p class="text-whatsapp-text-secondary">Professional Maid</p>
                         </div>
                     </div>
-                    <p class="text-gray-700 mb-4">"After creating my profile, I received multiple job opportunities. The unlock contact feature helped me connect directly with employers and negotiate fair terms. I found a great job with a good family!"</p>
-                    <div class="flex text-yellow-400">
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star-half-alt"></i>
+                    <p class="text-whatsapp-text-primary">"CityMaid helped me find regular clients in my area. The profile system is professional and easy to use."</p>
+                </div>
+                <div class="bg-white p-6 rounded-whatsapp shadow-whatsapp">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-whatsapp-primary rounded-full flex items-center justify-center text-white font-semibold">R</div>
+                        <div class="ml-4">
+                            <h3 class="font-semibold">Robert Chen</h3>
+                            <p class="text-whatsapp-text-secondary">Business Owner</p>
+                        </div>
                     </div>
+                    <p class="text-whatsapp-text-primary">"As a busy professional, finding reliable help was crucial. CityMaid's platform made it simple to find and hire the perfect maid for our office."</p>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
 
-    <!-- Call To Action -->
-    <section class="py-16 bg-gradient-to-r from-brand-primary to-brand-secondary text-white">
+    <!-- Call to Action Section -->
+    <div class="bg-gradient-to-r from-whatsapp-primary to-whatsapp-secondary py-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 class="text-3xl font-bold mb-6">Ready to Get Started?</h2>
-            <p class="text-xl mb-10 max-w-3xl mx-auto">
-                Join our platform today to find the perfect domestic helper or quality job opportunities
-            </p>
-            <div class="flex flex-col sm:flex-row justify-center gap-4">
-                <button onclick="selectUserRole('employer')" class="bg-white text-brand-primary px-8 py-3 rounded-lg hover:bg-gray-100 font-semibold transition-colors">
-                    I'm an Employer
-                </button>
-                <button onclick="selectUserRole('maid')" class="bg-white text-brand-primary px-8 py-3 rounded-lg hover:bg-gray-100 font-semibold transition-colors">
-                    I'm a Maid
-                </button>
+            <h2 class="text-3xl font-semibold text-white mb-4">Ready to Get Started?</h2>
+            <p class="text-white/90 mb-8">Join our community of professional maids and employers today</p>
+            <div class="flex justify-center space-x-4">
+                <a href="maid/create-profile.html" class="bg-white text-whatsapp-primary px-6 py-3 rounded-whatsapp text-base font-medium hover:bg-whatsapp-light transition-colors">Create Profile</a>
+                <a href="#browse-profiles" class="bg-whatsapp-dark text-white px-6 py-3 rounded-whatsapp text-base font-medium hover:bg-opacity-90 transition-colors">Browse Profiles</a>
             </div>
         </div>
-    </section>
-
-    <!-- Newsletter Section -->
-    <section class="py-12 bg-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="bg-brand-light rounded-xl p-8 md:p-12">
-                <div class="md:flex items-center justify-between">
-                    <div class="md:w-1/2 mb-6 md:mb-0">
-                        <h3 class="text-2xl font-bold text-gray-900 mb-2">Stay Updated</h3>
-                        <p class="text-gray-700">Subscribe to our newsletter for the latest job opportunities and domestic help services.</p>
-                    </div>
-                    <div class="md:w-1/2">
-                        <form class="flex flex-col sm:flex-row gap-3">
-                            <input type="email" placeholder="Your email address" class="flex-grow px-4 py-3 rounded-lg border-gray-300 focus:border-brand-primary focus:ring focus:ring-brand-primary focus:ring-opacity-50">
-                            <button type="submit" class="bg-brand-primary text-white px-6 py-3 rounded-lg hover:bg-brand-secondary transition-colors focus:outline-none">
-                                Subscribe
-                            </button>
-                        </form>
-                        <p class="text-xs text-gray-500 mt-2">We respect your privacy. Unsubscribe at any time.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+    </div>
 
     <!-- Footer -->
-    <footer class="bg-gray-900 text-white py-12">
+    <footer class="bg-whatsapp-dark text-white py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
                 <div>
-                    <h3 class="text-xl font-bold mb-4">City Maid Services</h3>
-                    <p class="text-gray-400">Connecting trusted domestic helpers with employers directly through our secure platform.</p>
+                    <h3 class="text-xl font-semibold mb-4">CITYMAID</h3>
+                    <p class="text-white/90">Professional cleaning services made easy</p>
                 </div>
                 <div>
-                    <h3 class="text-xl font-bold mb-4">For Employers</h3>
+                    <h4 class="text-lg font-medium mb-4">Quick Links</h4>
                     <ul class="space-y-2">
-                        <li><a href="#" onclick="selectUserRole('employer')" class="text-gray-400 hover:text-white transition-colors">Find Maids</a></li>
-                        <li><a href="#" onclick="selectUserRole('employer')" class="text-gray-400 hover:text-white transition-colors">Register as Employer</a></li>
+                        <li><a href="#how-it-works" class="text-white/90 hover:text-white transition-colors">How It Works</a></li>
+                        <li><a href="#services" class="text-white/90 hover:text-white transition-colors">Services</a></li>
+                        <li><a href="#testimonials" class="text-white/90 hover:text-white transition-colors">Testimonials</a></li>
                     </ul>
                 </div>
                 <div>
-                    <h3 class="text-xl font-bold mb-4">For Maids</h3>
+                    <h4 class="text-lg font-medium mb-4">For Maids</h4>
                     <ul class="space-y-2">
-                        <li><a href="#" onclick="selectUserRole('maid')" class="text-gray-400 hover:text-white transition-colors">Find Jobs</a></li>
-                        <li><a href="#" onclick="selectUserRole('maid')" class="text-gray-400 hover:text-white transition-colors">Register as Maid</a></li>
+                        <li><a href="maid/create-profile.html" class="text-white/90 hover:text-white transition-colors">Create Profile</a></li>
+                        <li><a href="find-maids.html" class="text-white/90 hover:text-white transition-colors">View Profile</a></li>
                     </ul>
                 </div>
                 <div>
-                    <h3 class="text-xl font-bold mb-4">Contact</h3>
+                    <h4 class="text-lg font-medium mb-4">Contact Us</h4>
                     <ul class="space-y-2">
-                        <li class="flex items-center text-gray-400">
-                            <i class="fas fa-map-marker-alt mr-2"></i> Kathmandu, Nepal
-                        </li>
-                        <li class="flex items-center text-gray-400">
-                            <i class="fas fa-phone mr-2"></i> +977 1234567
-                        </li>
-                        <li class="flex items-center text-gray-400">
-                            <i class="fas fa-envelope mr-2"></i> info@citymaidservices.com
-                        </li>
+                        <li class="text-white/90">Email: support@citymaid.com</li>
+                        <li class="text-white/90">Phone: (555) 123-4567</li>
                     </ul>
-                    <div class="mt-4">
-                        <h4 class="text-lg font-medium mb-2">Follow Us</h4>
-                    <div class="flex space-x-4">
-                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                            <i class="fab fa-facebook-f text-xl"></i>
-                        </a>
-                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                            <i class="fab fa-twitter text-xl"></i>
-                        </a>
-                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                            <i class="fab fa-instagram text-xl"></i>
-                        </a>
-                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                            <i class="fab fa-linkedin-in text-xl"></i>
-                        </a>
-                        </div>
-                    </div>
                 </div>
             </div>
-            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-                <p>&copy; <span id="currentYear"></span> City Maid Services. All rights reserved.</p>
+            <div class="mt-8 pt-8 border-t border-white/10 text-center">
+                <p class="text-white/90">&copy; <span id="currentYear"></span> CITYMAID. All rights reserved.</p>
             </div>
         </div>
     </footer>
 
     <script>
-        // Mobile menu functionality
-        document.getElementById('mobileMenuBtn').addEventListener('click', function() {
-            document.getElementById('mobileMenu').classList.remove('hidden');
-        });
-
-        document.getElementById('closeMobileMenu').addEventListener('click', function() {
-            document.getElementById('mobileMenu').classList.add('hidden');
-        });
-
         // Set current year in footer
         document.getElementById('currentYear').textContent = new Date().getFullYear();
-        
-        // Sample job data to use when Supabase tables don't exist
-        const sampleJobs = [
-            {
-                id: 1,
-                title: "Regular House Cleaning",
-                location: "Kathmandu",
-                job_type: "Regular",
-                hourly_rate: 250,
-                description: "Looking for a reliable maid for regular house cleaning in Kathmandu. Duties include sweeping, mopping, dusting, and kitchen cleaning. Must be available 3 days per week.",
-                created_at: new Date().toISOString()
-            },
-            {
-                id: 2,
-                title: "Childcare and Light Cleaning",
-                location: "Lalitpur",
-                job_type: "Full-time",
-                hourly_rate: 300,
-                description: "Need a full-time maid for childcare and light cleaning duties. Experience with children required. Must be patient and caring. Live-in option available.",
-                created_at: new Date().toISOString()
-            },
-            {
-                id: 3,
-                title: "Office Cleaning Service",
-                location: "Bhaktapur",
-                job_type: "Weekly",
-                hourly_rate: 220,
-                description: "Small office looking for a weekly cleaning service. Duties include cleaning common areas, bathrooms, and meeting rooms. Please have prior experience in office cleaning.",
-                created_at: new Date().toISOString()
-            }
-        ];
-        
-        // Initialize Supabase client
-        const SUPABASE_URL = 'https://fdgqqxyyofjnkhswkwcq.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZkZ3FxeHl5b2Zqbmtoc3drd2NxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQwMjQyMTMsImV4cCI6MjA1OTYwMDIxM30.YyJLLu3r2a7Mh7ny0ie-YzzLfPh5PdrJJHnBFBxWqVE';
-        
-        // Wait for Supabase to be loaded
-        function waitForSupabase() {
-            return new Promise((resolve, reject) => {
-                if (window.supabase) {
-                    resolve(window.supabase);
-                } else {
-                    const checkInterval = setInterval(() => {
-                        if (window.supabase) {
-                            clearInterval(checkInterval);
-                            resolve(window.supabase);
-                        }
-                    }, 100);
-                    
-                    // Timeout after 5 seconds
-                    setTimeout(() => {
-                        clearInterval(checkInterval);
-                        reject(new Error('Supabase failed to load'));
-                    }, 5000);
-                }
-            });
-        }
 
         // Initialize Supabase client
-        async function initializeSupabase() {
-            try {
-                const supabase = await waitForSupabase();
-        const { createClient } = supabase;
-                return createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            } catch (error) {
-                console.error('Failed to initialize Supabase:', error);
-                throw error;
-            }
+        const supabaseUrl = 'https://fdgqqxyyofjnkhswkwcq.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZkZ3FxeHl5b2Zqbmtoc3drd2NxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQwMjQyMTMsImV4cCI6MjA1OTYwMDIxM30.YyJLLu3r2a7Mh7ny0ie-YzzLfPh5PdrJJHnBFBxWqVE';
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+        // Function to show login prompt
+        function showLoginPrompt() {
+            document.getElementById('loginPromptModal').classList.remove('hidden');
+            document.getElementById('loginPromptModal').classList.add('flex');
         }
 
-        // Function to fetch and display latest jobs
-        async function fetchLatestJobs(supabaseClient) {
-            console.log('Starting fetchLatestJobs...');
-            const jobsContainer = document.getElementById('latestJobsContainer');
-            
-            if (!jobsContainer) {
-                console.error('Jobs container not found!');
-                return;
-            }
-            
-            // Show loading state
-            jobsContainer.innerHTML = `
-                <div class="col-span-full flex flex-col items-center justify-center py-8">
-                    <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brand-primary mb-4"></div>
-                    <p class="text-gray-600">Loading jobs...</p>
-                </div>
-            `;
-
-            try {
-                console.log('Fetching jobs from Supabase...');
-                
-                // Try from jobs table first
-                let { data: jobs, error: jobsError } = await supabaseClient
-                    .from('jobs')
-                    .select('*')
-                    .order('created_at', { ascending: false })
-                    .limit(3);
-
-                // If jobs table doesn't exist or has an error, try job_listings
-                if (jobsError || !jobs || jobs.length === 0) {
-                    console.log('Trying job_listings table...');
-                    const { data: jobListings, error: jobListingsError } = await supabaseClient
-                        .from('job_listings')
-                        .select('*')
-                        .order('created_at', { ascending: false })
-                        .limit(3);
-                    
-                    if (!jobListingsError && jobListings && jobListings.length > 0) {
-                        jobs = jobListings;
-                        jobsError = null;
-                    } else {
-                        // Try employer_jobs if job_listings fails
-                        console.log('Trying employer_jobs table...');
-                        const { data: employerJobs, error: employerJobsError } = await supabaseClient
-                            .from('employer_jobs')
-                            .select('*')
-                            .order('created_at', { ascending: false })
-                            .limit(3);
-                        
-                        if (!employerJobsError && employerJobs && employerJobs.length > 0) {
-                            jobs = employerJobs;
-                            jobsError = null;
-                        } else if (!jobs || jobs.length === 0) {
-                            // If all tables fail, use sample data
-                            console.log('No job tables found with data, using sample data');
-                            jobs = sampleJobs;
-                            jobsError = null;
-                        }
-                    }
-                }
-
-                console.log('Jobs fetch response:', { jobs, error: jobsError });
-
-                if (jobsError) {
-                    console.error('Error fetching jobs:', jobsError);
-                    jobsContainer.innerHTML = `
-                        <div class="col-span-full text-center py-8">
-                            <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <i class="fas fa-exclamation-circle text-red-500 text-2xl"></i>
-                            </div>
-                            <h3 class="text-xl font-semibold text-gray-900 mb-2">Error Loading Jobs</h3>
-                            <p class="text-gray-600 mb-4">We couldn't load the jobs at this time. Please try again later.</p>
-                            <button onclick="window.location.reload()" 
-                                    class="bg-brand-primary text-white px-6 py-2 rounded-lg hover:bg-brand-secondary transition-colors">
-                                Try Again
-                            </button>
-                        </div>
-                    `;
-                    return;
-                }
-
-                // Clear loading state
-                jobsContainer.innerHTML = '';
-
-                if (!jobs || jobs.length === 0) {
-                    jobsContainer.innerHTML = `
-                        <div class="col-span-full text-center py-12">
-                            <i class="fas fa-search text-6xl text-gray-300 mb-4"></i>
-                            <h3 class="text-xl font-semibold text-gray-900 mb-2">No Jobs Available</h3>
-                            <p class="text-gray-600">There are currently no job opportunities available.</p>
-                        </div>
-                    `;
-                    return;
-                }
-
-                // Display jobs, limited to 3
-                const displayJobs = jobs.slice(0, 3);
-                displayJobs.forEach(job => {
-                    // Use simpler HTML rendering instead of DOM manipulation for more reliable display
-                    const jobCardHTML = `
-                        <div class="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
-                            <div class="relative h-32 bg-gradient-to-r from-brand-primary to-brand-secondary">
-                                <div class="absolute top-4 right-4 bg-white text-brand-primary px-3 py-1 rounded-full text-sm font-medium">
-                                    ${job.job_type ? job.job_type.replace('_', ' ') : 'Full Time'}
-                                </div>
-                                <h3 class="absolute bottom-4 left-4 text-white text-xl font-bold">
-                                    ${job.title || job.job_title || 'No title'}
-                                </h3>
-                            </div>
-                            <div class="p-6">
-                                <div class="flex flex-wrap justify-between gap-4 mb-4">
-                                    <div class="flex items-center text-gray-600">
-                                        <i class="fas fa-clock w-6 text-brand-primary"></i>
-                                        <span>${job.preferred_time || 'Not specified'}</span>
-                                    </div>
-                                    <div class="flex items-center text-gray-600">
-                                        <i class="fas fa-map-marker-alt w-6 text-brand-primary"></i>
-                                        <span>${job.city && job.area ? `${job.city}, ${job.area}` : job.working_location || job.location || 'Location not specified'}</span>
-                                    </div>
-                                </div>
-                                <div class="mb-4">
-                                    <h4 class="font-semibold text-gray-700 mb-2">Required Skills</h4>
-                                    <div class="flex flex-wrap gap-2">
-                                        ${job.required_skills && Array.isArray(job.required_skills) && job.required_skills.length > 0 
-                                            ? job.required_skills.map(skill => 
-                                                `<span class="bg-brand-light text-brand-primary px-3 py-1 rounded-full text-sm font-medium">
-                                                    ${skill}
-                                                </span>`).join('') 
-                                            : '<span class="text-gray-500 text-sm">No skills listed</span>'}
-                                    </div>
-                                </div>
-                                <div class="flex items-center text-gray-600 mb-4">
-                                    <i class="fas fa-money-bill-wave w-6 text-brand-primary"></i>
-                                    <span class="font-semibold">${job.salary_range || job.hourly_rate || job.salary || 'Not specified'}</span>
-                                </div>
-                                <div class="mt-6">
-                                    <a href="#" onclick="selectUserRole('maid')" 
-                                        class="block w-full bg-gradient-to-r from-brand-primary to-brand-secondary text-white px-6 py-3 rounded-lg hover:shadow-lg transition-all duration-300 text-center font-semibold">
-                                        <i class="fas fa-lock mr-1"></i> Register to View
-                                    </a>
-                                    <p class="text-center text-xs text-gray-500 mt-1">Contact details locked</p>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                    jobsContainer.innerHTML += jobCardHTML;
-                });
-            } catch (error) {
-                console.error('Error in fetchLatestJobs:', error);
-                jobsContainer.innerHTML = `
-                    <div class="col-span-full text-center py-8">
-                        <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <i class="fas fa-exclamation-circle text-red-500 text-2xl"></i>
-                        </div>
-                        <h3 class="text-xl font-semibold text-gray-900 mb-2">Error Loading Jobs</h3>
-                        <p class="text-gray-600 mb-4">We encountered an error while loading job listings.</p>
-                        <button onclick="window.location.reload()" 
-                                class="bg-brand-primary text-white px-6 py-2 rounded-lg hover:bg-brand-secondary transition-colors">
-                            Try Again
-                        </button>
-                    </div>
-                `;
-            }
+        // Function to close login prompt
+        function closeLoginPrompt() {
+            document.getElementById('loginPromptModal').classList.add('hidden');
+            document.getElementById('loginPromptModal').classList.remove('flex');
         }
 
-        // Load featured maids
-        async function loadFeaturedMaids(supabaseClient) {
-            console.log('Starting loadFeaturedMaids...');
-            try {
-                const featuredMaidsContainer = document.getElementById('featuredMaids');
-                if (!featuredMaidsContainer) {
-                    console.error('Featured maids container not found!');
-                    throw new Error('Featured maids container not found');
-                }
-
-                console.log('Fetching maid profiles from Supabase...');
-                const { data: maids, error } = await supabaseClient
-                    .from('maid_profiles')
-                    .select('*')
-                    .order('created_at', { ascending: false })
-                    .limit(3);  // Limit to only 3 maid profiles
-                
-                console.log('Maid profiles fetch response:', { maids, error });
-                
-                if (error) {
-                    console.error('Error fetching maid profiles:', error);
-                    throw error;
-                }
-
-                featuredMaidsContainer.innerHTML = '';
-
-                if (!maids || maids.length === 0) {
-                    console.log('No maid profiles found');
-                    featuredMaidsContainer.innerHTML = `
-                        <div class="col-span-full text-center py-8">
-                            <p class="text-gray-500">No maid profiles available at the moment.</p>
-                        </div>
-                    `;
-                    return;
-                }
-
-                console.log(`Found ${maids.length} maid profiles to display`);
-                // Display each maid profile, limited to 3
-                const displayMaids = maids.slice(0, 3);
-                displayMaids.forEach(maid => {
-                    let photoUrl = 'https://via.placeholder.com/300x300?text=No+Photo';
-                    
-                    if (maid.profile_photo) {
-                        try {
-                            const { data } = supabaseClient.storage
-                            .from('profile-photos')
-                            .getPublicUrl(maid.profile_photo);
-                        
-                        if (data?.publicUrl) {
-                            photoUrl = data.publicUrl;
-                            }
-                        } catch (photoError) {
-                            console.error('Error getting profile photo URL:', photoError);
-                        }
-                    }
-
-                    const skillsHtml = maid.skills && Array.isArray(maid.skills)
-                        ? maid.skills.slice(0, 3).map(skill => 
-                            `<span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">${skill}</span>`
-                        ).join('')
-                        : '';
-
-                    const languagesHtml = maid.languages && Array.isArray(maid.languages)
-                        ? maid.languages.map(lang => 
-                            `<span class="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded">${lang}</span>`
-                        ).join('')
-                        : '';
-
-                    const cardHtml = `
-                        <div class="bg-white rounded-xl overflow-hidden shadow-[0_1px_3px_0_rgba(0,0,0,0.1),0_1px_2px_-1px_rgba(0,0,0,0.1)] hover:shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-2px_rgba(0,0,0,0.1)] transition-all duration-200 hover:-translate-y-0.5">
-                            <div class="relative h-48 overflow-hidden group">
-                                <img src="${photoUrl}" alt="${maid.full_name}" 
-                                    class="w-full h-full object-cover object-[center_30%] transition-transform duration-300 group-hover:scale-110">
-                                <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
-                                    <h3 class="text-white font-semibold text-lg">${maid.full_name || 'Name not specified'}</h3>
-                                </div>
-                            </div>
-                            <div class="p-6">
-                                <div class="flex items-center mb-2">
-                                    <i class="fas fa-briefcase text-gray-500 mr-2"></i>
-                                    <span class="text-sm">${maid.work_type || 'Not specified'}</span>
-                                </div>
-                                <div class="flex items-center mb-2">
-                                    <i class="fas fa-map-marker-alt text-gray-500 mr-2"></i>
-                                    <span class="text-sm">${maid.work_location || 'Location not specified'}</span>
-                                </div>
-                                <div class="flex items-center mb-2">
-                                    <i class="fas fa-clock text-gray-500 mr-2"></i>
-                                    <span class="text-sm">${maid.preferred_time || 'Time not specified'}</span>
-                                </div>
-                                <div class="flex items-center mb-4">
-                                    <i class="fas fa-money-bill-wave text-gray-500 mr-2"></i>
-                                    <span class="text-sm">NR ${maid.expected_salary || 'Salary not specified'}</span>
-                                </div>
-                                <div class="space-y-2">
-                                    <div class="flex flex-wrap gap-1">
-                                        ${skillsHtml}
-                                    </div>
-                                    <div class="flex flex-wrap gap-1">
-                                        ${languagesHtml}
-                                    </div>
-                                </div>
-                                <div class="mt-4">
-                                    <a href="#" onclick="selectUserRole('employer')" 
-                                        class="block w-full bg-brand-primary text-white py-2 rounded-lg hover:bg-brand-secondary transition-colors text-center">
-                                        <i class="fas fa-lock mr-1"></i> Register to View
-                                    </a>
-                                    <p class="text-center text-xs text-gray-500 mt-1">Contact details locked</p>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                    featuredMaidsContainer.innerHTML += cardHtml;
-                });
-
-            } catch (error) {
-                console.error('Error in loadFeaturedMaids:', error);
-                const featuredMaidsContainer = document.getElementById('featuredMaids');
-                if (featuredMaidsContainer) {
-                    featuredMaidsContainer.innerHTML = `
-                    <div class="col-span-full text-center py-8">
-                        <p class="text-red-500">Error loading featured maids. Please try again later.</p>
-                            <p class="text-sm text-gray-500 mt-2">Error details: ${error.message}</p>
-                    </div>
-                `;
-            }
-        }
-        }
-
-        // Initialize the page
-        document.addEventListener('DOMContentLoaded', async function() {
-            console.log('DOM Content Loaded, initializing...');
-            try {
-                // Initialize Supabase
-                console.log('Creating Supabase client...');
-                const supabaseClient = await initializeSupabase();
-                console.log('Supabase client created successfully');
-
-                // Load maids first
-                console.log('Starting to load maid profiles...');
-                await loadFeaturedMaids(supabaseClient);
-
-                // Load jobs after a short delay
-                console.log('Setting up jobs fetch timer...');
-                setTimeout(() => {
-                    console.log('Starting jobs fetch...');
-                    fetchLatestJobs(supabaseClient);
-                }, 500);
-
-            } catch (error) {
-                console.error('Initialization error:', error);
-                const jobsContainer = document.getElementById('latestJobsContainer');
-                if (jobsContainer) {
-                    jobsContainer.innerHTML = `
-                        <div class="col-span-full text-center py-8">
-                            <p class="text-red-500">Failed to initialize the application.</p>
-                            <p class="text-sm text-gray-500 mt-2">${error.message}</p>
-                        </div>
-                    `;
-                }
-            }
-        });
-
-        // Update the script section with complete search and filter implementation
-        document.addEventListener('DOMContentLoaded', function() {
-            // Get filter elements
-            const searchInput = document.getElementById('searchInput');
-            const locationFilter = document.getElementById('locationFilter');
-            const workTypeFilter = document.getElementById('workTypeFilter');
-            const salaryFilter = document.getElementById('salaryFilter');
-            const searchButton = document.querySelector('button[aria-label="Search"]');
-
-            // Store active filters
-            let activeFilters = {
-                search: '',
-                location: '',
-                workType: '',
-                salary: ''
-            };
-
-            // Function to update filters and trigger search
-            function updateFilters() {
-                // Update active filters
-                activeFilters.search = searchInput.value.trim();
-                activeFilters.location = locationFilter.value;
-                activeFilters.workType = workTypeFilter.value;
-                activeFilters.salary = salaryFilter.value;
-
-                // Trigger search with updated filters
-                searchMaids(activeFilters);
-            }
-
-            // Add event listeners
-            searchInput.addEventListener('input', debounce(updateFilters, 300));
-            searchButton.addEventListener('click', updateFilters);
-            locationFilter.addEventListener('change', updateFilters);
-            workTypeFilter.addEventListener('change', updateFilters);
-            salaryFilter.addEventListener('change', updateFilters);
-
-            // Debounce function for search input
-            function debounce(func, wait) {
-                let timeout;
-                return function executedFunction(...args) {
-                    const later = () => {
-                        clearTimeout(timeout);
-                        func(...args);
-                    };
-                    clearTimeout(timeout);
-                    timeout = setTimeout(later, wait);
-                };
-            }
-
-            // Function to search maids based on filters
-            async function searchMaids(filters) {
-                try {
-                    const supabaseClient = await initializeSupabase();
-                    
-                    let query = supabaseClient
-                        .from('maid_profiles')
-                        .select('*');
-
-                    // Apply filters
-                    if (filters.search) {
-                        query = query.or(`full_name.ilike.%${filters.search}%,skills.cs.{${filters.search}}`);
-                    }
-                    if (filters.location) {
-                        query = query.eq('work_location', filters.location);
-                    }
-                    if (filters.workType) {
-                        query = query.eq('work_type', filters.workType);
-                    }
-                    if (filters.salary) {
-                        const [min, max] = filters.salary.split('-');
-                        if (max) {
-                            query = query.gte('expected_salary', parseInt(min))
-                                       .lte('expected_salary', parseInt(max));
-                        } else {
-                            query = query.gte('expected_salary', parseInt(min));
-                        }
-                    }
-
-                    // Show loading state
-                    const featuredMaidsContainer = document.getElementById('featuredMaids');
-                    if (featuredMaidsContainer) {
-                        featuredMaidsContainer.innerHTML = `
-                            <div class="col-span-full flex flex-col items-center justify-center py-8">
-                                <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brand-primary mb-4"></div>
-                                <p class="text-gray-600">Searching maids...</p>
-                            </div>
-                        `;
-                    }
-
-                    const { data: maids, error } = await query;
-
-                    if (error) throw error;
-
-                    // Update the UI with filtered results
-                    updateFeaturedMaids(maids, supabaseClient);
-
-                    // If no results found, show appropriate message
-                    if (!maids || maids.length === 0) {
-                        const noResultsMessage = `
-                            <div class="col-span-full text-center py-8">
-                                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <i class="fas fa-search text-gray-400 text-2xl"></i>
-                                </div>
-                                <h3 class="text-xl font-semibold text-gray-900 mb-2">No Results Found</h3>
-                                <p class="text-gray-600">Try adjusting your search criteria</p>
-                            </div>
-                        `;
-                        if (featuredMaidsContainer) {
-                            featuredMaidsContainer.innerHTML = noResultsMessage;
-                        }
-                    }
-
-                } catch (error) {
-                    console.error('Error searching maids:', error);
-                    const featuredMaidsContainer = document.getElementById('featuredMaids');
-                    if (featuredMaidsContainer) {
-                        featuredMaidsContainer.innerHTML = `
-                            <div class="col-span-full text-center py-8">
-                                <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <i class="fas fa-exclamation-circle text-red-500 text-2xl"></i>
-                                </div>
-                                <h3 class="text-xl font-semibold text-gray-900 mb-2">Error Searching Maids</h3>
-                                <p class="text-gray-600 mb-4">Please try again later</p>
-                                <button onclick="window.location.reload()" 
-                                        class="bg-brand-primary text-white px-6 py-2 rounded-lg hover:bg-brand-secondary transition-colors">
-                                    Try Again
-                                </button>
-                            </div>
-                        `;
-                    }
-                }
-            }
-
-            // Function to create a maid card
-            function createMaidCard(maid, supabaseClient) {
-                const cardElement = document.createElement('div');
-                cardElement.className = 'bg-white rounded-xl overflow-hidden shadow-[0_1px_3px_0_rgba(0,0,0,0.1),0_1px_2px_-1px_rgba(0,0,0,0.1)] hover:shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-2px_rgba(0,0,0,0.1)] transition-all duration-200 hover:-translate-y-0.5';
-                
-                let photoUrl = 'https://via.placeholder.com/300x300?text=No+Photo';
-                if (maid.profile_photo) {
-                    try {
-                        const { data } = supabaseClient.storage
-                            .from('profile-photos')
-                            .getPublicUrl(maid.profile_photo);
-                        if (data?.publicUrl) {
-                            photoUrl = data.publicUrl;
-                        }
-                    } catch (photoError) {
-                        console.error('Error getting profile photo URL:', photoError);
-                    }
-                }
-
-                const skillsHtml = maid.skills && Array.isArray(maid.skills)
-                    ? maid.skills.slice(0, 3).map(skill => 
-                        `<span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">${skill}</span>`
-                    ).join('')
-                    : '';
-
-                const languagesHtml = maid.languages && Array.isArray(maid.languages)
-                    ? maid.languages.map(lang => 
-                        `<span class="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded">${lang}</span>`
-                    ).join('')
-                    : '';
-
-                const cardHtml = `
-                    <div class="relative h-48 overflow-hidden group">
-                        <img src="${photoUrl}" alt="${maid.full_name}" 
-                            class="w-full h-full object-cover object-[center_30%] transition-transform duration-300 group-hover:scale-110">
-                        <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
-                            <h3 class="text-white font-semibold text-lg">${maid.full_name || 'Name not specified'}</h3>
+        // Function to render limited maid cards
+        function renderLimitedMaidCard(maid) {
+            return `
+                <div class="bg-white rounded-lg shadow-whatsapp overflow-hidden hover:shadow-whatsapp-hover transition-all duration-200">
+                    <div class="relative">
+                        <img src="${maid.profile_photo || 'https://via.placeholder.com/300x200'}" 
+                             alt="${maid.full_name}" 
+                             class="w-full h-48 object-cover">
+                        <div class="absolute top-4 right-4 bg-whatsapp-primary text-white px-3 py-1 rounded-full text-sm">
+                            ${maid.experience}+ years
                         </div>
                     </div>
                     <div class="p-6">
-                        <div class="flex items-center mb-2">
-                            <i class="fas fa-briefcase text-gray-500 mr-2"></i>
-                            <span class="text-sm">${maid.work_type || 'Not specified'}</span>
+                        <h3 class="text-lg font-semibold text-whatsapp-text-primary mb-2">${maid.full_name}</h3>
+                        <div class="flex items-center text-whatsapp-text-secondary mb-4">
+                            <i class="fas fa-map-marker-alt mr-2"></i>
+                            <span>${maid.major_city}</span>
                         </div>
-                        <div class="flex items-center mb-2">
-                            <i class="fas fa-map-marker-alt text-gray-500 mr-2"></i>
-                            <span class="text-sm">${maid.work_location || 'Location not specified'}</span>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            ${maid.skills.slice(0, 3).map(skill => `
+                                <span class="bg-whatsapp-light text-whatsapp-text-primary px-3 py-1 rounded-full text-sm">
+                                    ${skill}
+                                </span>
+                            `).join('')}
                         </div>
-                        <div class="flex items-center mb-2">
-                            <i class="fas fa-clock text-gray-500 mr-2"></i>
-                            <span class="text-sm">${maid.preferred_time || 'Time not specified'}</span>
+                        <button onclick="showLoginPrompt()" 
+                                class="w-full bg-whatsapp-primary text-white py-2 rounded-lg hover:bg-whatsapp-secondary transition-colors">
+                            View Full Profile
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Fetch and display featured maid profiles
+        async function loadFeaturedProfiles() {
+            try {
+                const { data: profiles, error } = await supabaseClient
+                    .from('maid_profiles')
+                    .select('*')
+                    .limit(6)
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                const featuredProfilesContainer = document.getElementById('featuredProfiles');
+                if (profiles && profiles.length > 0) {
+                    featuredProfilesContainer.innerHTML = profiles.map(renderLimitedMaidCard).join('');
+                } else {
+                    featuredProfilesContainer.innerHTML = `
+                        <div class="col-span-full text-center py-8">
+                            <p class="text-whatsapp-text-secondary">No profiles available at the moment.</p>
                         </div>
-                        <div class="flex items-center mb-4">
-                            <i class="fas fa-money-bill-wave text-gray-500 mr-2"></i>
-                            <span class="text-sm">NR ${maid.expected_salary || 'Salary not specified'}</span>
-                        </div>
-                        <div class="space-y-2">
-                            <div class="flex flex-wrap gap-1">
-                            ${skillsHtml}
-                        </div>
-                            <div class="flex flex-wrap gap-1">
-                                ${languagesHtml}
-                            </div>
-                        </div>
-                        <div class="mt-4">
-                            <a href="#" onclick="selectUserRole('employer')" 
-                                class="block w-full bg-brand-primary text-white py-2 rounded-lg hover:bg-brand-secondary transition-colors text-center">
-                                <i class="fas fa-lock mr-1"></i> Register to View
-                            </a>
-                            <p class="text-center text-xs text-gray-500 mt-1">Contact details locked</p>
-                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading featured profiles:', error);
+                document.getElementById('featuredProfiles').innerHTML = `
+                    <div class="col-span-full text-center py-8">
+                        <p class="text-red-500">Error loading profiles. Please try again later.</p>
                     </div>
                 `;
-                
-                cardElement.innerHTML = cardHtml;
-                return cardElement;
             }
-        });
+        }
+
+        // Load profiles when page loads
+        document.addEventListener('DOMContentLoaded', loadFeaturedProfiles);
     </script>
 </body>
 </html>

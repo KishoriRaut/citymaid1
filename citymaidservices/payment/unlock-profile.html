@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unlock Profile - City Maid Services</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        whatsapp: {
+                            primary: '#25D366',
+                            secondary: '#128C7E',
+                            dark: '#075E54',
+                            light: '#F0F2F5',
+                            text: {
+                                primary: '#111B21',
+                                secondary: '#667781',
+                                light: '#FFFFFF',
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-whatsapp-light min-h-screen">
+    <!-- Navigation Bar -->
+    <nav class="bg-white shadow-whatsapp sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="../index.html" class="text-2xl font-semibold text-whatsapp-primary">CITYMAID</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="../index.html" class="text-whatsapp-text-primary hover:text-whatsapp-primary transition-colors">
+                        <i class="fas fa-home mr-1"></i> Home
+                    </a>
+                    <a href="../find-maids.html" class="text-whatsapp-text-primary hover:text-whatsapp-primary transition-colors">
+                        <i class="fas fa-search mr-1"></i> Find Maids
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Payment Section -->
+    <div class="max-w-4xl mx-auto px-4 py-12">
+        <div class="bg-white rounded-lg shadow-lg p-8">
+            <div class="text-center mb-8">
+                <h1 class="text-2xl font-semibold text-whatsapp-text-primary mb-2">Unlock Maid Profile</h1>
+                <p class="text-whatsapp-text-secondary">Get access to contact information and full profile details</p>
+            </div>
+
+            <!-- Maid Preview -->
+            <div class="bg-whatsapp-light rounded-lg p-6 mb-8">
+                <div class="flex items-center space-x-4">
+                    <img id="maidPhoto" src="" alt="Maid Photo" class="w-20 h-20 rounded-full object-cover">
+                    <div>
+                        <h2 id="maidName" class="text-xl font-semibold text-whatsapp-text-primary"></h2>
+                        <p id="maidLocation" class="text-whatsapp-text-secondary"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pricing Options -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <!-- Basic Plan -->
+                <div class="border-2 border-whatsapp-primary rounded-lg p-6 text-center">
+                    <h3 class="text-lg font-semibold text-whatsapp-text-primary mb-2">Basic</h3>
+                    <p class="text-3xl font-bold text-whatsapp-primary mb-4">NPR 500</p>
+                    <ul class="text-left space-y-2 mb-6">
+                        <li class="flex items-center text-whatsapp-text-secondary">
+                            <i class="fas fa-check text-whatsapp-primary mr-2"></i>
+                            Contact Information
+                        </li>
+                        <li class="flex items-center text-whatsapp-text-secondary">
+                            <i class="fas fa-check text-whatsapp-primary mr-2"></i>
+                            Full Profile Access
+                        </li>
+                        <li class="flex items-center text-whatsapp-text-secondary">
+                            <i class="fas fa-check text-whatsapp-primary mr-2"></i>
+                            7 Days Access
+                        </li>
+                    </ul>
+                    <button onclick="selectPlan('basic')" class="w-full bg-whatsapp-primary text-white py-2 rounded-lg hover:bg-whatsapp-secondary transition-colors">
+                        Select Plan
+                    </button>
+                </div>
+
+                <!-- Premium Plan -->
+                <div class="border-2 border-whatsapp-primary rounded-lg p-6 text-center relative">
+                    <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-whatsapp-primary text-white px-4 py-1 rounded-full text-sm">
+                        Popular
+                    </div>
+                    <h3 class="text-lg font-semibold text-whatsapp-text-primary mb-2">Premium</h3>
+                    <p class="text-3xl font-bold text-whatsapp-primary mb-4">NPR 1000</p>
+                    <ul class="text-left space-y-2 mb-6">
+                        <li class="flex items-center text-whatsapp-text-secondary">
+                            <i class="fas fa-check text-whatsapp-primary mr-2"></i>
+                            All Basic Features
+                        </li>
+                        <li class="flex items-center text-whatsapp-text-secondary">
+                            <i class="fas fa-check text-whatsapp-primary mr-2"></i>
+                            30 Days Access
+                        </li>
+                        <li class="flex items-center text-whatsapp-text-secondary">
+                            <i class="fas fa-check text-whatsapp-primary mr-2"></i>
+                            Priority Support
+                        </li>
+                    </ul>
+                    <button onclick="selectPlan('premium')" class="w-full bg-whatsapp-primary text-white py-2 rounded-lg hover:bg-whatsapp-secondary transition-colors">
+                        Select Plan
+                    </button>
+                </div>
+
+                <!-- Enterprise Plan -->
+                <div class="border-2 border-whatsapp-primary rounded-lg p-6 text-center">
+                    <h3 class="text-lg font-semibold text-whatsapp-text-primary mb-2">Enterprise</h3>
+                    <p class="text-3xl font-bold text-whatsapp-primary mb-4">NPR 2000</p>
+                    <ul class="text-left space-y-2 mb-6">
+                        <li class="flex items-center text-whatsapp-text-secondary">
+                            <i class="fas fa-check text-whatsapp-primary mr-2"></i>
+                            All Premium Features
+                        </li>
+                        <li class="flex items-center text-whatsapp-text-secondary">
+                            <i class="fas fa-check text-whatsapp-primary mr-2"></i>
+                            90 Days Access
+                        </li>
+                        <li class="flex items-center text-whatsapp-text-secondary">
+                            <i class="fas fa-check text-whatsapp-primary mr-2"></i>
+                            Dedicated Support
+                        </li>
+                    </ul>
+                    <button onclick="selectPlan('enterprise')" class="w-full bg-whatsapp-primary text-white py-2 rounded-lg hover:bg-whatsapp-secondary transition-colors">
+                        Select Plan
+                    </button>
+                </div>
+            </div>
+
+            <!-- Payment Form (initially hidden) -->
+            <div id="paymentForm" class="hidden">
+                <h3 class="text-lg font-semibold text-whatsapp-text-primary mb-4">Payment Details</h3>
+                <form id="paymentDetailsForm" class="space-y-4">
+                    <div>
+                        <label for="cardNumber" class="block text-sm font-medium text-whatsapp-text-primary mb-1">Card Number</label>
+                        <input type="text" id="cardNumber" required pattern="[0-9]{16}"
+                            class="w-full rounded-lg border-gray-300 shadow-sm focus:border-whatsapp-primary focus:ring-whatsapp-primary"
+                            placeholder="1234 5678 9012 3456">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="expiryDate" class="block text-sm font-medium text-whatsapp-text-primary mb-1">Expiry Date</label>
+                            <input type="text" id="expiryDate" required pattern="(0[1-9]|1[0-2])\/([0-9]{2})"
+                                class="w-full rounded-lg border-gray-300 shadow-sm focus:border-whatsapp-primary focus:ring-whatsapp-primary"
+                                placeholder="MM/YY">
+                        </div>
+                        <div>
+                            <label for="cvv" class="block text-sm font-medium text-whatsapp-text-primary mb-1">CVV</label>
+                            <input type="text" id="cvv" required pattern="[0-9]{3,4}"
+                                class="w-full rounded-lg border-gray-300 shadow-sm focus:border-whatsapp-primary focus:ring-whatsapp-primary"
+                                placeholder="123">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="cardName" class="block text-sm font-medium text-whatsapp-text-primary mb-1">Name on Card</label>
+                        <input type="text" id="cardName" required
+                            class="w-full rounded-lg border-gray-300 shadow-sm focus:border-whatsapp-primary focus:ring-whatsapp-primary"
+                            placeholder="John Doe">
+                    </div>
+                    <button type="submit" 
+                        class="w-full bg-whatsapp-primary text-white py-3 rounded-lg font-medium hover:bg-whatsapp-secondary transition-colors">
+                        Pay Now
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Supabase client
+        const supabaseUrl = 'https://fdgqqxyyofjnkhswkwcq.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZkZ3FxeHl5b2Zqbmtoc3drd2NxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQwMjQyMTMsImV4cCI6MjA1OTYwMDIxM30.YyJLLu3r2a7Mh7ny0ie-YzzLfPh5PdrJJHnBFBxWqVE';
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+        // Get maid ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const maidId = urlParams.get('id');
+
+        // Load maid details
+        async function loadMaidDetails() {
+            try {
+                const { data: maid, error } = await supabaseClient
+                    .from('maid_profiles')
+                    .select('*')
+                    .eq('id', maidId)
+                    .single();
+
+                if (error) throw error;
+
+                // Update UI with maid details
+                document.getElementById('maidPhoto').src = maid.profile_photo || 'https://via.placeholder.com/150';
+                document.getElementById('maidName').textContent = maid.full_name;
+                document.getElementById('maidLocation').textContent = maid.major_city;
+
+            } catch (error) {
+                console.error('Error loading maid details:', error);
+                showError('Failed to load maid details');
+            }
+        }
+
+        // Select plan
+        function selectPlan(plan) {
+            document.getElementById('paymentForm').classList.remove('hidden');
+            // Scroll to payment form
+            document.getElementById('paymentForm').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Handle payment form submission
+        document.getElementById('paymentDetailsForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            try {
+                // Here you would typically integrate with a payment gateway
+                // For now, we'll simulate a successful payment
+                
+                // Record the purchase in Supabase
+                const { data: purchase, error } = await supabaseClient
+                    .from('profile_purchases')
+                    .insert([{
+                        maid_id: maidId,
+                        employer_id: localStorage.getItem('userId'),
+                        plan_type: 'premium', // This should be dynamic based on selected plan
+                        amount: 1000, // This should be dynamic based on selected plan
+                        status: 'completed'
+                    }]);
+
+                if (error) throw error;
+
+                // Show success message
+                showSuccess('Payment successful! Redirecting to profile...');
+                
+                // Redirect to profile page
+                setTimeout(() => {
+                    window.location.href = `../view-profile.html?id=${maidId}`;
+                }, 2000);
+
+            } catch (error) {
+                console.error('Payment error:', error);
+                showError('Payment failed. Please try again.');
+            }
+        });
+
+        // Show success message
+        function showSuccess(message) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-4 right-4 bg-whatsapp-primary text-white px-6 py-3 rounded-lg shadow-lg z-50';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // Show error message
+        function showError(message) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // Load maid details when page loads
+        document.addEventListener('DOMContentLoaded', loadMaidDetails);
+    </script>
+</body>
+</html> 

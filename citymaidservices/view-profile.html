@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Profile - City Maid Services</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        whatsapp: {
+                            primary: '#25D366',
+                            secondary: '#128C7E',
+                            dark: '#075E54',
+                            light: '#F0F2F5',
+                            text: {
+                                primary: '#111B21',
+                                secondary: '#667781',
+                                light: '#FFFFFF',
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-whatsapp-light min-h-screen">
+    <!-- Navigation Bar -->
+    <nav class="bg-white shadow-whatsapp sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="index.html" class="text-2xl font-semibold text-whatsapp-primary">CITYMAID</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="index.html" class="text-whatsapp-text-primary hover:text-whatsapp-primary transition-colors">
+                        <i class="fas fa-home mr-1"></i> Home
+                    </a>
+                    <a href="find-maids.html" class="text-whatsapp-text-primary hover:text-whatsapp-primary transition-colors">
+                        <i class="fas fa-search mr-1"></i> Find Maids
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Profile Section -->
+    <div class="max-w-4xl mx-auto px-4 py-12">
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+            <!-- Profile Header -->
+            <div class="relative h-48 bg-whatsapp-primary">
+                <div class="absolute -bottom-16 left-8">
+                    <img id="profilePhoto" src="" alt="Profile Photo" 
+                        class="w-32 h-32 rounded-full border-4 border-white object-cover">
+                </div>
+            </div>
+
+            <!-- Profile Info -->
+            <div class="pt-20 px-8 pb-8">
+                <div class="flex justify-between items-start mb-6">
+                    <div>
+                        <h1 id="fullName" class="text-2xl font-semibold text-whatsapp-text-primary"></h1>
+                        <p id="location" class="text-whatsapp-text-secondary"></p>
+                    </div>
+                    <div class="flex space-x-4">
+                        <button onclick="contactMaid()" class="bg-whatsapp-primary text-white px-6 py-2 rounded-lg hover:bg-whatsapp-secondary transition-colors">
+                            <i class="fas fa-phone mr-2"></i> Contact
+                        </button>
+                        <button onclick="saveProfile()" class="border border-whatsapp-primary text-whatsapp-primary px-6 py-2 rounded-lg hover:bg-whatsapp-light transition-colors">
+                            <i class="fas fa-bookmark mr-2"></i> Save
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Contact Information -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div class="bg-whatsapp-light rounded-lg p-6">
+                        <h2 class="text-lg font-semibold text-whatsapp-text-primary mb-4">Contact Information</h2>
+                        <div class="space-y-4">
+                            <div class="flex items-center">
+                                <i class="fas fa-phone text-whatsapp-primary w-6"></i>
+                                <span id="phone" class="text-whatsapp-text-primary"></span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-envelope text-whatsapp-primary w-6"></i>
+                                <span id="email" class="text-whatsapp-text-primary"></span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-map-marker-alt text-whatsapp-primary w-6"></i>
+                                <span id="address" class="text-whatsapp-text-primary"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Experience & Skills -->
+                    <div class="bg-whatsapp-light rounded-lg p-6">
+                        <h2 class="text-lg font-semibold text-whatsapp-text-primary mb-4">Experience & Skills</h2>
+                        <div class="space-y-4">
+                            <div>
+                                <h3 class="font-medium text-whatsapp-text-primary">Experience</h3>
+                                <p id="experience" class="text-whatsapp-text-secondary"></p>
+                            </div>
+                            <div>
+                                <h3 class="font-medium text-whatsapp-text-primary">Skills</h3>
+                                <div id="skills" class="flex flex-wrap gap-2 mt-2"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- About -->
+                <div class="bg-whatsapp-light rounded-lg p-6 mb-8">
+                    <h2 class="text-lg font-semibold text-whatsapp-text-primary mb-4">About</h2>
+                    <p id="about" class="text-whatsapp-text-secondary"></p>
+                </div>
+
+                <!-- Availability -->
+                <div class="bg-whatsapp-light rounded-lg p-6">
+                    <h2 class="text-lg font-semibold text-whatsapp-text-primary mb-4">Availability</h2>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="text-center">
+                            <h3 class="font-medium text-whatsapp-text-primary">Full Time</h3>
+                            <p id="fullTime" class="text-whatsapp-text-secondary"></p>
+                        </div>
+                        <div class="text-center">
+                            <h3 class="font-medium text-whatsapp-text-primary">Part Time</h3>
+                            <p id="partTime" class="text-whatsapp-text-secondary"></p>
+                        </div>
+                        <div class="text-center">
+                            <h3 class="font-medium text-whatsapp-text-primary">Weekends</h3>
+                            <p id="weekends" class="text-whatsapp-text-secondary"></p>
+                        </div>
+                        <div class="text-center">
+                            <h3 class="font-medium text-whatsapp-text-primary">Night Shift</h3>
+                            <p id="nightShift" class="text-whatsapp-text-secondary"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Modal -->
+    <div id="contactModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+            <h2 class="text-xl font-semibold text-whatsapp-text-primary mb-4">Contact Maid</h2>
+            <form id="contactForm" class="space-y-4">
+                <div>
+                    <label for="message" class="block text-sm font-medium text-whatsapp-text-primary mb-1">Message</label>
+                    <textarea id="message" rows="4" required
+                        class="w-full rounded-lg border-gray-300 shadow-sm focus:border-whatsapp-primary focus:ring-whatsapp-primary"
+                        placeholder="Write your message here..."></textarea>
+                </div>
+                <div class="flex justify-end space-x-4">
+                    <button type="button" onclick="closeContactModal()"
+                        class="px-4 py-2 text-whatsapp-text-primary hover:text-whatsapp-primary transition-colors">
+                        Cancel
+                    </button>
+                    <button type="submit"
+                        class="bg-whatsapp-primary text-white px-6 py-2 rounded-lg hover:bg-whatsapp-secondary transition-colors">
+                        Send Message
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Supabase client
+        const supabaseUrl = 'https://fdgqqxyyofjnkhswkwcq.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZkZ3FxeHl5b2Zqbmtoc3drd2NxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQwMjQyMTMsImV4cCI6MjA1OTYwMDIxM30.YyJLLu3r2a7Mh7ny0ie-YzzLfPh5PdrJJHnBFBxWqVE';
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+        // Get maid ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const maidId = urlParams.get('id');
+
+        // Load maid profile
+        async function loadMaidProfile() {
+            try {
+                // Check if user has purchased access
+                const userId = localStorage.getItem('userId');
+                const { data: purchase, error: purchaseError } = await supabaseClient
+                    .from('profile_purchases')
+                    .select('*')
+                    .eq('maid_id', maidId)
+                    .eq('employer_id', userId)
+                    .eq('status', 'completed')
+                    .single();
+
+                if (purchaseError || !purchase) {
+                    window.location.href = `payment/unlock-profile.html?id=${maidId}`;
+                    return;
+                }
+
+                // Load maid details
+                const { data: maid, error } = await supabaseClient
+                    .from('maid_profiles')
+                    .select('*')
+                    .eq('id', maidId)
+                    .single();
+
+                if (error) throw error;
+
+                // Update UI with maid details
+                document.getElementById('profilePhoto').src = maid.profile_photo || 'https://via.placeholder.com/150';
+                document.getElementById('fullName').textContent = maid.full_name;
+                document.getElementById('location').textContent = maid.major_city;
+                document.getElementById('phone').textContent = maid.phone;
+                document.getElementById('email').textContent = maid.email;
+                document.getElementById('address').textContent = maid.address;
+                document.getElementById('experience').textContent = `${maid.experience} years`;
+                document.getElementById('about').textContent = maid.about;
+                document.getElementById('fullTime').textContent = maid.full_time ? 'Available' : 'Not Available';
+                document.getElementById('partTime').textContent = maid.part_time ? 'Available' : 'Not Available';
+                document.getElementById('weekends').textContent = maid.weekends ? 'Available' : 'Not Available';
+                document.getElementById('nightShift').textContent = maid.night_shift ? 'Available' : 'Not Available';
+
+                // Render skills
+                const skillsContainer = document.getElementById('skills');
+                maid.skills.forEach(skill => {
+                    const skillTag = document.createElement('span');
+                    skillTag.className = 'bg-whatsapp-primary text-white px-3 py-1 rounded-full text-sm';
+                    skillTag.textContent = skill;
+                    skillsContainer.appendChild(skillTag);
+                });
+
+            } catch (error) {
+                console.error('Error loading maid profile:', error);
+                showError('Failed to load profile');
+            }
+        }
+
+        // Contact maid
+        function contactMaid() {
+            document.getElementById('contactModal').classList.remove('hidden');
+            document.getElementById('contactModal').classList.add('flex');
+        }
+
+        // Close contact modal
+        function closeContactModal() {
+            document.getElementById('contactModal').classList.add('hidden');
+            document.getElementById('contactModal').classList.remove('flex');
+        }
+
+        // Save profile
+        async function saveProfile() {
+            try {
+                const userId = localStorage.getItem('userId');
+                const { data, error } = await supabaseClient
+                    .from('saved_profiles')
+                    .insert([{
+                        maid_id: maidId,
+                        employer_id: userId
+                    }]);
+
+                if (error) throw error;
+
+                showSuccess('Profile saved successfully');
+
+            } catch (error) {
+                console.error('Error saving profile:', error);
+                showError('Failed to save profile');
+            }
+        }
+
+        // Handle contact form submission
+        document.getElementById('contactForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            try {
+                const message = document.getElementById('message').value;
+                const userId = localStorage.getItem('userId');
+
+                const { data, error } = await supabaseClient
+                    .from('messages')
+                    .insert([{
+                        maid_id: maidId,
+                        employer_id: userId,
+                        message: message,
+                        status: 'sent'
+                    }]);
+
+                if (error) throw error;
+
+                showSuccess('Message sent successfully');
+                closeContactModal();
+                document.getElementById('message').value = '';
+
+            } catch (error) {
+                console.error('Error sending message:', error);
+                showError('Failed to send message');
+            }
+        });
+
+        // Show success message
+        function showSuccess(message) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-4 right-4 bg-whatsapp-primary text-white px-6 py-3 rounded-lg shadow-lg z-50';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // Show error message
+        function showError(message) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // Load profile when page loads
+        document.addEventListener('DOMContentLoaded', loadMaidProfile);
+    </script>
+</body>
+</html> 
