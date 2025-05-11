@@ -1,0 +1,1290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Profile - City Maid Services</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Helvetica Neue', 'Segoe UI', 'Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        whatsapp: {
+                            primary: '#25D366',    // WhatsApp Green
+                            secondary: '#128C7E',  // WhatsApp Teal
+                            dark: '#075E54',       // WhatsApp Dark Green
+                            light: '#F0F2F5',      // WhatsApp Background
+                            text: {
+                                primary: '#111B21',   // WhatsApp Dark Text
+                                secondary: '#667781', // WhatsApp Secondary Text
+                                light: '#FFFFFF',     // White text
+                            }
+                        }
+                    },
+                    boxShadow: {
+                        'whatsapp': '0 1px 3px rgba(0, 0, 0, 0.1)',
+                        'whatsapp-hover': '0 2px 4px rgba(0, 0, 0, 0.15)',
+                        'float': '0 4px 12px rgba(0, 0, 0, 0.15)',
+                    },
+                    borderRadius: {
+                        'whatsapp': '8px',
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Add Khalti Checkout Script -->
+    <script src="https://khalti.s3.ap-south-1.amazonaws.com/KPG/dist/2020.12.17.0.0.0/khalti-checkout.iffe.js"></script>
+    <style>
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .slide-up {
+            animation: slideUp 0.3s ease-out;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="bg-whatsapp-light min-h-screen">
+    <!-- Navigation Bar -->
+    <nav class="bg-white shadow-whatsapp sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="../index.html" class="text-2xl font-semibold text-whatsapp-primary">CITYMAID</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="../index.html" class="text-whatsapp-text-primary hover:text-whatsapp-primary transition-colors">
+                        <i class="fas fa-home mr-1"></i> Home
+                    </a>
+                    <a href="../find-maids.html" class="text-whatsapp-text-primary hover:text-whatsapp-primary transition-colors">
+                        <i class="fas fa-search mr-1"></i> Find Maids
+                    </a>
+                    <a href="edit-profile.html" class="bg-whatsapp-primary text-white px-4 py-2 rounded-whatsapp text-sm font-medium hover:bg-whatsapp-secondary transition-colors">
+                        <i class="fas fa-edit mr-1"></i> Edit Profile
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 py-8">
+        <!-- Loading Message -->
+        <div id="loadingMessage" class="text-center py-12">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-whatsapp-primary mx-auto"></div>
+            <p class="mt-4 text-whatsapp-text-secondary">Loading profile...</p>
+        </div>
+
+        <!-- Error Message -->
+        <div id="errorMessage" class="hidden">
+            <div class="bg-red-50 border-l-4 border-red-400 p-4 mb-4">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-red-700" id="errorText"></p>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center">
+                <a href="create-profile.html" class="inline-block mt-4 bg-whatsapp-primary text-white px-6 py-2 rounded-whatsapp hover:bg-whatsapp-secondary transition-colors">
+                    Create New Profile
+                </a>
+            </div>
+        </div>
+
+        <!-- Profile Content -->
+        <div id="profileContent" class="hidden max-w-7xl mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Left Column - Profile Image -->
+                <div class="md:col-span-1">
+                    <div class="bg-white rounded-whatsapp shadow-whatsapp overflow-hidden fade-in">
+                        <div class="relative">
+                            <img id="profilePhoto" src="" alt="Profile Photo" 
+                                class="w-full h-[500px] object-cover object-top"
+                                onerror="this.src='../assets/default-profile.jpg'">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column - Profile Information -->
+                <div class="md:col-span-2 space-y-6">
+                    <!-- Profile Header -->
+                    <div class="bg-white rounded-whatsapp shadow-whatsapp p-6 fade-in">
+                        <div class="flex justify-between items-start mb-6">
+                            <div>
+                                <div class="flex items-center gap-3 mb-2">
+                                    <h1 id="profileName" class="text-3xl font-semibold text-whatsapp-text-primary"></h1>
+                                    <!-- Verification Badge -->
+                                    <div id="verificationBadge" class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm flex items-center">
+                                        <i class="fas fa-check-circle mr-1"></i>
+                                        <span>Verified</span>
+                                    </div>
+                                    <!-- Status Badge -->
+                                    <div id="statusBadge" class="px-2 py-1 rounded-full text-sm flex items-center">
+                                        <i class="fas fa-circle mr-1"></i>
+                                        <span>Available</span>
+                                    </div>
+                                </div>
+                                <!-- Rating -->
+                                <div class="flex items-center gap-2 text-whatsapp-text-secondary">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-star text-yellow-400"></i>
+                                        <span id="rating" class="ml-1 font-medium">0.0</span>
+                                    </div>
+                                    <span>•</span>
+                                    <span id="reviewCount">0 reviews</span>
+                                </div>
+                            </div>
+                            <div class="flex gap-2">
+                                <button id="shareBtn" class="bg-white text-whatsapp-primary border border-whatsapp-primary p-2 rounded-full hover:bg-whatsapp-light transition-colors" title="Share Profile">
+                                    <i class="fas fa-share-alt"></i>
+                                </button>
+                                <button id="saveBtn" class="bg-white text-whatsapp-primary border border-whatsapp-primary p-2 rounded-full hover:bg-whatsapp-light transition-colors" title="Save Profile">
+                                    <i class="fas fa-bookmark"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Key Information Grid -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                            <!-- Age Group -->
+                            <div class="bg-whatsapp-light rounded-lg p-4">
+                                <div class="flex items-center space-x-3 mb-2">
+                                    <div class="bg-whatsapp-primary/10 p-2 rounded-full">
+                                        <i class="fas fa-user text-whatsapp-primary"></i>
+                                    </div>
+                                    <p class="text-sm text-whatsapp-text-secondary">Age Group</p>
+                                </div>
+                                <p id="ageGroup" class="font-medium text-whatsapp-text-primary text-lg"></p>
+                            </div>
+
+                            <!-- Education -->
+                            <div class="bg-whatsapp-light rounded-lg p-4">
+                                <div class="flex items-center space-x-3 mb-2">
+                                    <div class="bg-whatsapp-primary/10 p-2 rounded-full">
+                                        <i class="fas fa-graduation-cap text-whatsapp-primary"></i>
+                                    </div>
+                                    <p class="text-sm text-whatsapp-text-secondary">Education</p>
+                                </div>
+                                <p id="education" class="font-medium text-whatsapp-text-primary text-lg"></p>
+                            </div>
+
+                            <!-- Expected Salary -->
+                            <div class="bg-whatsapp-light rounded-lg p-4">
+                                <div class="flex items-center space-x-3 mb-2">
+                                    <div class="bg-whatsapp-primary/10 p-2 rounded-full">
+                                        <i class="fas fa-money-bill-wave text-whatsapp-primary"></i>
+                                    </div>
+                                    <p class="text-sm text-whatsapp-text-secondary">Expected Salary</p>
+                                </div>
+                                <p id="expectedSalary" class="font-medium text-whatsapp-text-primary text-lg"></p>
+                            </div>
+
+                            <!-- Available From -->
+                            <div class="bg-whatsapp-light rounded-lg p-4">
+                                <div class="flex items-center space-x-3 mb-2">
+                                    <div class="bg-whatsapp-primary/10 p-2 rounded-full">
+                                        <i class="fas fa-calendar-alt text-whatsapp-primary"></i>
+                                    </div>
+                                    <p class="text-sm text-whatsapp-text-secondary">Available From</p>
+                                </div>
+                                <p id="availableFrom" class="font-medium text-whatsapp-text-primary text-lg"></p>
+                            </div>
+                        </div>
+
+                        <!-- Location and Time -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Location -->
+                            <div class="bg-whatsapp-light rounded-lg p-4">
+                                <div class="flex items-center space-x-3 mb-2">
+                                    <div class="bg-whatsapp-primary/10 p-2 rounded-full">
+                                        <i class="fas fa-map-marker-alt text-whatsapp-primary"></i>
+                                    </div>
+                                    <p class="text-sm text-whatsapp-text-secondary">Location</p>
+                                </div>
+                                <p id="profileLocation" class="font-medium text-whatsapp-text-primary text-lg"></p>
+                            </div>
+
+                            <!-- Preferred Time -->
+                            <div class="bg-whatsapp-light rounded-lg p-4">
+                                <div class="flex items-center space-x-3 mb-2">
+                                    <div class="bg-whatsapp-primary/10 p-2 rounded-full">
+                                        <i class="fas fa-clock text-whatsapp-primary"></i>
+                                    </div>
+                                    <p class="text-sm text-whatsapp-text-secondary">Preferred Time</p>
+                                </div>
+                                <p id="preferredTime" class="font-medium text-whatsapp-text-primary text-lg"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Profile Details -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Basic Information -->
+                        <div class="bg-white rounded-whatsapp shadow-whatsapp p-6 slide-up">
+                            <h2 class="text-lg font-semibold text-whatsapp-text-primary mb-4">Basic Information</h2>
+                            <div class="space-y-4">
+                                <div class="flex justify-between">
+                                    <span class="text-whatsapp-text-secondary">Gender</span>
+                                    <span id="gender" class="text-whatsapp-text-primary font-medium"></span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-whatsapp-text-secondary">Marital Status</span>
+                                    <span id="maritalStatus" class="text-whatsapp-text-primary font-medium"></span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-whatsapp-text-secondary">ID Verification</span>
+                                    <span id="idVerification" class="text-green-600 font-medium">Verified</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Work Information -->
+                        <div class="bg-white rounded-whatsapp shadow-whatsapp p-6 slide-up">
+                            <h2 class="text-lg font-semibold text-whatsapp-text-primary mb-4">Work Information</h2>
+                            <div class="space-y-4">
+                                <div class="flex justify-between">
+                                    <span class="text-whatsapp-text-secondary">Experience</span>
+                                    <span id="experience" class="text-whatsapp-text-primary font-medium"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Skills -->
+                        <div class="bg-white rounded-whatsapp shadow-whatsapp p-6 slide-up">
+                            <h2 class="text-lg font-semibold text-whatsapp-text-primary mb-4">Skills</h2>
+                            <div id="skills" class="flex flex-wrap gap-2"></div>
+                        </div>
+
+                        <!-- Languages -->
+                        <div class="bg-white rounded-whatsapp shadow-whatsapp p-6 slide-up">
+                            <h2 class="text-lg font-semibold text-whatsapp-text-primary mb-4">Languages</h2>
+                            <div id="languages" class="flex flex-wrap gap-2"></div>
+                        </div>
+
+                        <!-- Reviews -->
+                        <div class="bg-white rounded-whatsapp shadow-whatsapp p-6 slide-up md:col-span-2">
+                            <div class="flex justify-between items-center mb-4">
+                                <h2 class="text-lg font-semibold text-whatsapp-text-primary">Reviews</h2>
+                                <button id="writeReviewBtn" class="text-whatsapp-primary text-sm hover:text-whatsapp-secondary transition-colors">
+                                    Write a Review
+                                </button>
+                            </div>
+                            <div id="reviews" class="space-y-4">
+                                <!-- Reviews will be dynamically added here -->
+                            </div>
+                        </div>
+
+                        <!-- About Me -->
+                        <div class="bg-white rounded-whatsapp shadow-whatsapp p-6 slide-up md:col-span-2">
+                            <h2 class="text-lg font-semibold text-whatsapp-text-primary mb-4">About Me</h2>
+                            <p id="about" class="text-whatsapp-text-primary mb-6"></p>
+                            <div class="flex flex-wrap gap-3">
+                                <button id="unlockContactBtn" class="bg-whatsapp-primary text-white px-6 py-2 rounded-whatsapp hover:bg-whatsapp-secondary transition-colors flex items-center">
+                                    <i class="fas fa-lock mr-2"></i> Unlock Contact
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Similar Profiles Section -->
+                    <div class="mt-8">
+                        <h2 class="text-xl font-semibold text-whatsapp-text-primary mb-6">Similar Profiles</h2>
+                        <div id="similarProfiles" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <!-- Similar profile cards will be dynamically added here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Action Button (Mobile) -->
+    <div class="fixed bottom-6 right-6 md:hidden">
+        <div class="flex flex-col items-end space-y-4">
+            <button id="mobileShareBtn" class="bg-white text-whatsapp-primary p-3 rounded-full shadow-float" title="Share Profile">
+                <i class="fas fa-share-alt"></i>
+            </button>
+            <button id="mobileSaveBtn" class="bg-white text-whatsapp-primary p-3 rounded-full shadow-float" title="Save Profile">
+                <i class="fas fa-bookmark"></i>
+            </button>
+            <button id="mobileUnlockBtn" class="bg-whatsapp-primary text-white p-4 rounded-full shadow-float" title="Unlock Contact">
+                <i class="fas fa-lock"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Contact Modal -->
+    <div id="contactModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-whatsapp p-6 max-w-2xl w-full mx-4 slide-up">
+            <h3 class="text-xl font-semibold text-whatsapp-text-primary mb-4">Unlock Contact Information</h3>
+            <p class="text-whatsapp-text-secondary mb-6">Choose a plan to view contact information:</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <!-- Single Contact Plan -->
+                <div class="border rounded-whatsapp p-4 hover:border-whatsapp-primary cursor-pointer transition-colors" data-plan="basic">
+                    <div class="text-center">
+                        <h4 class="font-semibold text-lg mb-2">Single Contact</h4>
+                        <p class="text-2xl font-bold text-whatsapp-primary mb-2">NRs 5</p>
+                        <p class="text-sm text-whatsapp-text-secondary mb-4">7 days access</p>
+                        <ul class="text-sm text-whatsapp-text-secondary space-y-2 mb-4">
+                            <li class="flex items-center">
+                                <i class="fas fa-check text-green-500 mr-2"></i>
+                                1 Contact Access
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-check text-green-500 mr-2"></i>
+                                Valid for 7 days
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-check text-green-500 mr-2"></i>
+                                Basic Support
+                            </li>
+                        </ul>
+                        <button class="select-plan-btn w-full bg-whatsapp-primary text-white px-4 py-2 rounded-whatsapp hover:bg-whatsapp-secondary transition-colors">
+                            Select Plan
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Multiple Contacts Plan -->
+                <div class="border rounded-whatsapp p-4 hover:border-whatsapp-primary cursor-pointer transition-colors" data-plan="premium">
+                    <div class="text-center">
+                        <h4 class="font-semibold text-lg mb-2">Multiple Contacts</h4>
+                        <p class="text-2xl font-bold text-whatsapp-primary mb-2">NRs 10</p>
+                        <p class="text-sm text-whatsapp-text-secondary mb-4">14 days access</p>
+                        <ul class="text-sm text-whatsapp-text-secondary space-y-2 mb-4">
+                            <li class="flex items-center">
+                                <i class="fas fa-check text-green-500 mr-2"></i>
+                                3 Contact Access
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-check text-green-500 mr-2"></i>
+                                Valid for 14 days
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-check text-green-500 mr-2"></i>
+                                Priority Support
+                            </li>
+                        </ul>
+                        <button class="select-plan-btn w-full bg-whatsapp-primary text-white px-4 py-2 rounded-whatsapp hover:bg-whatsapp-secondary transition-colors">
+                            Select Plan
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Extended Access Plan -->
+                <div class="border rounded-whatsapp p-4 hover:border-whatsapp-primary cursor-pointer transition-colors" data-plan="enterprise">
+                    <div class="text-center">
+                        <h4 class="font-semibold text-lg mb-2">Extended Access</h4>
+                        <p class="text-2xl font-bold text-whatsapp-primary mb-2">NRs 15</p>
+                        <p class="text-sm text-whatsapp-text-secondary mb-4">21 days access</p>
+                        <ul class="text-sm text-whatsapp-text-secondary space-y-2 mb-4">
+                            <li class="flex items-center">
+                                <i class="fas fa-check text-green-500 mr-2"></i>
+                                5 Contact Access
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-check text-green-500 mr-2"></i>
+                                Valid for 21 days
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-check text-green-500 mr-2"></i>
+                                Priority Support
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-check text-green-500 mr-2"></i>
+                                Extended Support
+                            </li>
+                        </ul>
+                        <button class="select-plan-btn w-full bg-whatsapp-primary text-white px-4 py-2 rounded-whatsapp hover:bg-whatsapp-secondary transition-colors">
+                            Select Plan
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex space-x-3">
+                <button id="proceedPaymentBtn" class="flex-1 bg-whatsapp-primary text-white px-6 py-3 rounded-whatsapp hover:bg-whatsapp-secondary transition-colors" disabled>
+                    Proceed to Payment
+                </button>
+                <button id="closeModalBtn" class="flex-1 bg-white text-whatsapp-text-primary border border-whatsapp-text-primary px-6 py-3 rounded-whatsapp hover:bg-whatsapp-light transition-colors">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Review Modal -->
+    <div id="reviewModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-whatsapp p-6 max-w-md w-full mx-4 slide-up">
+            <h3 class="text-xl font-semibold text-whatsapp-text-primary mb-4">Write a Review</h3>
+            <form id="reviewForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-whatsapp-text-secondary mb-2">Rating</label>
+                    <div class="flex items-center space-x-2">
+                        <div class="rating-stars flex space-x-1">
+                            <i class="fas fa-star text-gray-300 text-2xl cursor-pointer hover:text-yellow-400" data-rating="1"></i>
+                            <i class="fas fa-star text-gray-300 text-2xl cursor-pointer hover:text-yellow-400" data-rating="2"></i>
+                            <i class="fas fa-star text-gray-300 text-2xl cursor-pointer hover:text-yellow-400" data-rating="3"></i>
+                            <i class="fas fa-star text-gray-300 text-2xl cursor-pointer hover:text-yellow-400" data-rating="4"></i>
+                            <i class="fas fa-star text-gray-300 text-2xl cursor-pointer hover:text-yellow-400" data-rating="5"></i>
+                        </div>
+                        <span id="ratingValue" class="text-whatsapp-text-secondary">0/5</span>
+                    </div>
+                </div>
+                <div>
+                    <label for="reviewComment" class="block text-sm font-medium text-whatsapp-text-secondary mb-2">Your Review</label>
+                    <textarea id="reviewComment" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-whatsapp focus:outline-none focus:ring-2 focus:ring-whatsapp-primary focus:border-transparent" placeholder="Share your experience..."></textarea>
+                </div>
+                <div class="flex space-x-3">
+                    <button type="submit" class="flex-1 bg-whatsapp-primary text-white px-6 py-2 rounded-whatsapp hover:bg-whatsapp-secondary transition-colors">
+                        Submit Review
+                    </button>
+                    <button type="button" id="closeReviewModalBtn" class="flex-1 bg-white text-whatsapp-text-primary border border-whatsapp-text-primary px-6 py-2 rounded-whatsapp hover:bg-whatsapp-light transition-colors">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Supabase client
+        const supabaseUrl = 'https://fdgqqxyyofjnkhswkwcq.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZkZ3FxeHl5b2Zqbmtoc3drd2NxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQwMjQyMTMsImV4cCI6MjA1OTYwMDIxM30.YyJLLu3r2a7Mh7ny0ie-YzzLfPh5PdrJJHnBFBxWqVE';
+        const { createClient } = supabase;
+        const supabaseClient = createClient(supabaseUrl, supabaseKey);
+
+        // Get profile ID from URL parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const profileId = urlParams.get('id');
+        console.log('Retrieved profile ID from URL:', profileId);
+
+        if (!profileId) {
+            console.log('No profile ID found in URL');
+            showError('No profile found. Please create a new profile.');
+        } else {
+            console.log('Found profile ID, attempting to fetch profile...');
+            fetchProfile();
+        }
+
+        // Fetch profile data
+        async function fetchProfile() {
+            try {
+                console.log('Starting profile fetch for ID:', profileId);
+                console.log('Supabase URL:', supabaseUrl);
+                
+                const { data, error } = await supabaseClient
+                    .from('maid_profiles')
+                    .select('*')
+                    .eq('id', profileId)
+                    .single();
+
+                console.log('Supabase response:', { data, error });
+
+                if (error) {
+                    console.error('Supabase error during profile fetch:', error);
+                    throw error;
+                }
+                
+                if (!data) {
+                    console.error('No profile data found for ID:', profileId);
+                    throw new Error('Profile not found');
+                }
+
+                console.log('Profile data received:', data);
+                displayProfile(data);
+            } catch (error) {
+                console.error('Error fetching profile:', error);
+                showError(`Error loading profile: ${error.message}`);
+            }
+        }
+
+        function showError(message) {
+            console.log('Showing error:', message);
+            document.getElementById('loadingMessage').classList.add('hidden');
+            document.getElementById('errorMessage').classList.remove('hidden');
+            document.getElementById('errorText').textContent = message;
+        }
+
+        function displayProfile(profile) {
+            console.log('Displaying profile:', profile);
+            document.getElementById('loadingMessage').classList.add('hidden');
+            document.getElementById('profileContent').classList.remove('hidden');
+
+            // Set profile photo
+            const profilePhoto = document.getElementById('profilePhoto');
+            if (profile.profile_photo) {
+                profilePhoto.src = profile.profile_photo;
+            }
+
+            // Set basic information
+            document.getElementById('profileName').textContent = profile.full_name || 'Anonymous';
+            
+            // Set status badge
+            const statusBadge = document.getElementById('statusBadge');
+            if (profile.is_hired) {
+                statusBadge.className = 'bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-sm flex items-center';
+                statusBadge.innerHTML = '<i class="fas fa-circle mr-1"></i><span>Hired</span>';
+                // Hide action buttons when hired
+                document.getElementById('unlockContactBtn').classList.add('hidden');
+                document.getElementById('mobileUnlockBtn').classList.add('hidden');
+            } else if (profile.is_available === false) {
+                statusBadge.className = 'bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-sm flex items-center';
+                statusBadge.innerHTML = '<i class="fas fa-circle mr-1"></i><span>Not Available</span>';
+            } else {
+                statusBadge.className = 'bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm flex items-center';
+                statusBadge.innerHTML = '<i class="fas fa-circle mr-1"></i><span>Available</span>';
+            }
+
+            // Set location with proper formatting
+            const location = [];
+            if (profile.major_city) location.push(profile.major_city);
+            if (profile.newroad) location.push(profile.newroad);
+            document.getElementById('profileLocation').textContent = location.join(', ') || 'Location not specified';
+
+            // Set preferred working time with proper formatting
+            let preferredTime = 'Flexible';
+            if (profile.preferred_time) {
+                if (profile.preferred_time === 'morning') {
+                    preferredTime = 'Morning (6 AM - 12 PM)';
+                } else if (profile.preferred_time === 'afternoon') {
+                    preferredTime = 'Afternoon (12 PM - 6 PM)';
+                } else if (profile.preferred_time === 'evening') {
+                    preferredTime = 'Evening (6 PM - 12 AM)';
+                } else if (profile.preferred_time === 'night') {
+                    preferredTime = 'Night (12 AM - 6 AM)';
+                } else if (profile.preferred_time === 'flexible') {
+                    preferredTime = 'Flexible';
+                } else {
+                    preferredTime = profile.preferred_time;
+                }
+            }
+            document.getElementById('preferredTime').textContent = preferredTime;
+
+            // Set other profile information
+            document.getElementById('ageGroup').textContent = profile.age_group || 'Not specified';
+            document.getElementById('gender').textContent = profile.gender || 'Not specified';
+            document.getElementById('maritalStatus').textContent = profile.marital_status || 'Not specified';
+            document.getElementById('education').textContent = profile.education || 'Not specified';
+            document.getElementById('expectedSalary').textContent = profile.expected_salary || 'Negotiable';
+            document.getElementById('experience').textContent = `${profile.experience || '0'} years`;
+            document.getElementById('about').textContent = profile.about || 'No description available.';
+
+            // Set Available From date
+            const availableFromElement = document.getElementById('availableFrom');
+            if (profile.available_from) {
+                // Format the available_from text
+                let availableText = profile.available_from;
+                if (availableText === 'Immediate') {
+                    availableText = 'Available Immediately';
+                } else if (availableText === 'Within a week') {
+                    availableText = 'Available Within a Week';
+                } else if (availableText === 'Within 2 weeks') {
+                    availableText = 'Available Within 2 Weeks';
+                } else if (availableText === 'Within a month') {
+                    availableText = 'Available Within a Month';
+                } else if (availableText === 'After a month') {
+                    availableText = 'Available After a Month';
+                }
+                availableFromElement.textContent = availableText;
+            } else {
+                availableFromElement.textContent = 'Not specified';
+            }
+
+            // Set skills
+            const skillsContainer = document.getElementById('skills');
+            if (profile.skills && profile.skills.length > 0) {
+                skillsContainer.innerHTML = profile.skills.map(skill => `
+                    <span class="bg-whatsapp-primary/10 text-whatsapp-primary px-3 py-1 rounded-full text-sm">
+                        ${skill}
+                    </span>
+                `).join('');
+            } else {
+                skillsContainer.innerHTML = '<span class="text-whatsapp-text-secondary">No skills listed</span>';
+            }
+
+            // Set languages
+            const languagesContainer = document.getElementById('languages');
+            if (profile.languages && profile.languages.length > 0) {
+                languagesContainer.innerHTML = profile.languages.map(language => `
+                    <span class="bg-whatsapp-primary/10 text-whatsapp-primary px-3 py-1 rounded-full text-sm">
+                        ${language}
+                    </span>
+                `).join('');
+            } else {
+                languagesContainer.innerHTML = '<span class="text-whatsapp-text-secondary">No languages listed</span>';
+            }
+
+            // Update verification status
+            const verificationBadge = document.getElementById('verificationBadge');
+            if (profile.is_verified) {
+                verificationBadge.classList.remove('hidden');
+            } else {
+                verificationBadge.classList.add('hidden');
+            }
+
+            // Update rating
+            document.getElementById('rating').textContent = profile.rating?.toFixed(1) || '0.0';
+            document.getElementById('reviewCount').textContent = `${profile.review_count || 0} reviews`;
+
+            // Display reviews
+            if (profile.reviews) {
+                displayReviews(profile.reviews);
+            }
+
+            // Fetch similar profiles
+            fetchSimilarProfiles(profile);
+        }
+
+        // Contact Unlock functionality
+        let selectedPlan = null;
+        const planCards = document.querySelectorAll('[data-plan]');
+        const selectPlanBtns = document.querySelectorAll('.select-plan-btn');
+        const proceedPaymentBtn = document.getElementById('proceedPaymentBtn');
+
+        function selectPlan(planCard, plan) {
+            // Remove selection from all cards
+            planCards.forEach(card => {
+                card.classList.remove('border-whatsapp-primary', 'bg-whatsapp-light');
+                const btn = card.querySelector('.select-plan-btn');
+                btn.classList.remove('bg-whatsapp-secondary');
+                btn.classList.add('bg-whatsapp-primary');
+            });
+            
+            // Add selection to clicked card
+            planCard.classList.add('border-whatsapp-primary', 'bg-whatsapp-light');
+            const selectedBtn = planCard.querySelector('.select-plan-btn');
+            selectedBtn.classList.remove('bg-whatsapp-primary');
+            selectedBtn.classList.add('bg-whatsapp-secondary');
+            
+            selectedPlan = plan;
+            proceedPaymentBtn.disabled = false;
+        }
+
+        // Add click handlers only for the buttons
+        planCards.forEach(card => {
+            const plan = card.dataset.plan;
+            const selectBtn = card.querySelector('.select-plan-btn');
+            
+            selectBtn.addEventListener('click', () => {
+                selectPlan(card, plan);
+            });
+        });
+
+        // Initially disable the proceed button
+        proceedPaymentBtn.disabled = true;
+
+        // Update plan details
+        const planDetails = {
+            basic: { 
+                price: 5, 
+                duration: 7, 
+                type: 'days',
+                contacts: 1
+            },
+            premium: { 
+                price: 10, 
+                duration: 14, 
+                type: 'days',
+                contacts: 3
+            },
+            enterprise: { 
+                price: 15, 
+                duration: 21, 
+                type: 'days',
+                contacts: 5
+            }
+        };
+
+        proceedPaymentBtn.addEventListener('click', async () => {
+            if (!selectedPlan) {
+                alert('Please select a plan');
+                return;
+            }
+
+            try {
+                console.log('Starting payment process...');
+                
+                // Check if user is authenticated
+                const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
+                console.log('Auth user:', user);
+                
+                if (authError) {
+                    console.error('Auth error:', authError);
+                    throw new Error('Authentication error: ' + authError.message);
+                }
+
+                if (!user) {
+                    console.log('No authenticated user found');
+                    alert('Please sign in to proceed with payment');
+                    window.location.href = '../auth/login.html';
+                    return;
+                }
+
+                const userId = user.id;
+                console.log('User ID:', userId);
+
+                // Verify maid profile exists
+                const { data: maidProfile, error: maidError } = await supabaseClient
+                    .from('maid_profiles')
+                    .select('id')
+                    .eq('id', profileId)
+                    .single();
+
+                if (maidError) {
+                    console.error('Error verifying maid profile:', maidError);
+                    throw new Error('Maid profile verification failed');
+                }
+
+                if (!maidProfile) {
+                    console.log('Maid profile not found');
+                    alert('Profile not found. Please try again.');
+                    return;
+                }
+
+                console.log('Maid profile verified:', maidProfile);
+
+                const plan = planDetails[selectedPlan];
+                console.log('Selected plan:', plan);
+
+                // Create payment record
+                console.log('Creating payment record with user_id:', userId);
+                console.log('Maid ID:', maidProfile.id);
+                
+                // First check if a pending payment already exists
+                const { data: existingPayment, error: checkError } = await supabaseClient
+                    .from('payments')
+                    .select('id, status')
+                    .eq('user_id', userId)
+                    .eq('maid_id', maidProfile.id)
+                    .eq('status', 'pending')
+                    .single();
+
+                if (checkError && checkError.code !== 'PGRST116') {
+                    console.error('Error checking existing payment:', checkError);
+                    throw new Error('Error checking payment status');
+                }
+
+                if (existingPayment) {
+                    console.log('Existing pending payment found:', existingPayment);
+                    alert('You already have a pending payment for this profile. Please complete or cancel the existing payment first.');
+                    return;
+                }
+
+                // Create payment with minimal required fields
+                const paymentData = {
+                    user_id: userId,
+                    maid_id: maidProfile.id,
+                    type: selectedPlan,
+                    amount: plan.price,
+                    status: 'pending',
+                    created_at: new Date().toISOString()
+                };
+                console.log('Payment data:', paymentData);
+
+                const { data: payment, error: paymentError } = await supabaseClient
+                    .from('payments')
+                    .insert([paymentData])
+                    .select()
+                    .single();
+
+                if (paymentError) {
+                    console.error('Error creating payment record:', paymentError);
+                    if (paymentError.code === '23503') {
+                        console.error('Foreign key violation details:', paymentError);
+                        // Log the exact error message for debugging
+                        console.error('Full error message:', paymentError.message);
+                        throw new Error('Unable to create payment. Please try again or contact support.');
+                    }
+                    throw paymentError;
+                }
+                console.log('Payment record created:', payment);
+
+                // Initialize Khalti Checkout
+                console.log('Initializing Khalti Checkout...');
+                const config = {
+                    publicKey: 'live_public_key_6e625b0e30734036b528b0c9e4f34e34',
+                    productIdentity: payment.id,
+                    productName: `${selectedPlan} Plan - Contact Access`,
+                    productUrl: window.location.href,
+                    eventHandler: {
+                        onSuccess(payload) {
+                            console.log('Payment successful:', payload);
+                            handleSuccessfulPayment(payload, payment.id, userId, plan);
+                        },
+                        onError(error) {
+                            console.error('Payment failed:', error);
+                            alert('Payment failed: ' + (error.message || 'Please try again.'));
+                        },
+                        onClose() {
+                            console.log('Payment window closed');
+                        }
+                    },
+                    paymentPreference: ['KHALTI', 'EBANKING', 'MOBILE_BANKING', 'CONNECT_IPS', 'SCT'],
+                };
+
+                console.log('Khalti config:', config);
+                const checkout = new KhaltiCheckout(config);
+                
+                // Convert amount to paisa (multiply by 100)
+                const amountInPaisa = Math.round(plan.price * 100);
+                console.log('Amount in paisa:', amountInPaisa);
+                
+                checkout.show({ amount: amountInPaisa });
+
+            } catch (error) {
+                console.error('Error in payment process:', error);
+                // Show more specific error message
+                if (error.message) {
+                    alert('Payment Error: ' + error.message);
+                } else {
+                    alert('Failed to initiate payment. Please try again.');
+                }
+            }
+        });
+
+        // Handle successful payment
+        async function handleSuccessfulPayment(payload, paymentId, userId, plan) {
+            try {
+                console.log('Processing successful payment...');
+                console.log('Payment payload:', payload);
+                console.log('Payment ID:', paymentId);
+                console.log('User ID:', userId);
+                console.log('Plan:', plan);
+
+                // Update payment record
+                console.log('Updating payment record...');
+                const { error: updateError } = await supabaseClient
+                    .from('payments')
+                    .update({ 
+                        status: 'completed'
+                    })
+                    .eq('id', paymentId);
+
+                if (updateError) {
+                    console.error('Error updating payment record:', updateError);
+                    throw updateError;
+                }
+                console.log('Payment record updated successfully');
+
+                // Create access record
+                console.log('Creating access record...');
+                const { error: accessError } = await supabaseClient
+                    .from('contact_access')
+                    .insert([{
+                        user_id: userId,
+                        profile_id: profileId,
+                        plan_type: selectedPlan,
+                        contacts_remaining: plan.contacts - 1,
+                        expires_at: new Date(Date.now() + (plan.duration * 86400000)).toISOString(),
+                        created_at: new Date().toISOString()
+                    }]);
+
+                if (accessError) {
+                    console.error('Error creating access record:', accessError);
+                    throw accessError;
+                }
+                console.log('Access record created successfully');
+
+                hideContactModal();
+                showPaymentSuccess();
+                showContactInformation();
+            } catch (error) {
+                console.error('Error in successful payment handling:', error);
+                alert('Payment successful but there was an error updating your access. Please contact support with payment ID: ' + paymentId);
+            }
+        }
+
+        // Show payment success message
+        function showPaymentSuccess() {
+            const successModal = document.createElement('div');
+            successModal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            successModal.innerHTML = `
+                <div class="bg-white rounded-whatsapp p-6 max-w-md w-full mx-4 slide-up">
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-check text-3xl text-green-500"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold text-whatsapp-text-primary mb-2">Payment Successful!</h3>
+                        <p class="text-whatsapp-text-secondary mb-6">Your contact access has been activated.</p>
+                        <button class="w-full bg-whatsapp-primary text-white px-6 py-3 rounded-whatsapp hover:bg-whatsapp-secondary transition-colors" onclick="this.parentElement.parentElement.parentElement.remove()">
+                            Continue
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(successModal);
+        }
+
+        function showContactInformation() {
+            // Fetch and display contact information
+            fetchProfile().then(async () => {
+                const { data: profile } = await supabaseClient
+                    .from('maid_profiles')
+                    .select('phone, email')
+                    .eq('id', profileId)
+                    .single();
+
+                if (profile) {
+                    // Create contact info modal
+                    const contactInfoModal = document.createElement('div');
+                    contactInfoModal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+                    contactInfoModal.innerHTML = `
+                        <div class="bg-white rounded-whatsapp p-6 max-w-md w-full mx-4 slide-up">
+                            <h3 class="text-xl font-semibold text-whatsapp-text-primary mb-4">Contact Information</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <p class="text-sm text-whatsapp-text-secondary mb-1">Phone</p>
+                                    <p class="font-medium">${profile.phone || 'Not available'}</p>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-whatsapp-text-secondary mb-1">Email</p>
+                                    <p class="font-medium">${profile.email || 'Not available'}</p>
+                                </div>
+                            </div>
+                            <button class="w-full mt-6 bg-whatsapp-primary text-white px-6 py-3 rounded-whatsapp hover:bg-whatsapp-secondary transition-colors" onclick="this.parentElement.parentElement.remove()">
+                                Close
+                            </button>
+                        </div>
+                    `;
+                    document.body.appendChild(contactInfoModal);
+                }
+            });
+        }
+
+        // Contact Unlock Modal
+        const contactModal = document.getElementById('contactModal');
+        const unlockContactBtn = document.getElementById('unlockContactBtn');
+        const mobileUnlockBtn = document.getElementById('mobileUnlockBtn');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+
+        function showContactModal() {
+            contactModal.classList.remove('hidden');
+            contactModal.classList.add('flex');
+        }
+
+        function hideContactModal() {
+            contactModal.classList.add('hidden');
+            contactModal.classList.remove('flex');
+        }
+
+        unlockContactBtn.addEventListener('click', showContactModal);
+        mobileUnlockBtn.addEventListener('click', showContactModal);
+        closeModalBtn.addEventListener('click', hideContactModal);
+
+        // Share functionality
+        const shareBtn = document.getElementById('shareBtn');
+        const mobileShareBtn = document.getElementById('mobileShareBtn');
+
+        async function shareProfile() {
+            try {
+                await navigator.share({
+                    title: 'Maid Profile - CityMaid',
+                    text: 'Check out this maid profile on CityMaid!',
+                    url: window.location.href
+                });
+            } catch (error) {
+                console.log('Error sharing:', error);
+            }
+        }
+
+        shareBtn.addEventListener('click', shareProfile);
+        mobileShareBtn.addEventListener('click', shareProfile);
+
+        // Save functionality
+        const saveBtn = document.getElementById('saveBtn');
+        const mobileSaveBtn = document.getElementById('mobileSaveBtn');
+
+        function toggleSave() {
+            const isSaved = saveBtn.classList.contains('text-whatsapp-primary');
+            saveBtn.classList.toggle('text-whatsapp-primary');
+            saveBtn.classList.toggle('text-whatsapp-secondary');
+            mobileSaveBtn.classList.toggle('text-whatsapp-primary');
+            mobileSaveBtn.classList.toggle('text-whatsapp-secondary');
+            // Add save logic here
+        }
+
+        saveBtn.addEventListener('click', toggleSave);
+        mobileSaveBtn.addEventListener('click', toggleSave);
+
+        // Function to fetch and display similar profiles
+        async function fetchSimilarProfiles(currentProfile) {
+            try {
+                const { data: similarProfiles, error } = await supabaseClient
+                    .from('maid_profiles')
+                    .select('*')
+                    .neq('id', currentProfile.id) // Exclude current profile
+                    .eq('major_city', currentProfile.major_city) // Same city
+                    .limit(6); // Limit to 6 similar profiles
+
+                if (error) throw error;
+
+                const similarProfilesContainer = document.getElementById('similarProfiles');
+                if (similarProfiles && similarProfiles.length > 0) {
+                    similarProfilesContainer.innerHTML = similarProfiles.map(profile => `
+                        <div class="bg-white rounded-whatsapp shadow-whatsapp overflow-hidden hover:shadow-whatsapp-hover transition-shadow">
+                            <div class="relative">
+                                <img src="${profile.profile_photo || '../assets/default-profile.jpg'}" 
+                                     alt="${profile.full_name}" 
+                                     class="w-full h-[250px] object-cover object-top">
+                                <div class="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-sm text-whatsapp-text-primary shadow-sm">
+                                    <i class="fas fa-map-marker-alt text-whatsapp-primary mr-1"></i>
+                                    ${profile.major_city}${profile.newroad ? `, ${profile.newroad}` : ''}
+                                </div>
+                            </div>
+                            <div class="p-4">
+                                <h3 class="font-semibold text-whatsapp-text-primary mb-2">${profile.full_name}</h3>
+                                <div class="flex items-center justify-between text-sm text-whatsapp-text-secondary mb-3">
+                                    <span>${profile.age_group || 'Age not specified'}</span>
+                                    <span>${profile.education || 'Education not specified'}</span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-whatsapp-primary font-medium">${profile.expected_salary || 'Salary negotiable'}</span>
+                                    <a href="find-maids.html?id=${profile.id}" 
+                                       class="bg-whatsapp-primary text-white px-4 py-1 rounded-whatsapp text-sm hover:bg-whatsapp-secondary transition-colors">
+                                        View Profile
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    similarProfilesContainer.innerHTML = `
+                        <div class="col-span-full text-center py-8 text-whatsapp-text-secondary">
+                            No similar profiles found
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error fetching similar profiles:', error);
+                document.getElementById('similarProfiles').innerHTML = `
+                    <div class="col-span-full text-center py-8 text-red-500">
+                        Error loading similar profiles
+                    </div>
+                `;
+            }
+        }
+
+        // Review functionality
+        const reviewModal = document.getElementById('reviewModal');
+        const writeReviewBtn = document.getElementById('writeReviewBtn');
+        const closeReviewModalBtn = document.getElementById('closeReviewModalBtn');
+        const reviewForm = document.getElementById('reviewForm');
+        const ratingStars = document.querySelectorAll('.rating-stars i');
+        const ratingValue = document.getElementById('ratingValue');
+        let selectedRating = 0;
+
+        function showReviewModal() {
+            reviewModal.classList.remove('hidden');
+            reviewModal.classList.add('flex');
+            // Reset form
+            reviewForm.reset();
+            selectedRating = 0;
+            updateRatingDisplay();
+        }
+
+        function hideReviewModal() {
+            reviewModal.classList.add('hidden');
+            reviewModal.classList.remove('flex');
+        }
+
+        function updateRatingDisplay() {
+            ratingStars.forEach(star => {
+                const rating = parseInt(star.dataset.rating);
+                if (rating <= selectedRating) {
+                    star.classList.remove('text-gray-300');
+                    star.classList.add('text-yellow-400');
+                } else {
+                    star.classList.add('text-gray-300');
+                    star.classList.remove('text-yellow-400');
+                }
+            });
+            ratingValue.textContent = `${selectedRating}/5`;
+        }
+
+        ratingStars.forEach(star => {
+            star.addEventListener('click', () => {
+                selectedRating = parseInt(star.dataset.rating);
+                updateRatingDisplay();
+            });
+
+            star.addEventListener('mouseover', () => {
+                const rating = parseInt(star.dataset.rating);
+                ratingStars.forEach(s => {
+                    const r = parseInt(s.dataset.rating);
+                    if (r <= rating) {
+                        s.classList.remove('text-gray-300');
+                        s.classList.add('text-yellow-400');
+                    } else {
+                        s.classList.add('text-gray-300');
+                        s.classList.remove('text-yellow-400');
+                    }
+                });
+            });
+
+            star.addEventListener('mouseout', () => {
+                updateRatingDisplay();
+            });
+        });
+
+        writeReviewBtn.addEventListener('click', showReviewModal);
+        closeReviewModalBtn.addEventListener('click', hideReviewModal);
+
+        reviewForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (selectedRating === 0) {
+                alert('Please select a rating');
+                return;
+            }
+
+            const comment = document.getElementById('reviewComment').value.trim();
+            if (!comment) {
+                alert('Please write a review comment');
+                return;
+            }
+
+            try {
+                console.log('Starting review submission...');
+                const { data: { user } } = await supabaseClient.auth.getUser();
+                if (!user) {
+                    console.log('No authenticated user found');
+                    alert('Please sign in to write a review');
+                    return;
+                }
+                console.log('User authenticated:', user.id);
+
+                const review = {
+                    profile_id: profileId,
+                    reviewer_id: user.id,
+                    reviewer_name: user.email.split('@')[0],
+                    rating: selectedRating,
+                    comment: comment,
+                    created_at: new Date().toISOString()
+                };
+                console.log('Submitting review:', review);
+
+                const { error: insertError } = await supabaseClient
+                    .from('reviews')
+                    .insert([review]);
+
+                if (insertError) {
+                    console.error('Error inserting review:', insertError);
+                    throw insertError;
+                }
+                console.log('Review inserted successfully');
+
+                // Update profile rating
+                console.log('Fetching all reviews for profile...');
+                const { data: reviews, error: fetchError } = await supabaseClient
+                    .from('reviews')
+                    .select('rating')
+                    .eq('profile_id', profileId);
+
+                if (fetchError) {
+                    console.error('Error fetching reviews:', fetchError);
+                    throw fetchError;
+                }
+                console.log('Reviews fetched:', reviews);
+
+                const averageRating = reviews.reduce((acc, curr) => acc + curr.rating, 0) / reviews.length;
+                console.log('Calculated average rating:', averageRating);
+
+                const { error: updateError } = await supabaseClient
+                    .from('maid_profiles')
+                    .update({
+                        rating: averageRating,
+                        review_count: reviews.length
+                    })
+                    .eq('id', profileId);
+
+                if (updateError) {
+                    console.error('Error updating profile rating:', updateError);
+                    throw updateError;
+                }
+                console.log('Profile rating updated successfully');
+
+                hideReviewModal();
+                await fetchProfile(); // Refresh profile to show new review
+                console.log('Profile refreshed with new review');
+            } catch (error) {
+                console.error('Error in review submission process:', error);
+                alert('Failed to submit review. Please try again.');
+            }
+        });
+
+        // Update displayReviews function to handle review display
+        function displayReviews(reviews) {
+            const reviewsContainer = document.getElementById('reviews');
+            if (reviews && reviews.length > 0) {
+                reviewsContainer.innerHTML = reviews.map(review => `
+                    <div class="border-b border-gray-100 pb-4 last:border-0">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 rounded-full bg-whatsapp-primary/10 flex items-center justify-center text-whatsapp-primary mr-2">
+                                    ${review.reviewer_name.charAt(0).toUpperCase()}
+                                </div>
+                                <div>
+                                    <p class="font-medium text-whatsapp-text-primary">${review.reviewer_name}</p>
+                                    <p class="text-sm text-whatsapp-text-secondary">${new Date(review.created_at).toLocaleDateString()}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center">
+                                ${Array(5).fill().map((_, i) => `
+                                    <i class="fas fa-star ${i < review.rating ? 'text-yellow-400' : 'text-gray-300'}"></i>
+                                `).join('')}
+                            </div>
+                        </div>
+                        <p class="text-whatsapp-text-primary">${review.comment}</p>
+                    </div>
+                `).join('');
+            } else {
+                reviewsContainer.innerHTML = `
+                    <div class="text-center py-4 text-whatsapp-text-secondary">
+                        No reviews yet. Be the first to review!
+                    </div>
+                `;
+            }
+        }
+
+        // Add event listeners for status updates
+        document.addEventListener('DOMContentLoaded', function() {
+            // Listen for status changes from the admin panel
+            const statusChannel = supabaseClient
+                .channel('profile-status')
+                .on('postgres_changes', 
+                    { 
+                        event: 'UPDATE', 
+                        schema: 'public', 
+                        table: 'maid_profiles',
+                        filter: `id=eq.${profileId}`
+                    }, 
+                    (payload) => {
+                        console.log('Profile status updated:', payload);
+                        fetchProfile();
+                    }
+                )
+                .subscribe();
+        });
+    </script>
+</body>
+</html> 

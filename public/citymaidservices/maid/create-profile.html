@@ -1,0 +1,1374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Your Profile - City Maid Services</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Helvetica Neue', 'Segoe UI', 'Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        whatsapp: {
+                            primary: '#25D366',    // WhatsApp Green
+                            secondary: '#128C7E',  // WhatsApp Teal
+                            dark: '#075E54',       // WhatsApp Dark Green
+                            light: '#F0F2F5',      // WhatsApp Background
+                            text: {
+                                primary: '#111B21',   // WhatsApp Dark Text
+                                secondary: '#667781', // WhatsApp Secondary Text
+                                light: '#FFFFFF',     // White text
+                            }
+                        }
+                    },
+                    boxShadow: {
+                        'whatsapp': '0 1px 3px rgba(0, 0, 0, 0.1)',
+                        'whatsapp-hover': '0 2px 4px rgba(0, 0, 0, 0.15)',
+                    },
+                    borderRadius: {
+                        'whatsapp': '8px',
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // Initialize Supabase client
+        const supabaseUrl = 'https://fdgqqxyyofjnkhswkwcq.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZkZ3FxeHl5b2Zqbmtoc3drd2NxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQwMjQyMTMsImV4cCI6MjA1OTYwMDIxM30.YyJLLu3r2a7Mh7ny0ie-YzzLfPh5PdrJJHnBFBxWqVE';
+        const { createClient } = supabase;
+        const supabaseClient = createClient(supabaseUrl, supabaseKey);
+
+        // Check authentication and role on page load
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                // Add test mode check
+                const urlParams = new URLSearchParams(window.location.search);
+                const testMode = urlParams.get('test') === 'true';
+                
+                if (testMode) {
+                    console.log("Test mode enabled - bypassing all checks");
+                    // Initialize the page directly
+                    setupPhotoPreview();
+                    setupFormSubmission();
+                    setupCharCounter();
+                    setupSkillTemplates();
+                    setupLocationSelection();
+                    return;
+                }
+
+                // Rest of the authentication code...
+                console.log("Page loaded, starting authentication check...");
+                
+                // Add debug mode check
+                const debugMode = urlParams.get('debug') === 'true';
+                console.log("Debug mode:", debugMode);
+
+                // Check if user is authenticated
+                const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
+                console.log("Auth check result:", { user, authError });
+                
+                if (authError || !user) {
+                    console.log("No authenticated user found, redirecting to login...");
+                    // Store intended destination
+                    localStorage.setItem('redirectAfterAuth', window.location.href);
+                    // Redirect to login with maid role pre-selected
+                    window.location.href = '../auth/login.html?role=maid';
+                    return;
+                }
+
+                console.log("User authenticated, checking role...");
+                // Verify user role is maid
+                const { data: profile, error: profileError } = await supabaseClient
+                    .from('profiles')
+                    .select('role')
+                    .eq('id', user.id)
+                    .single();
+                
+                console.log("Role check result:", { profile, profileError });
+
+                if (profileError || !profile || profile.role !== 'maid') {
+                    console.log("Role verification failed:", { profileError, profile });
+                    // If user is not registered as maid, redirect to registration
+                    if (!profile || profile.role !== 'maid') {
+                        console.log("User is not registered as maid, redirecting to registration...");
+                        window.location.href = '../auth/register.html?role=maid';
+                        return;
+                    }
+                    // For other errors, redirect to login
+                    console.log("Other error, redirecting to login...");
+                    window.location.href = '../auth/login.html?role=maid';
+                    return;
+                }
+
+                // Only check for existing profile if not in debug mode
+                if (!debugMode) {
+                    console.log("Checking for existing profile...");
+                    const { data: existingProfile, error: checkError } = await supabaseClient
+                        .from('maid_profiles')
+                        .select('id')
+                        .eq('user_id', user.id)
+                        .single();
+                    
+                    console.log("Existing profile check:", { existingProfile, checkError });
+
+                    if (!checkError && existingProfile) {
+                        console.log("Profile exists, redirecting to dashboard...");
+                        window.location.href = 'dashboard.html';
+                        return;
+                    }
+                } else {
+                    console.log("Debug mode: Skipping profile existence check");
+                }
+
+                // If authenticated, role is correct, and no profile exists (or in debug mode), initialize the page
+                console.log("All checks passed, initializing page...");
+                setupPhotoPreview();
+                setupFormSubmission();
+                setupCharCounter();
+                setupSkillTemplates();
+                setupLocationSelection();
+            } catch (error) {
+                console.error('Authentication error:', error);
+                // Show error to user
+                alert('Error loading page: ' + error.message);
+                window.location.href = '../auth/login.html?role=maid';
+            }
+        });
+        
+        // Setup photo preview functionality
+        function setupPhotoPreview() {
+            console.log("Setting up photo preview...");
+            const profilePhotoInput = document.getElementById('profilePhoto');
+            const profilePhotoPreview = document.getElementById('profilePhotoPreview');
+            const placeholderIcon = document.getElementById('placeholderIcon');
+            
+            if (profilePhotoInput && profilePhotoPreview) {
+                profilePhotoInput.addEventListener('change', function() {
+                    const file = this.files[0];
+                    if (file) {
+                        // Validate file type
+                        const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+                        if (!validTypes.includes(file.type)) {
+                            showError('Please upload a valid image file (JPEG or PNG)');
+                            this.value = '';
+                            return;
+                        }
+
+                        // Validate file size (max 2MB)
+                        const maxSize = 2 * 1024 * 1024; // 2MB in bytes
+                        if (file.size > maxSize) {
+                            showError('Image size should be less than 2MB');
+                            this.value = '';
+                            return;
+                        }
+
+                        // Validate image dimensions
+                        const img = new Image();
+                        img.onload = function() {
+                            if (this.width < 200 || this.height < 200) {
+                                showError('Image dimensions should be at least 200x200 pixels');
+                                profilePhotoInput.value = '';
+                                return;
+                            }
+                            
+                            const reader = new FileReader();
+                            reader.onload = function(e) {
+                                profilePhotoPreview.src = e.target.result;
+                                profilePhotoPreview.style.opacity = '1';
+                                placeholderIcon.style.display = 'none';
+                            };
+                            reader.readAsDataURL(file);
+                        };
+                        img.src = URL.createObjectURL(file);
+                    }
+                });
+            }
+        }
+        
+        // Setup character counter for About Me
+        function setupCharCounter() {
+            const aboutTextarea = document.getElementById('about');
+            const charCount = document.getElementById('charCount');
+            
+            if (aboutTextarea && charCount) {
+                aboutTextarea.addEventListener('input', function() {
+                    const remaining = this.value.length;
+                    charCount.textContent = remaining;
+                    
+                    // Add visual feedback when approaching limit
+                    if (remaining > 225) {
+                        charCount.classList.add('text-red-500');
+                    } else {
+                        charCount.classList.remove('text-red-500');
+                    }
+                });
+            }
+        }
+        
+        // Setup form submission
+        function setupFormSubmission() {
+            const form = document.getElementById('profileForm');
+            if (form) {
+                form.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    // Validate form
+                    if (!validateForm()) {
+                        return;
+                    }
+                    
+                    try {
+                        const submitButton = form.querySelector('button[type="submit"]');
+                        submitButton.disabled = true;
+                        submitButton.textContent = 'Creating...';
+                        
+                        // Handle photo upload first
+                        let photoUrl = null;
+                        const photoFile = document.getElementById('profilePhoto').files[0];
+                        if (photoFile) {
+                            const fileExt = photoFile.name.split('.').pop();
+                            const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
+                            const { data: uploadData, error: uploadError } = await supabaseClient
+                                .storage
+                                .from('maid-photos')
+                                .upload(fileName, photoFile);
+
+                            if (uploadError) throw uploadError;
+
+                            const { data: { publicUrl } } = supabaseClient
+                                .storage
+                                .from('maid-photos')
+                                .getPublicUrl(fileName);
+                            
+                            photoUrl = publicUrl;
+                        }
+                        
+                        const loadingToast = showLoading('Creating profile...');
+                        
+                        // Collect form data
+                        const formData = new FormData(form);
+                        const profileData = {
+                            // Basic Information
+                            full_name: formData.get('fullName'),
+                            age_group: formData.get('ageGroup'),
+                            gender: formData.get('gender'),
+                            marital_status: formData.get('maritalStatus'),
+                            
+                            // Contact Information
+                            email: formData.get('email'),
+                            phone: formData.get('phone'),
+                            
+                            // Work Information
+                            experience: formData.get('experience'),
+                            available_from: formData.get('availableFrom'),
+                            preferred_time: formData.get('preferredTime'),
+                            expected_salary: formData.get('expectedSalary'),
+                            major_city: formData.get('majorCity'),
+                            specific_areas: Array.from(formData.getAll('kathmanduAreas')),
+                            willing_to_travel: formData.get('willingToTravel') === 'on',
+                            travel_distance: formData.get('travelDistance'),
+                            
+                            // Background Information
+                            nationality: formData.get('nationality'),
+                            religion: formData.get('religion'),
+                            education: formData.get('education'),
+                            documents: formData.get('documents'),
+                            languages: Array.from(formData.getAll('languages')),
+                            
+                            // Other
+                            about: formData.get('about'),
+                            skills: Array.from(formData.getAll('skills')),
+                            profile_photo: photoUrl
+                        };
+                        
+                        // Save profile data
+                        console.log('Attempting to save profile data:', profileData);
+                        const { data, error } = await supabaseClient
+                            .from('maid_profiles')
+                            .insert([profileData])
+                            .select('id')
+                            .single();
+                            
+                        if (error) {
+                            console.error('Supabase error during profile creation:', error);
+                            throw error;
+                        }
+                        
+                        console.log('Profile creation response:', data);
+                        
+                        if (!data || !data.id) {
+                            console.error('No profile ID returned from Supabase');
+                            throw new Error('Failed to get profile ID after creation');
+                        }
+
+                        // Verify the profile was created by fetching it
+                        const { data: verifyData, error: verifyError } = await supabaseClient
+                            .from('maid_profiles')
+                            .select('*')
+                            .eq('id', data.id)
+                            .single();
+
+                        if (verifyError) {
+                            console.error('Error verifying profile creation:', verifyError);
+                            throw verifyError;
+                        }
+
+                        if (!verifyData) {
+                            console.error('Profile verification failed - profile not found after creation');
+                            throw new Error('Profile verification failed');
+                        }
+
+                        console.log('Profile verified successfully:', verifyData);
+                        
+                        showSuccess('Profile created successfully!');
+                        
+                        // Redirect with profile ID as URL parameter
+                        const profileId = data.id;
+                        console.log('Preparing to redirect with profile ID:', profileId);
+                        
+                        // Ensure we have a valid profile ID before redirecting
+                        if (!profileId) {
+                            console.error('Invalid profile ID for redirect:', profileId);
+                            throw new Error('Invalid profile ID');
+                        }
+                        
+                        // Use encodeURIComponent to safely encode the profile ID
+                        const redirectUrl = `view-profile.html?id=${encodeURIComponent(profileId)}`;
+                        console.log('Redirecting to:', redirectUrl);
+                        
+                        // Use a shorter timeout to reduce chance of state issues
+                        setTimeout(() => {
+                            window.location.href = redirectUrl;
+                        }, 1000);
+                        
+                    } catch (error) {
+                        console.error('Error creating profile:', error);
+                        showError('Failed to create profile. Please try again.');
+                    } finally {
+                        const submitButton = form.querySelector('button[type="submit"]');
+                        submitButton.disabled = false;
+                        submitButton.textContent = 'Create Profile';
+                    }
+                });
+            }
+        }
+        
+        // Form validation function
+        function validateForm() {
+            const form = document.getElementById('profileForm');
+            const requiredFields = form.querySelectorAll('[required]');
+            let isValid = true;
+
+            // Check required fields
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    showError(`${field.previousElementSibling.textContent.replace(' *', '')} is required`);
+                    field.classList.add('border-red-500');
+                    isValid = false;
+                } else {
+                    field.classList.remove('border-red-500');
+                }
+            });
+
+            // Validate email format
+            const email = form.querySelector('#email');
+            if (email && !email.value.match(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)) {
+                showError('Please enter a valid email address');
+                email.classList.add('border-red-500');
+                isValid = false;
+            }
+
+            // Validate phone numbers
+            const phone = form.querySelector('#phone');
+            if (phone && !phone.value.match(/^[0-9]{10}$/)) {
+                showError('Please enter a valid 10-digit phone number');
+                phone.classList.add('border-red-500');
+                isValid = false;
+            }
+
+            // Validate skills selection
+            const skills = form.querySelectorAll('.skill-checkbox:checked');
+            if (skills.length === 0) {
+                showError('Please select at least one skill');
+                isValid = false;
+            }
+
+            // Add location validation
+            const majorCity = document.getElementById('majorCity');
+            const otherCity = document.getElementById('otherCity');
+            const kathmanduAreas = document.querySelectorAll('input[name="kathmanduAreas"]:checked');
+            
+            if (!majorCity.value) {
+                showError('Please select a major city');
+                majorCity.classList.add('border-red-500');
+                isValid = false;
+            }
+
+            if (majorCity.value === 'other' && (!otherCity.value || otherCity.value.length < 2)) {
+                showError('Please enter a valid city name');
+                otherCity.classList.add('border-red-500');
+                isValid = false;
+            }
+
+            if (majorCity.value === 'Kathmandu' && kathmanduAreas.length === 0) {
+                showError('Please select at least one area in Kathmandu');
+                return false;
+            }
+
+            return isValid;
+        }
+        
+        // Show success message
+        function showSuccess(message) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-4 right-4 bg-whatsapp-primary text-white px-6 py-3 rounded-whatsapp shadow-whatsapp z-50 flex items-center';
+            toast.innerHTML = `
+                <i class="fas fa-check-circle mr-2"></i>
+                <span>${message}</span>
+            `;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+        
+        // Show error message
+        function showError(message) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-4 right-4 bg-red-500 text-white px-6 py-3 rounded-whatsapp shadow-whatsapp z-50 flex items-center';
+            toast.innerHTML = `
+                <i class="fas fa-exclamation-circle mr-2"></i>
+                <span>${message}</span>
+            `;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // Setup skill templates
+        function setupSkillTemplates() {
+            const skillCheckboxes = document.querySelectorAll('.skill-checkbox');
+            const aboutTextarea = document.getElementById('about');
+            
+            // Store templates in a JavaScript object with expanded descriptions
+            const skillTemplates = {
+                'Cooking': 'Experienced cook specializing in Nepali and Indian cuisine. Skilled in preparing healthy meals, managing kitchen inventory, and maintaining kitchen hygiene. Passionate about creating delicious and nutritious dishes while following proper food safety protocols.',
+                'Cleaning': 'Professional cleaner with expertise in deep cleaning, dusting, and maintaining household hygiene. Experienced in using eco-friendly cleaning products and following proper cleaning protocols. Dedicated to creating spotless and sanitized living spaces.',
+                'Laundry': 'Expert in handling all types of laundry, including delicate fabrics. Skilled in stain removal, proper washing techniques, and garment care. Experienced in ironing and folding clothes professionally while maintaining fabric quality and appearance.',
+                'Child Care': 'Experienced in providing attentive and nurturing care for children. Skilled in preparing meals, helping with homework, and organizing educational activities. Certified in basic first aid and child safety, ensuring a safe and stimulating environment.',
+                'Elderly Care': 'Compassionate caregiver with experience in elderly care. Skilled in providing assistance with daily activities, medication reminders, and companionship. Trained in basic elderly care protocols and maintaining a comfortable living environment.',
+                'Patient Care': 'Experienced in providing care for patients, including assistance with daily activities, medication management, and maintaining a clean environment. Trained in basic patient care protocols and ensuring comfort and well-being.',
+                'Pet Care': 'Experienced in pet care including feeding, walking, and basic grooming. Skilled in maintaining pet hygiene and providing companionship. Knowledgeable about different pet needs, behaviors, and proper care routines.',
+                'Postnatal/Sutkeri Care': 'Specialized in postnatal care with experience in newborn care, mother\'s recovery support, and household management. Trained in traditional and modern postnatal care practices, ensuring proper care for both mother and baby.',
+                'Office Assistant': 'Experienced in office assistance including basic administrative tasks, maintaining office cleanliness, and managing supplies. Skilled in organizing workspace and supporting office operations while maintaining professional standards.',
+                'Gardening': 'Experienced in maintaining gardens and indoor plants. Skilled in planting, watering, pruning, and basic garden maintenance. Knowledgeable about different plant care requirements and seasonal gardening practices.',
+                'Ironing': 'Expert in professional ironing and garment care. Skilled in handling different fabric types and maintaining proper ironing techniques. Experienced in proper folding and storage of clothes while preserving fabric quality.',
+                'Dishwashing': 'Experienced in efficient dishwashing and kitchen cleaning. Skilled in proper handling of different types of dishes and maintaining kitchen hygiene. Knowledgeable about proper cleaning techniques and equipment maintenance.'
+            };
+
+            if (aboutTextarea) {
+                skillCheckboxes.forEach(checkbox => {
+                    checkbox.addEventListener('change', function() {
+                        // Only update if this is the first skill being selected
+                        const selectedSkills = Array.from(document.querySelectorAll('.skill-checkbox:checked'));
+                        if (selectedSkills.length === 1 && this.checked) {
+                            const template = skillTemplates[this.value];
+                            if (template) {
+                                // Trim and limit to 250 characters
+                                let templateText = template.trim();
+                                if (templateText.length > 250) {
+                                    templateText = templateText.substring(0, 247) + '...';
+                                }
+                                aboutTextarea.value = templateText;
+                                // Trigger input event to update character count
+                                aboutTextarea.dispatchEvent(new Event('input'));
+                            }
+                        }
+                    });
+                });
+            }
+        }
+
+        // Setup location selection
+        function setupLocationSelection() {
+            const majorCitySelect = document.getElementById('majorCity');
+            const areaSelectionContainer = document.getElementById('areaSelectionContainer');
+            const kathmanduValleyAreas = document.getElementById('kathmanduValleyAreas');
+            const kathmanduAreas = document.getElementById('kathmanduAreas');
+            const lalitpurAreas = document.getElementById('lalitpurAreas');
+            const bhaktapurAreas = document.getElementById('bhaktapurAreas');
+            const otherCitiesInput = document.getElementById('otherCitiesInput');
+            const willingToTravel = document.getElementById('willingToTravel');
+            const travelDistanceContainer = document.getElementById('travelDistanceContainer');
+
+            if (majorCitySelect) {
+                majorCitySelect.addEventListener('change', function() {
+                    const selectedCity = this.value;
+                    
+                    // Reset all containers first
+                    areaSelectionContainer.classList.add('hidden');
+                    kathmanduValleyAreas.classList.add('hidden');
+                    kathmanduAreas.classList.add('hidden');
+                    lalitpurAreas.classList.add('hidden');
+                    bhaktapurAreas.classList.add('hidden');
+                    otherCitiesInput.classList.add('hidden');
+                    
+                    // Show area selection container for any city selection
+                    if (selectedCity) {
+                        areaSelectionContainer.classList.remove('hidden');
+                        
+                        // Show relevant section based on selection
+                        if (['Kathmandu', 'Lalitpur', 'Bhaktapur'].includes(selectedCity)) {
+                            kathmanduValleyAreas.classList.remove('hidden');
+                            
+                            if (selectedCity === 'Kathmandu') {
+                                kathmanduAreas.classList.remove('hidden');
+                            } else if (selectedCity === 'Lalitpur') {
+                                lalitpurAreas.classList.remove('hidden');
+                            } else if (selectedCity === 'Bhaktapur') {
+                                bhaktapurAreas.classList.remove('hidden');
+                            }
+                        } else {
+                            otherCitiesInput.classList.remove('hidden');
+                        }
+                    }
+                });
+            }
+
+            // Handle willing to travel checkbox
+            if (willingToTravel) {
+                willingToTravel.addEventListener('change', function() {
+                    travelDistanceContainer.classList.toggle('hidden', !this.checked);
+                });
+            }
+
+            // Add event listeners to area checkboxes
+            const areaCheckboxes = document.querySelectorAll('.area-checkbox');
+            areaCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    console.log('Area selected:', this.value);
+                });
+            });
+        }
+
+        // Show loading message
+        function showLoading(message) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-4 right-4 bg-whatsapp-primary text-white px-6 py-3 rounded-whatsapp shadow-whatsapp z-50 flex items-center';
+            toast.innerHTML = `
+                <i class="fas fa-spinner fa-spin mr-2"></i>
+                <span>${message}</span>
+            `;
+            document.body.appendChild(toast);
+            return toast;
+        }
+    </script>
+</head>
+<body class="font-sans bg-whatsapp-light text-whatsapp-text-primary">
+    <!-- Navigation Bar -->
+    <nav class="bg-white shadow-whatsapp sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="../index.html" class="text-2xl font-semibold text-whatsapp-primary">CITYMAID</a>
+                </div>
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="../index.html" class="text-whatsapp-text-primary hover:text-whatsapp-primary text-sm font-medium transition-colors">Home</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Profile Creation Form -->
+    <div class="max-w-4xl mx-auto px-4 py-8">
+        <div class="bg-white rounded-lg shadow-lg p-6 md:p-8 border border-gray-100">
+            <h1 class="text-2xl font-semibold text-whatsapp-text-primary mb-8 pb-4 border-b border-gray-200">Create Your Profile</h1>
+            
+            <form id="profileForm" class="space-y-8">
+                <!-- Profile Photo -->
+                <div class="space-y-4 p-6 bg-gray-50 rounded-lg border border-gray-200">
+                    <label class="block text-sm font-medium text-whatsapp-text-primary">Profile Photo *</label>
+                    <div class="flex items-center space-x-4">
+                        <div class="relative">
+                            <div class="w-32 h-32 rounded-full bg-white flex items-center justify-center overflow-hidden border-2 border-whatsapp-primary">
+                                <img id="profilePhotoPreview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150' viewBox='0 0 150 150' fill='none'%3E%3Crect width='150' height='150' fill='%23F0F2F5'/%3E%3Cpath d='M75 75C83.2843 75 90 68.2843 90 60C90 51.7157 83.2843 45 75 45C66.7157 45 60 51.7157 60 60C60 68.2843 66.7157 75 75 75Z' fill='%23667781'/%3E%3Cpath d='M75 82.5C58.4315 82.5 45 95.9315 45 112.5V120H105V112.5C105 95.9315 91.5685 82.5 75 82.5Z' fill='%23667781'/%3E%3C/svg%3E" alt="Profile Photo" 
+                                    class="w-32 h-32 object-cover">
+                                <i id="placeholderIcon" class="fas fa-user-circle text-whatsapp-text-secondary text-5xl absolute"></i>
+                            </div>
+                            <input type="file" id="profilePhoto" accept="image/*" class="hidden" title="Upload profile photo">
+                            <button type="button" onclick="document.getElementById('profilePhoto').click()" 
+                                class="absolute bottom-0 right-0 bg-whatsapp-primary text-white p-3 rounded-full hover:bg-whatsapp-secondary shadow-lg transition-all duration-200" title="Upload photo">
+                                <i class="fas fa-camera text-lg"></i>
+                            </button>
+                        </div>
+                        <div class="space-y-2">
+                            <p class="text-sm text-whatsapp-text-primary">Click the camera icon to upload your photo</p>
+                            <p class="text-xs text-whatsapp-text-secondary">Upload a clear face photo to increase your chances of getting hired</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Basic Information -->
+                <div class="space-y-6 p-6 bg-gray-50 rounded-lg border border-gray-200">
+                    <h2 class="text-lg font-semibold text-whatsapp-text-primary pb-2 border-b border-gray-200">Basic Information</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+                            <label for="fullName" class="block text-sm font-medium text-whatsapp-text-primary mb-2">Full Name *</label>
+                            <input type="text" id="fullName" name="fullName" required minlength="3" maxlength="50"
+                                placeholder="Enter your full name as per documents"
+                                pattern="[A-Za-z\s]+" title="Please enter a valid name (letters and spaces only)"
+                                class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-whatsapp-primary focus:ring-whatsapp-primary">
+                            <p class="text-xs text-whatsapp-text-secondary mt-1">3-50 characters, letters only</p>
+                        </div>
+                        <div>
+                            <label for="ageGroup" class="block text-sm font-medium text-whatsapp-text-primary">Age Group *</label>
+                            <select id="ageGroup" name="ageGroup" required
+                                class="mt-1 block w-full rounded-whatsapp border-gray-300 shadow-whatsapp focus:border-whatsapp-primary focus:ring-whatsapp-primary">
+                                <option value="">Select Age Group</option>
+                                <option value="18-25">18-25 years</option>
+                                <option value="25-35">25-35 years</option>
+                                <option value="35-45">35-45 years</option>
+                                <option value="45+">45+ years</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="gender" class="block text-sm font-medium text-whatsapp-text-primary">Gender *</label>
+                            <select id="gender" name="gender" required
+                                class="mt-1 block w-full rounded-whatsapp border-gray-300 shadow-whatsapp focus:border-whatsapp-primary focus:ring-whatsapp-primary">
+                                <option value="">Select Gender</option>
+                                <option value="Female">Female</option>
+                                <option value="Male">Male</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="maritalStatus" class="block text-sm font-medium text-whatsapp-text-primary">Marital Status *</label>
+                            <select id="maritalStatus" name="maritalStatus" required
+                                class="mt-1 block w-full rounded-whatsapp border-gray-300 shadow-whatsapp focus:border-whatsapp-primary focus:ring-whatsapp-primary">
+                                <option value="">Select Status</option>
+                                <option value="Single">Single</option>
+                                <option value="Married">Married</option>
+                                <option value="Divorced">Divorced</option>
+                                <option value="Widowed">Widowed</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Information -->
+                <div class="space-y-6 p-6 bg-gray-50 rounded-lg border border-gray-200">
+                    <h2 class="text-lg font-semibold text-whatsapp-text-primary pb-2 border-b border-gray-200">Contact Information</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+                            <label for="email" class="block text-sm font-medium text-whatsapp-text-primary">Email *</label>
+                            <input type="email" id="email" name="email" required
+                                placeholder="Enter your active email address"
+                                pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+                                title="Please enter a valid email address"
+                                class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-whatsapp-primary focus:ring-whatsapp-primary">
+                        </div>
+                        <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+                            <label for="phone" class="block text-sm font-medium text-whatsapp-text-primary">Phone Number *</label>
+                            <input type="tel" id="phone" name="phone" required
+                                placeholder="Enter your active phone number"
+                                pattern="[0-9]{10}" title="Please enter a valid 10-digit phone number"
+                                class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-whatsapp-primary focus:ring-whatsapp-primary">
+                            <p class="text-xs text-whatsapp-text-secondary mt-1">10 digits only</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Work Information -->
+                <div class="space-y-6 p-6 bg-gray-50 rounded-lg border border-gray-200">
+                    <h2 class="text-lg font-semibold text-whatsapp-text-primary pb-2 border-b border-gray-200">Work Information</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+                            <label for="experience" class="block text-sm font-medium text-whatsapp-text-primary">Years of Experience *</label>
+                            <select id="experience" name="experience" required
+                                class="mt-1 block w-full rounded-whatsapp border-gray-300 shadow-whatsapp focus:border-whatsapp-primary focus:ring-whatsapp-primary">
+                                <option value="0">No experience/Freshers</option>
+                                <option value="1">1+ year</option>
+                                <option value="2">2+ years</option>
+                                <option value="3">3+ years</option>
+                                <option value="5">5+ years</option>
+                                <option value="10">10+ years</option>
+                            </select>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+                            <label for="availableFrom" class="block text-sm font-medium text-whatsapp-text-primary">Available From *</label>
+                            <select id="availableFrom" name="availableFrom" required
+                                class="mt-1 block w-full rounded-whatsapp border-gray-300 shadow-whatsapp focus:border-whatsapp-primary focus:ring-whatsapp-primary">
+                                <option value="">Select Availability</option>
+                                <option value="Immediate">Immediate</option>
+                                <option value="Within a week">Within a week</option>
+                                <option value="Within 2 weeks">Within 2 weeks</option>
+                                <option value="Within a month">Within a month</option>
+                                <option value="After a month">After a month</option>
+                            </select>
+                            <p class="text-xs text-whatsapp-text-secondary mt-1">When can you start working?</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+                            <label for="preferredTime" class="block text-sm font-medium text-whatsapp-text-primary">Preferred Working Time *</label>
+                            <select id="preferredTime" name="preferredTime" required
+                                class="mt-1 block w-full rounded-whatsapp border-gray-300 shadow-whatsapp focus:border-whatsapp-primary focus:ring-whatsapp-primary">
+                                <option value="">Select Preferred Time</option>
+                                <!-- 24-Hour/Home Stay Options -->
+                                <option value="24-hour">24-Hour Stay</option>
+                                <option value="home-stay">Home Stay (Live-in)</option>
+                                <!-- Regular Time Slots -->
+                                <option value="Morning">Morning (6AM-10AM)</option>
+                                <option value="Morning">Morning(6AM-9AM)</option>
+                                <option value="Morning">Morning(6AM-8AM)</option>
+                                <option value="Morning">Morning(7AM-12AM)</option>
+                                <option value="Morning">Morning(7AM-11AM)</option>
+                                <option value="Morning">Morning(7AM-10AM)</option>
+                                <option value="Morning">Morning(7AM-9AM)</option>
+                                <option value="Afternoon">Afternoon (10AM-2PM)</option>
+                                <option value="Evening">Evening (2PM-6PM)</option>
+                                <option value="6-2">6:00 AM - 2:00 PM</option>
+                                <option value="7-3">7:00 AM - 3:00 PM</option>
+                                <option value="8-4">8:00 AM - 4:00 PM</option>
+                                <option value="9-5">9:00 AM - 5:00 PM</option>
+                                <option value="10-6">10:00 AM - 6:00 PM</option>
+                                <option value="7-7">7:00 AM - 7:00 PM</option>
+                                <option value="6-4">6:00 AM-4:00 PM</option>
+                                <option value="6-6">6:00 AM-6:00 PM</option>
+                                <option value="7-5">7:00 AM-5:00 PM</option>
+                                <option value="Flexible">Flexible Hours</option>
+                            </select>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+                            <label for="expectedSalary" class="block text-sm font-medium text-whatsapp-text-primary">Expected Monthly Salary (NPR) *</label>
+                            <select id="expectedSalary" name="expectedSalary" required
+                                class="mt-1 block w-full rounded-whatsapp border-gray-300 shadow-whatsapp focus:border-whatsapp-primary focus:ring-whatsapp-primary">
+                                <option value="">Select Expected Salary</option>
+                                <option value="6000">NPR 6,000</option>
+                                <option value="8000">NPR 8,000</option>
+                                <option value="10000">NPR 10,000</option>
+                                <option value="12000">NPR 12,000</option>
+                                <option value="14000">NPR 14,000</option>
+                                <option value="16000">NPR 16,000</option>
+                                <option value="18000">NPR 18,000</option>
+                                <option value="20000">NPR 20,000</option>
+                                <option value="22000">NPR 22,000</option>
+                                <option value="24000">NPR 24,000</option>
+                                <option value="26000">NPR 26,000</option>
+                            </select>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+                            <label for="workLocation" class="block text-sm font-medium text-whatsapp-text-primary">Preferred Work Location *</label>
+                            <div class="space-y-4">
+                                <!-- First Level: Major City Selection -->
+                                <div>
+                                    <select id="majorCity" name="majorCity" required
+                                        class="mt-1 block w-full rounded-whatsapp border-gray-300 shadow-whatsapp focus:border-whatsapp-primary focus:ring-whatsapp-primary"
+                                        title="Select your major city"
+                                        aria-label="Select your major city">
+                                        <option value="">Select Major City</option>
+                                <option value="Kathmandu">Kathmandu</option>
+                                <option value="Lalitpur">Lalitpur</option>
+                                <option value="Bhaktapur">Bhaktapur</option>
+                                <option value="Pokhara">Pokhara</option>
+                                <option value="Biratnagar">Biratnagar</option>
+                                <option value="Birgunj">Birgunj</option>
+                                <option value="Butwal">Butwal</option>
+                                <option value="Dharan">Dharan</option>
+                                <option value="Hetauda">Hetauda</option>
+                                <option value="Nepalgunj">Nepalgunj</option>
+                                        <option value="other">Other City</option>
+                            </select>
+                                </div>
+
+                                <!-- Second Level: Area Selection (initially hidden) -->
+                                <div id="areaSelectionContainer" class="hidden">
+                                    <label class="block text-sm font-medium text-whatsapp-text-primary mb-2">Select Specific Areas</label>
+                                    
+                                    <!-- Kathmandu Valley Areas (Detailed) -->
+                                    <div id="kathmanduValleyAreas" class="hidden space-y-4">
+                                        <!-- Kathmandu Areas -->
+                                        <div id="kathmanduAreas" class="hidden space-y-4">
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <!-- Central Areas -->
+                                                <div class="space-y-2">
+                                                    <label class="font-medium">Central Areas</label>
+                                                    <div class="space-y-1">
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="kathmanduAreas" value="New Road" class="area-checkbox">
+                                                            <span>New Road</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="kathmanduAreas" value="Thamel" class="area-checkbox">
+                                                            <span>Thamel</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="kathmanduAreas" value="Asan" class="area-checkbox">
+                                                            <span>Asan</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="kathmanduAreas" value="Indra Chowk" class="area-checkbox">
+                                                            <span>Indra Chowk</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="kathmanduAreas" value="Ratna Park" class="area-checkbox">
+                                                            <span>Ratna Park</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="kathmanduAreas" value="Sundhara" class="area-checkbox">
+                                                            <span>Sundhara</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="kathmanduAreas" value="Lazimpat" class="area-checkbox">
+                                                            <span>Lazimpat</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="kathmanduAreas" value="Baneshwor" class="area-checkbox">
+                                                            <span>Baneshwor</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="kathmanduAreas" value="Putalisadak" class="area-checkbox">
+                                                            <span>Putalisadak</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="kathmanduAreas" value="Dillibazaar" class="area-checkbox">
+                                                            <span>Dillibazaar</span>
+                                                        </label>
+                                                    </div>
+                                                </div>
+
+                                                <!-- East Areas -->
+                                                <div class="space-y-2">
+                                                    <label class="font-medium">East Areas</label>
+                                                    <div class="space-y-1">
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="kathmanduAreas" value="Chabahil" class="area-checkbox">
+                                                            <span>Chabahil</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="kathmanduAreas" value="Gongabu" class="area-checkbox">
+                                                            <span>Gongabu</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="kathmanduAreas" value="Maharajgunj" class="area-checkbox">
+                                                            <span>Maharajgunj</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="kathmanduAreas" value="Koteshwor" class="area-checkbox">
+                                                            <span>Koteshwor</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="kathmanduAreas" value="Sinamangal" class="area-checkbox">
+                                                            <span>Sinamangal</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="kathmanduAreas" value="Baneshwor" class="area-checkbox">
+                                                            <span>Baneshwor</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="kathmanduAreas" value="Tinkune" class="area-checkbox">
+                                                            <span>Tinkune</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="kathmanduAreas" value="Gaushala" class="area-checkbox">
+                                                            <span>Gaushala</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="kathmanduAreas" value="Boudha" class="area-checkbox">
+                                                            <span>Boudha</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="kathmanduAreas" value="Jorpati" class="area-checkbox">
+                                                            <span>Jorpati</span>
+                                                        </label>
+                                                    </div>
+                                                </div>
+
+                                                <!-- West Areas -->
+                                                <div class="space-y-2">
+                                                    <label class="font-medium">West Areas</label>
+                                                    <div class="space-y-1">
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="kathmanduAreas" value="Kalanki" class="area-checkbox">
+                                                            <span>Kalanki</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="kathmanduAreas" value="Swayambhu" class="area-checkbox">
+                                                            <span>Swayambhu</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="kathmanduAreas" value="Balaju" class="area-checkbox">
+                                                            <span>Balaju</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="kathmanduAreas" value="Balkhu" class="area-checkbox">
+                                                            <span>Balkhu</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="kathmanduAreas" value="Teku" class="area-checkbox">
+                                                            <span>Teku</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="kathmanduAreas" value="Kirtipur" class="area-checkbox">
+                                                            <span>Kirtipur</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="kathmanduAreas" value="Chobhar" class="area-checkbox">
+                                                            <span>Chobhar</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="kathmanduAreas" value="Sitapaila" class="area-checkbox">
+                                                            <span>Sitapaila</span>
+                                                        </label>
+                                                    </div>
+                                                </div>
+
+                                                <!-- North Areas -->
+                                                <div class="space-y-2">
+                                                    <label class="font-medium">North Areas</label>
+                                                    <div class="space-y-1">
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="kathmanduAreas" value="Budhanilkantha" class="area-checkbox">
+                                                            <span>Budhanilkantha</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="kathmanduAreas" value="Tokha" class="area-checkbox">
+                                                            <span>Tokha</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="kathmanduAreas" value="Gokarna" class="area-checkbox">
+                                                            <span>Gokarna</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="kathmanduAreas" value="Boudha" class="area-checkbox">
+                                                            <span>Boudha</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="kathmanduAreas" value="Sundarijal" class="area-checkbox">
+                                                            <span>Sundarijal</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="kathmanduAreas" value="Chandragiri" class="area-checkbox">
+                                                            <span>Chandragiri</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="kathmanduAreas" value="Nayapati" class="area-checkbox">
+                                                            <span>Nayapati</span>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Lalitpur Areas -->
+                                        <div id="lalitpurAreas" class="hidden space-y-4">
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <!-- Core Areas -->
+                                                <div class="space-y-2">
+                                                    <label class="font-medium">Core Areas</label>
+                                                    <div class="space-y-1">
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="lalitpurAreas" value="Patan Durbar Square" class="area-checkbox">
+                                                            <span>Patan Durbar Square</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="lalitpurAreas" value="Mangal Bazaar" class="area-checkbox">
+                                                            <span>Mangal Bazaar</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="lalitpurAreas" value="Pulchowk" class="area-checkbox">
+                                                            <span>Pulchowk</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="lalitpurAreas" value="Jawalakhel" class="area-checkbox">
+                                                            <span>Jawalakhel</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="lalitpurAreas" value="Lagankhel" class="area-checkbox">
+                                                            <span>Lagankhel</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="lalitpurAreas" value="Kumaripati" class="area-checkbox">
+                                                            <span>Kumaripati</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="lalitpurAreas" value="Chyasal" class="area-checkbox">
+                                                            <span>Chyasal</span>
+                                                        </label>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Residential Areas -->
+                                                <div class="space-y-2">
+                                                    <label class="font-medium">Residential Areas</label>
+                                                    <div class="space-y-1">
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="lalitpurAreas" value="Sanepa" class="area-checkbox">
+                                                            <span>Sanepa</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="lalitpurAreas" value="Kupondole" class="area-checkbox">
+                                                            <span>Kupondole</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="lalitpurAreas" value="Imadol" class="area-checkbox">
+                                                            <span>Imadol</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="lalitpurAreas" value="Satdobato" class="area-checkbox">
+                                                            <span>Satdobato</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="lalitpurAreas" value="Ekantakuna" class="area-checkbox">
+                                                            <span>Ekantakuna</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="lalitpurAreas" value="Chapagaun" class="area-checkbox">
+                                                            <span>Chapagaun</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="lalitpurAreas" value="Godawari" class="area-checkbox">
+                                                            <span>Godawari</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="lalitpurAreas" value="Harisiddhi" class="area-checkbox">
+                                                            <span>Harisiddhi</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="lalitpurAreas" value="Hatiban" class="area-checkbox">
+                                                            <span>Hatiban</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="lalitpurAreas" value="Thaiba" class="area-checkbox">
+                                                            <span>Thaiba</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="lalitpurAreas" value="Talchhikhel" class="area-checkbox">
+                                                            <span>Talchhikhel</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="lalitpurAreas" value="Nakhu" class="area-checkbox">
+                                                            <span>Nakhu</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="lalitpurAreas" value="Nakhipot" class="area-checkbox">
+                                                            <span>Nakhipot</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="lalitpurAreas" value="Sunakothi" class="area-checkbox">
+                                                            <span>Sunakothi</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="lalitpurAreas" value="Khumaltar" class="area-checkbox">
+                                                            <span>Khumaltar</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="lalitpurAreas" value="Sanagau" class="area-checkbox">
+                                                            <span>Sanagau</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="lalitpurAreas" value="Bafal" class="area-checkbox">
+                                                            <span>Bafal</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="lalitpurAreas" value="Jhamsikhel" class="area-checkbox">
+                                                            <span>Jhamsikhel</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="lalitpurAreas" value="Balkumari" class="area-checkbox">
+                                                            <span>Balkumari</span>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Bhaktapur Areas -->
+                                        <div id="bhaktapurAreas" class="hidden space-y-4">
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <!-- Core Areas -->
+                                                <div class="space-y-2">
+                                                    <label class="font-medium">Core Areas</label>
+                                                    <div class="space-y-1">
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="bhaktapurAreas" value="Bhaktapur Durbar Square" class="area-checkbox">
+                                                            <span>Bhaktapur Durbar Square</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="bhaktapurAreas" value="Taumadhi" class="area-checkbox">
+                                                            <span>Taumadhi</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="bhaktapurAreas" value="Dattatreya" class="area-checkbox">
+                                                            <span>Dattatreya</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="bhaktapurAreas" value="Pottery Square" class="area-checkbox">
+                                                            <span>Pottery Square</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="bhaktapurAreas" value="Suryamadhi" class="area-checkbox">
+                                                            <span>Suryamadhi</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="bhaktapurAreas" value="Tachapal" class="area-checkbox">
+                                                            <span>Tachapal</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="bhaktapurAreas" value="Wattisattal" class="area-checkbox">
+                                                            <span>Wattisattal</span>
+                                                        </label>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Residential Areas -->
+                                                <div class="space-y-2">
+                                                    <label class="font-medium">Residential Areas</label>
+                                                    <div class="space-y-1">
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="bhaktapurAreas" value="Thimi" class="area-checkbox">
+                                                            <span>Thimi</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="bhaktapurAreas" value="Sallaghari" class="area-checkbox">
+                                                            <span>Sallaghari</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="bhaktapurAreas" value="Madhyapur Thimi" class="area-checkbox">
+                                                            <span>Madhyapur Thimi</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="bhaktapurAreas" value="Suryabinayak" class="area-checkbox">
+                                                            <span>Suryabinayak</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="bhaktapurAreas" value="Nagarjun" class="area-checkbox">
+                                                            <span>Nagarjun</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="bhaktapurAreas" value="Changunarayan" class="area-checkbox">
+                                                            <span>Changunarayan</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="bhaktapurAreas" value="Duwakot" class="area-checkbox">
+                                                            <span>Duwakot</span>
+                                                        </label>
+                                                        <label class="flex items-center space-x-2">
+                                                            <input type="checkbox" name="bhaktapurAreas" value="Jhaukhel" class="area-checkbox">
+                                                            <span>Jhaukhel</span>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Other Cities Input -->
+                                    <div id="otherCitiesInput" class="hidden space-y-4">
+                                        <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+                                            <label for="specificArea" class="block text-sm font-medium text-whatsapp-text-primary mb-2">Enter Your Specific Area/Neighborhood</label>
+                                            <input type="text" id="specificArea" name="specificArea" 
+                                                class="mt-1 block w-full rounded-whatsapp border-gray-300 shadow-whatsapp focus:border-whatsapp-primary focus:ring-whatsapp-primary"
+                                                placeholder="e.g., Lakeside for Pokhara, Bhanu Chowk for Dharan">
+                                        </div>
+                                    </div>
+
+                                    <!-- Additional Options -->
+                                    <div class="mt-4 space-y-2">
+                                        <label class="flex items-center space-x-2">
+                                            <input type="checkbox" id="willingToTravel" name="willingToTravel">
+                                            <span>Willing to travel to nearby areas</span>
+                                        </label>
+                                        <div id="travelDistanceContainer" class="hidden ml-6">
+                                            <label class="block text-sm text-gray-600">Maximum travel distance:</label>
+                                            <select id="travelDistance" name="travelDistance" 
+                                                class="mt-1 block w-full rounded-whatsapp border-gray-300 shadow-whatsapp"
+                                                title="Select maximum travel distance"
+                                                aria-label="Select maximum travel distance">
+                                                <option value="2">Within 2 km</option>
+                                                <option value="5">Within 5 km</option>
+                                                <option value="10">Within 10 km</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Background Information -->
+                <div class="space-y-6 p-6 bg-gray-50 rounded-lg border border-gray-200">
+                    <h2 class="text-lg font-semibold text-whatsapp-text-primary pb-2 border-b border-gray-200">Background Information</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+                            <label for="nationality" class="block text-sm font-medium text-whatsapp-text-primary">Nationality *</label>
+                            <select id="nationality" name="nationality" required
+                                class="mt-1 block w-full rounded-whatsapp border-gray-300 shadow-whatsapp focus:border-whatsapp-primary focus:ring-whatsapp-primary">
+                                <option value="">Select Nationality</option>
+                                <option value="Nepali">Nepali</option>
+                                <option value="Indian">Indian</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+                            <label for="religion" class="block text-sm font-medium text-whatsapp-text-primary">Religion</label>
+                            <select id="religion" name="religion"
+                                class="mt-1 block w-full rounded-whatsapp border-gray-300 shadow-whatsapp focus:border-whatsapp-primary focus:ring-whatsapp-primary">
+                                <option value="">Select Religion</option>
+                                <option value="Hindu">Hindu</option>
+                                <option value="Buddhist">Buddhist</option>
+                                <option value="Muslim">Muslim</option>
+                                <option value="Christian">Christian</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+                            <label for="education" class="block text-sm font-medium text-whatsapp-text-primary">Education Level *</label>
+                            <select id="education" name="education" required
+                                class="mt-1 block w-full rounded-whatsapp border-gray-300 shadow-whatsapp focus:border-whatsapp-primary focus:ring-whatsapp-primary">
+                                <option value="">Select Education Level</option>
+                                <option value="Under SEE">Under SEE</option>
+                                <option value="SEE">SEE Pass</option>
+                                <option value="Intermediate">Intermediate Pass</option>
+                                <option value="Bachelor">Bachelor Pass</option>
+                                <option value="None">None</option>
+                            </select>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+                            <label for="documents" class="block text-sm font-medium text-whatsapp-text-primary">Available Documents *</label>
+                            <select id="documents" name="documents" required
+                                class="mt-1 block w-full rounded-whatsapp border-gray-300 shadow-whatsapp focus:border-whatsapp-primary focus:ring-whatsapp-primary">
+                                <option value="">Select Available Documents</option>
+                                <option value="Citizenship">Citizenship</option>
+                                <option value="Rastriya Parichay Patra">Rastriya Parichay Patra</option>
+                                <option value="Passport">Passport</option>
+                                <option value="None">No Documents Available</option>
+                            </select>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+                            <label class="block text-sm font-medium text-whatsapp-text-primary">Languages Spoken *</label>
+                            <p class="text-xs text-whatsapp-text-secondary mb-2">Select all languages you can speak</p>
+                            <div class="grid grid-cols-2 gap-2">
+                                <label class="flex items-center space-x-2">
+                                    <input type="checkbox" name="languages" value="Nepali" class="language-checkbox">
+                                    <span>Nepali</span>
+                                </label>
+                                <label class="flex items-center space-x-2">
+                                    <input type="checkbox" name="languages" value="English" class="language-checkbox">
+                                    <span>English</span>
+                                </label>
+                                <label class="flex items-center space-x-2">
+                                    <input type="checkbox" name="languages" value="Hindi" class="language-checkbox">
+                                    <span>Hindi</span>
+                                </label>
+                                <label class="flex items-center space-x-2">
+                                    <input type="checkbox" name="languages" value="Newari" class="language-checkbox">
+                                    <span>Newari</span>
+                                </label>
+                                <label class="flex items-center space-x-2">
+                                    <input type="checkbox" name="languages" value="Tamang" class="language-checkbox">
+                                    <span>Tamang</span>
+                                </label>
+                                <label class="flex items-center space-x-2">
+                                    <input type="checkbox" name="languages" value="Gurung" class="language-checkbox">
+                                    <span>Gurung</span>
+                                </label>
+                                <label class="flex items-center space-x-2">
+                                    <input type="checkbox" name="languages" value="Magar" class="language-checkbox">
+                                    <span>Magar</span>
+                                </label>
+                                <label class="flex items-center space-x-2">
+                                    <input type="checkbox" name="languages" value="Maithili" class="language-checkbox">
+                                    <span>Maithili</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Skills -->
+                <div class="space-y-4 p-6 bg-gray-50 rounded-lg border border-gray-200">
+                    <label class="block text-sm font-medium text-whatsapp-text-primary">Skills * (Select all that matches your skills )</label>
+                    <p class="text-xs text-whatsapp-text-secondary mb-4">Check all the services you can provide</p>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4 bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" class="skill-checkbox" value="Cooking" name="skills">
+                            <span>Cooking</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" class="skill-checkbox" value="Cleaning" name="skills">
+                            <span>Cleaning</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" class="skill-checkbox" value="Laundry" name="skills">
+                            <span>Laundry/Clothes Washing </span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" class="skill-checkbox" value="Child Care" name="skills">
+                            <span>Child Care</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" class="skill-checkbox" value="Elderly Care" name="skills">
+                            <span>Elderly Care</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" class="skill-checkbox" value="Patient Care" name="skills">
+                            <span>Patient Care</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" class="skill-checkbox" value="Pet Care" name="skills">
+                            <span>Pet Care</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" class="skill-checkbox" value="Postnatal/Sutkeri Care" name="skills">
+                            <span>Postnatal/Sutkeri Care</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" class="skill-checkbox" value="Office Assistant" name="skills">
+                            <span>Office Assistant</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" class="skill-checkbox" value="Gardening" name="skills">
+                            <span>Gardening</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" class="skill-checkbox" value="Ironing" name="skills">
+                            <span>Ironing</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" class="skill-checkbox" value="Dishwashing" name="skills">
+                            <span>Dishwashing</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- About Me -->
+                <div class="space-y-4 p-6 bg-gray-50 rounded-lg border border-gray-200">
+                    <label for="about" class="block text-sm font-medium text-whatsapp-text-primary">About Me *</label>
+                    <div class="relative bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+                        <textarea id="about" name="about" rows="4" required maxlength="250"
+                            class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-whatsapp-primary focus:ring-whatsapp-primary"
+                            placeholder="Tell employers about yourself, your experience, and what makes you a great domestic helper (max 250 characters)"></textarea>
+                        <div class="absolute bottom-2 right-2 text-xs text-whatsapp-text-secondary">
+                            <span id="charCount">0</span>/250
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="flex justify-end pt-4">
+                    <button type="submit"
+                        class="bg-whatsapp-primary text-white px-8 py-3 rounded-lg text-sm font-medium hover:bg-whatsapp-secondary transition-all duration-200 shadow-lg hover:shadow-xl">
+                        Create Profile
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html> 

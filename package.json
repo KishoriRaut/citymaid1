@@ -1,17 +1,25 @@
 {
-  "name": "citymaid",
+  "name": "citymaid-services",
   "version": "1.0.0",
-  "description": "City Maid Services Platform",
+  "description": "House maid supply business platform",
+  "main": "index.js",
   "scripts": {
-    "build": "tailwindcss -i ./src/input.css -o ./citymaidservices/dist/output.css --minify",
-    "watch": "tailwindcss -i ./src/input.css -o ./citymaidservices/dist/output.css --watch"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint src/**/*.js",
+    "format": "prettier --write \"src/**/*.{js,html,css}\""
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "tailwindcss": "^3.3.0",
+    "vite": "^5.0.0"
   },
   "devDependencies": {
-    "@tailwindcss/aspect-ratio": "^0.4.2",
-    "@tailwindcss/forms": "^0.5.7",
-    "@tailwindcss/typography": "^0.5.10",
-    "autoprefixer": "^10.4.17",
-    "postcss": "^8.4.35",
-    "tailwindcss": "^3.4.1"
+    "@vitejs/plugin-react": "^4.2.0",
+    "autoprefixer": "^10.4.16",
+    "eslint": "^8.54.0",
+    "postcss": "^8.4.31",
+    "prettier": "^3.1.0"
   }
 }
