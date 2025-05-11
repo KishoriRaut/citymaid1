@@ -4,11 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Maid Dashboard - City Maid Services</title>
-    <link rel="stylesheet" href="../dist/output.css">
-    <link rel="icon" type="image/x-icon" href="../assets/favicon.ico">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../config.js"></script>
+    <script src="../js/auth.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -28,13 +31,6 @@
                                 light: '#FFFFFF',     // White text
                             }
                         }
-                    },
-                    boxShadow: {
-                        'whatsapp': '0 1px 3px rgba(0, 0, 0, 0.1)',
-                        'whatsapp-hover': '0 2px 4px rgba(0, 0, 0, 0.15)',
-                    },
-                    borderRadius: {
-                        'whatsapp': '8px',
                     }
                 }
             }
@@ -43,405 +39,121 @@
 </head>
 <body class="font-sans bg-whatsapp-light text-whatsapp-text-primary">
     <!-- Navigation Bar -->
-    <nav class="bg-white shadow-whatsapp sticky top-0 z-50">
+    <nav class="bg-white shadow-md sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
                     <a href="../index.html" class="text-2xl font-semibold text-whatsapp-primary">CITYMAID</a>
                 </div>
-                <!-- Desktop menu -->
-                <div class="hidden md:flex items-center space-x-6">
-                    <a href="../index.html" class="text-whatsapp-text-primary hover:text-whatsapp-primary transition-colors">
-                        <i class="fas fa-home mr-1"></i> Home
-                    </a>
-                    <div class="relative">
-                        <button id="userMenuBtn" class="flex items-center space-x-2 text-whatsapp-text-primary hover:text-whatsapp-primary transition-colors">
-                            <i class="fas fa-user-circle text-2xl"></i>
-                            <span class="font-medium" id="user-role-display">My Account</span>
-                        </button>
-                        <div id="user-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-whatsapp shadow-whatsapp border border-gray-200">
-                            <a href="dashboard.html" class="block px-4 py-2 hover:bg-whatsapp-light text-whatsapp-primary transition-colors">Dashboard</a>
-                            <a href="profile.html" class="block px-4 py-2 hover:bg-whatsapp-light transition-colors">Profile</a>
-                            <a href="#" id="signOutBtn" class="block px-4 py-2 hover:bg-whatsapp-light transition-colors">Sign Out</a>
-                        </div>
-                    </div>
+                <div class="flex items-center space-x-4">
+                    <span id="userName" class="text-whatsapp-text-primary"></span>
+                    <button onclick="handleLogout()" class="text-whatsapp-text-primary hover:text-whatsapp-primary transition-colors">
+                        <i class="fas fa-sign-out-alt mr-1"></i> Logout
+                    </button>
                 </div>
             </div>
         </div>
     </nav>
 
-    <!-- Dashboard Content -->
+    <!-- Main Content -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <!-- Welcome Section -->
-        <div class="bg-white rounded-whatsapp shadow-whatsapp p-6 mb-8">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h1 class="text-2xl font-bold text-whatsapp-text-primary" id="welcomeHeading">Welcome, <span id="maidFullName">Maid</span>!</h1>
-                    <p class="text-whatsapp-text-secondary mt-1" id="welcomeSubtext">Manage your profile and view your statistics from your dashboard.</p>
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h1 class="text-2xl font-semibold text-whatsapp-text-primary">Welcome to your Dashboard</h1>
+            <p class="text-whatsapp-text-secondary mt-2">Manage your profile and job applications here.</p>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-medium text-whatsapp-text-primary">Profile Status</h3>
+                        <p class="text-whatsapp-text-secondary mt-1">Complete your profile to get hired</p>
+                    </div>
+                    <div class="text-3xl text-whatsapp-primary">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
                 </div>
-                <div class="flex space-x-4">
-                    <a href="profile.html" id="updateProfileBtn" class="inline-flex items-center px-4 py-2 border border-transparent rounded-whatsapp shadow-whatsapp text-sm font-medium text-white bg-whatsapp-primary hover:bg-whatsapp-secondary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-whatsapp-primary transition-colors">
-                        <i class="fas fa-user-edit mr-2"></i>
-                        Profile
-                    </a>
+                <button onclick="window.location.href='create-profile.html'" class="mt-4 w-full bg-whatsapp-primary text-white px-4 py-2 rounded-lg hover:bg-whatsapp-secondary transition-colors">
+                    Update Profile
+                </button>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-medium text-whatsapp-text-primary">Job Applications</h3>
+                        <p class="text-whatsapp-text-secondary mt-1">View your job applications</p>
+                    </div>
+                    <div class="text-3xl text-whatsapp-primary">
+                        <i class="fas fa-briefcase"></i>
+                    </div>
                 </div>
+                <button onclick="window.location.href='applications.html'" class="mt-4 w-full bg-whatsapp-primary text-white px-4 py-2 rounded-lg hover:bg-whatsapp-secondary transition-colors">
+                    View Applications
+                </button>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-medium text-whatsapp-text-primary">Messages</h3>
+                        <p class="text-whatsapp-text-secondary mt-1">Check your messages</p>
+                    </div>
+                    <div class="text-3xl text-whatsapp-primary">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                </div>
+                <button onclick="window.location.href='messages.html'" class="mt-4 w-full bg-whatsapp-primary text-white px-4 py-2 rounded-lg hover:bg-whatsapp-secondary transition-colors">
+                    View Messages
+                </button>
             </div>
         </div>
 
-        <!-- Dashboard Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <!-- Profile Status Card -->
-            <div class="bg-white rounded-whatsapp shadow-whatsapp p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-lg font-semibold text-whatsapp-text-primary">Profile Status</h2>
-                    <span id="profileStatus" class="px-3 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">Incomplete</span>
-                </div>
-                <div class="space-y-4">
-                    <p class="text-sm text-whatsapp-text-secondary" id="profileCompletionMessage">Complete your profile to start receiving contact requests</p>
-                    <div class="flex justify-between items-center">
-                        <span class="text-sm text-whatsapp-text-secondary">Profile Visibility</span>
-                        <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" id="profileVisibilityToggle" class="sr-only peer" aria-label="Toggle profile visibility">
-                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-whatsapp-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-whatsapp-primary"></div>
-                        </label>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Profile Views Card -->
-            <div class="bg-white rounded-whatsapp shadow-whatsapp p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-lg font-semibold text-whatsapp-text-primary">Profile Views</h2>
-                    <i class="fas fa-eye text-whatsapp-primary text-xl"></i>
-                </div>
-                <div class="space-y-4">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <p class="text-3xl font-bold text-whatsapp-primary" id="totalProfileViews">0</p>
-                            <p class="text-sm text-whatsapp-text-secondary">Total Views</p>
-                        </div>
-                        <div>
-                            <p class="text-3xl font-bold text-green-500" id="weeklyProfileViews">0</p>
-                            <p class="text-sm text-whatsapp-text-secondary">This Week</p>
-                        </div>
-                    </div>
-                    <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
-                        <div class="h-full bg-whatsapp-primary rounded-full" id="profileViewsProgress" style="width: 0%"></div>
-                    </div>
-                    <p class="text-sm text-whatsapp-text-secondary">Compared to last week: <span id="profileViewsChange" class="text-green-500">+0%</span></p>
-                </div>
-            </div>
-
-            <!-- Unlock Contact Stats Card -->
-            <div class="bg-white rounded-whatsapp shadow-whatsapp p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-lg font-semibold text-whatsapp-text-primary">Contact Unlocks</h2>
-                    <i class="fas fa-unlock text-whatsapp-primary text-xl"></i>
-                </div>
-                <div class="space-y-4">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <p class="text-3xl font-bold text-whatsapp-primary" id="totalContactUnlocks">0</p>
-                            <p class="text-sm text-whatsapp-text-secondary">Total Unlocks</p>
-                        </div>
-                        <div>
-                            <p class="text-3xl font-bold text-green-500" id="monthlyContactUnlocks">0</p>
-                            <p class="text-sm text-whatsapp-text-secondary">This Month</p>
-                        </div>
-                    </div>
-                    <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
-                        <div class="h-full bg-whatsapp-primary rounded-full" id="contactUnlocksProgress" style="width: 0%"></div>
-                    </div>
-                    <p class="text-sm text-whatsapp-text-secondary">Conversion rate: <span id="contactUnlockRate" class="text-green-500">0%</span></p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Recent Activity Section -->
-        <div class="mt-8">
+        <!-- Recent Activity -->
+        <div class="bg-white rounded-lg shadow-md p-6">
             <h2 class="text-xl font-semibold text-whatsapp-text-primary mb-4">Recent Activity</h2>
-            <div class="bg-white rounded-whatsapp shadow-whatsapp overflow-hidden">
-                <div class="p-6 text-center">
-                    <i class="fas fa-clock text-4xl text-whatsapp-text-secondary mb-2"></i>
-                    <p class="text-whatsapp-text-secondary">No recent activity</p>
-                    <p class="text-sm text-whatsapp-text-secondary mt-1">Your recent activities will appear here</p>
+            <div id="recentActivity" class="space-y-4">
+                <!-- Activity items will be loaded here -->
+                <div class="text-center text-whatsapp-text-secondary py-4">
+                    No recent activity
                 </div>
             </div>
-        </div>
-    </div>
-
-    <!-- Error Toast -->
-    <div id="errorToast" class="fixed bottom-4 right-4 bg-red-500 text-white px-6 py-3 rounded-whatsapp shadow-whatsapp hidden">
-        <div class="flex items-center">
-            <i class="fas fa-exclamation-circle mr-2"></i>
-            <span id="errorMessage"></span>
-        </div>
-    </div>
-
-    <!-- Success Toast -->
-    <div id="successToast" class="fixed bottom-4 right-4 bg-whatsapp-primary text-white px-6 py-3 rounded-whatsapp shadow-whatsapp hidden">
-        <div class="flex items-center">
-            <i class="fas fa-check-circle mr-2"></i>
-            <span id="successMessage"></span>
         </div>
     </div>
 
     <script>
-        // Initialize Supabase client
-        const SUPABASE_URL = 'https://fdgqqxyyofjnkhswkwcq.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZkZ3FxeHl5b2Zqbmtoc3drd2NxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQwMjQyMTMsImV4cCI6MjA1OTYwMDIxM30.YyJLLu3r2a7Mh7ny0ie-YzzLfPh5PdrJJHnBFBxWqVE';
-        const { createClient } = supabase;
-        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // Check authentication and load user data
+        document.addEventListener('DOMContentLoaded', async () => {
+            const isLoggedIn = auth.checkAuthStatus();
+            if (!isLoggedIn) {
+                window.location.href = '../auth/login.html';
+                return;
+            }
 
-        let currentUser = null;
-        let currentProfile = null;
+            const user = await auth.getCurrentUser();
+            if (!user || user.user_metadata.role !== 'maid') {
+                window.location.href = '../auth/login.html';
+                return;
+            }
 
-        // Check session and load profile
-        async function initializeDashboard() {
+            // Display user name
+            const userNameElement = document.getElementById('userName');
+            if (user.user_metadata.full_name) {
+                userNameElement.textContent = `Welcome, ${user.user_metadata.full_name}`;
+            }
+        });
+
+        // Handle logout
+        async function handleLogout() {
             try {
-                // Verify that user has the correct role for this page
-                const userRole = localStorage.getItem('userRole');
-                if (userRole !== 'maid') {
-                    // Redirect employers to their dashboard
-                    if (userRole === 'employer') {
-                        window.location.href = '../employer/dashboard.html';
-                        return;
-                    }
-                    
-                    // Set role to maid if not set or invalid
-                    localStorage.setItem('userRole', 'maid');
-                }
-                
-                const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
-                if (sessionError) throw sessionError;
-                
-                if (!session) {
-                    window.location.href = '../auth/login.html?role=maid';
-                    return;
-                }
-
-                currentUser = session.user;
-                await loadProfile();
-                await loadProfileStats();
-                updateUIWithProfileData();
+                await auth.signOut();
+                window.location.href = '../auth/login.html';
             } catch (error) {
-                console.error('Error initializing dashboard:', error);
-                showError('Error loading dashboard. Please try again.');
+                console.error('Logout error:', error);
             }
         }
-
-        // Load existing profile data
-        async function loadProfile() {
-            try {
-                if (!currentUser || !currentUser.id) {
-                    console.error('No current user found');
-                    showError('Please sign in to access your profile');
-                    return null;
-                }
-
-                console.log('Starting to load profile for user:', currentUser.id);
-                
-                // Get the maid profile
-                const { data: maidProfile, error: maidError } = await supabaseClient
-                    .from('maid_profiles')
-                    .select('full_name, is_active')
-                    .eq('user_id', currentUser.id)
-                    .single();
-
-                console.log('Maid profile fetch result:', { 
-                    data: maidProfile, 
-                    error: maidError,
-                    errorCode: maidError?.code,
-                    errorMessage: maidError?.message,
-                    errorDetails: maidError?.details
-                });
-
-                if (maidError) {
-                    if (maidError.code === 'PGRST116') {
-                        console.log('No maid profile found, creating default profile');
-                        // Create a default profile if none exists
-                        const { data: newProfile, error: createError } = await supabaseClient
-                            .from('maid_profiles')
-                            .insert([
-                                {
-                                    user_id: currentUser.id,
-                                    full_name: currentUser.email?.split('@')[0] || 'Maid',
-                                    is_active: false,
-                                    age_group: '18-25',
-                                    gender: 'Female',
-                                    nationality: 'Nepali',
-                                    education: 'High School',
-                                    documents: 'None',
-                                    email: currentUser.email,
-                                    phone: '0000000000',
-                                    address: 'Not specified',
-                                    emergency_contact: 'Not specified',
-                                    service_type: 'Regular House Cleaning',
-                                    work_type: 'Regular',
-                                    work_location: 'Kathmandu',
-                                    expected_salary: 15000,
-                                    created_at: new Date().toISOString(),
-                                    updated_at: new Date().toISOString()
-                                }
-                            ])
-                            .select()
-                            .single();
-
-                        if (createError) throw createError;
-                        currentProfile = newProfile;
-                    } else {
-                        throw maidError;
-                    }
-                } else {
-                    currentProfile = maidProfile;
-                }
-
-                return currentProfile;
-            } catch (error) {
-                console.error('Error loading profile:', error);
-                showError('Error loading profile. Please try again.');
-                return null;
-            }
-        }
-
-        // Load profile statistics
-        async function loadProfileStats() {
-            try {
-                if (!currentUser || !currentUser.id) return;
-
-                // Get profile views
-                const { data: views, error: viewsError } = await supabaseClient
-                    .from('profile_views')
-                    .select('count')
-                    .eq('maid_id', currentUser.id)
-                    .single();
-
-                if (!viewsError && views) {
-                    document.getElementById('totalProfileViews').textContent = views.count || '0';
-                }
-
-                // Get contact unlocks
-                const { data: unlocks, error: unlocksError } = await supabaseClient
-                    .from('contact_unlocks')
-                    .select('count')
-                    .eq('maid_id', currentUser.id)
-                    .single();
-
-                if (!unlocksError && unlocks) {
-                    document.getElementById('totalContactUnlocks').textContent = unlocks.count || '0';
-                }
-
-            } catch (error) {
-                console.error('Error loading profile stats:', error);
-            }
-        }
-
-        // Update UI with profile data
-        function updateUIWithProfileData() {
-            if (!currentProfile) return;
-
-            // Update welcome message
-            const welcomeHeading = document.getElementById('welcomeHeading');
-            const maidFullName = document.getElementById('maidFullName');
-            if (welcomeHeading && maidFullName) {
-                maidFullName.textContent = currentProfile.full_name || 'Maid';
-            }
-
-            // Update profile status
-            const profileStatus = document.getElementById('profileStatus');
-            const profileCompletionMessage = document.getElementById('profileCompletionMessage');
-            if (profileStatus && profileCompletionMessage) {
-                if (currentProfile.is_active) {
-                    profileStatus.textContent = 'Active';
-                    profileStatus.className = 'px-3 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800';
-                    profileCompletionMessage.textContent = 'Your profile is visible to employers';
-                } else {
-                    profileStatus.textContent = 'Inactive';
-                    profileStatus.className = 'px-3 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800';
-                    profileCompletionMessage.textContent = 'Complete your profile to start receiving contact requests';
-                }
-            }
-
-            // Update profile visibility toggle
-            const profileVisibilityToggle = document.getElementById('profileVisibilityToggle');
-            if (profileVisibilityToggle) {
-                profileVisibilityToggle.checked = currentProfile.is_active;
-                profileVisibilityToggle.addEventListener('change', async function() {
-                    try {
-                        const { error } = await supabaseClient
-                            .from('maid_profiles')
-                            .update({ is_active: this.checked })
-                            .eq('user_id', currentUser.id);
-
-                        if (error) throw error;
-
-                        showSuccess('Profile visibility updated successfully');
-                        updateUIWithProfileData();
-                    } catch (error) {
-                        console.error('Error updating profile visibility:', error);
-                        showError('Failed to update profile visibility');
-                        this.checked = !this.checked;
-                    }
-                });
-            }
-        }
-
-        // Show error message
-        function showError(message) {
-            const toast = document.getElementById('errorToast');
-            const messageEl = document.getElementById('errorMessage');
-            messageEl.textContent = message;
-            toast.classList.remove('hidden');
-            setTimeout(() => {
-                toast.classList.add('hidden');
-            }, 5000);
-        }
-
-        // Show success message
-        function showSuccess(message) {
-            const toast = document.getElementById('successToast');
-            const messageEl = document.getElementById('successMessage');
-            messageEl.textContent = message;
-            toast.classList.remove('hidden');
-            setTimeout(() => {
-                toast.classList.add('hidden');
-            }, 5000);
-        }
-
-        // Handle user menu toggle
-        const userMenuBtn = document.getElementById('userMenuBtn');
-        const userDropdown = document.getElementById('user-dropdown');
-        if (userMenuBtn && userDropdown) {
-            userMenuBtn.addEventListener('click', () => {
-                userDropdown.classList.toggle('hidden');
-            });
-
-            // Close dropdown when clicking outside
-            document.addEventListener('click', (e) => {
-                if (!userMenuBtn.contains(e.target) && !userDropdown.contains(e.target)) {
-                    userDropdown.classList.add('hidden');
-                }
-            });
-        }
-
-        // Handle sign out
-        const signOutBtn = document.getElementById('signOutBtn');
-        if (signOutBtn) {
-            signOutBtn.addEventListener('click', async (e) => {
-                e.preventDefault();
-                try {
-                    const { error } = await supabaseClient.auth.signOut();
-                    if (error) throw error;
-                    window.location.href = '../auth/login.html';
-                } catch (error) {
-                    console.error('Error signing out:', error);
-                    showError('Failed to sign out');
-                }
-            });
-        }
-
-        // Initialize dashboard when DOM is loaded
-        document.addEventListener('DOMContentLoaded', initializeDashboard);
     </script>
 </body>
 </html> 

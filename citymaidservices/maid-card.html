@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maid Profiles - City Maid Services</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/maid-card.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://khalti.s3.ap-south-1.amazonaws.com/KPG/dist/2020.12.17.0.0.0/khalti-checkout.iffe.js"></script>
+    <script src="config.js"></script>
+    <script src="js/maid-card.js"></script>
+</head>
+<body class="font-sans bg-whatsapp-light text-whatsapp-text-primary">
+    <!-- Navigation Bar -->
+    <nav class="bg-white shadow-whatsapp sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="index.html" class="text-2xl font-semibold text-whatsapp-primary">CITYMAID</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="index.html" class="text-whatsapp-text-primary hover:text-whatsapp-primary transition-colors">
+                        <i class="fas fa-home mr-1"></i> Home
+                    </a>
+                    <a href="find-maids.html" class="text-whatsapp-text-primary hover:text-whatsapp-primary transition-colors">
+                        <i class="fas fa-search mr-1"></i> Find Maids
+                    </a>
+                    <a href="maid/create-profile.html" class="text-whatsapp-text-primary hover:text-whatsapp-primary transition-colors">
+                        <i class="fas fa-user-plus mr-1"></i> Create Profile
+                    </a>
+                    <a href="auth/login.html" class="bg-whatsapp-primary text-white px-4 py-2 rounded-whatsapp text-sm font-medium hover:bg-whatsapp-secondary transition-colors">
+                        <i class="fas fa-sign-in-alt mr-1"></i> Login
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Filters Section -->
+        <div class="bg-white p-4 rounded-lg shadow-whatsapp mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Skills</label>
+                    <select class="w-full rounded-md border-gray-300 shadow-sm focus:border-whatsapp-primary focus:ring focus:ring-whatsapp-primary focus:ring-opacity-50" aria-label="Select skills">
+                        <option value="">All Skills</option>
+                        <option value="house-cleaning">House Cleaning</option>
+                        <option value="cooking">Cooking</option>
+                        <option value="child-care">Child Care</option>
+                        <option value="elderly-care">Elderly Care</option>
+                        <option value="laundry">Laundry</option>
+                        <option value="pet-care">Pet Care</option>
+                        <option value="gardening">Gardening</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Experience</label>
+                    <select class="w-full rounded-md border-gray-300 shadow-sm focus:border-whatsapp-primary focus:ring focus:ring-whatsapp-primary focus:ring-opacity-50" aria-label="Select experience">
+                        <option value="">Any Experience</option>
+                        <option value="0-1">0-1 years</option>
+                        <option value="1-3">1-3 years</option>
+                        <option value="3-5">3-5 years</option>
+                        <option value="5+">5+ years</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                    <input type="text" placeholder="Enter location" class="w-full rounded-md border-gray-300 shadow-sm focus:border-whatsapp-primary focus:ring focus:ring-whatsapp-primary focus:ring-opacity-50">
+                </div>
+            </div>
+        </div>
+
+        <!-- Maid Cards Container -->
+        <div id="maid-cards-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Maid cards will be dynamically inserted here -->
+        </div>
+
+        <!-- Loading State -->
+        <div id="loading-state" class="hidden">
+            <div class="flex justify-center items-center py-12">
+                <div class="loading-spinner"></div>
+            </div>
+        </div>
+
+        <!-- No Results State -->
+        <div id="no-results" class="hidden text-center py-12">
+            <i class="fas fa-search text-4xl text-gray-400 mb-4"></i>
+            <h3 class="text-xl font-semibold text-gray-600">No maids found</h3>
+            <p class="text-gray-500">Try adjusting your filters or search criteria</p>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="text-center text-gray-500">
+                <p>&copy; 2024 City Maid Services. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html> 

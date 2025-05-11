@@ -1,0 +1,143 @@
+/* Maid Card Styles */
+.maid-card {
+    transition: transform 0.2s ease-in-out;
+}
+
+.maid-card:hover {
+    transform: translateY(-4px);
+}
+
+/* Image Loading Animation */
+.image-loading {
+    position: relative;
+    overflow: hidden;
+}
+
+.image-loading::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(
+        to right,
+        transparent,
+        rgba(255, 255, 255, 0.3),
+        transparent
+    );
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    100% {
+        left: 100%;
+    }
+}
+
+/* Modal Animation */
+.modal-enter {
+    animation: modalFadeIn 0.3s ease-out;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Skill Tags */
+.skill-tag {
+    transition: background-color 0.2s ease;
+}
+
+.skill-tag:hover {
+    background-color: #e5e7eb;
+}
+
+/* Contact Button */
+.contact-button {
+    position: relative;
+    overflow: hidden;
+}
+
+.contact-button::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.3s, height 0.3s;
+}
+
+.contact-button:hover::after {
+    width: 200%;
+    height: 200%;
+}
+
+/* Loading Spinner */
+.loading-spinner {
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #25D366;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsive Image Container */
+.image-container {
+    position: relative;
+    padding-top: 75%; /* 4:3 Aspect Ratio */
+}
+
+.image-container img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Grid/List View Transitions */
+.view-transition {
+    transition: all 0.3s ease-in-out;
+}
+
+/* Error State */
+.error-state {
+    animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+    .maid-card,
+    .contact-button,
+    .skill-tag,
+    .modal-enter,
+    .loading-spinner {
+        transition: none;
+        animation: none;
+    }
+} 

@@ -4,9 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register - City Maid Services</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../config.js"></script>
+    <script src="../js/auth.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -39,310 +44,227 @@
         }
     </script>
 </head>
-<body class="bg-whatsapp-light min-h-screen">
-    <!-- Navigation Bar -->
-    <nav class="bg-white shadow-whatsapp sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center">
-                    <a href="../index.html" class="text-2xl font-semibold text-whatsapp-primary">CITYMAID</a>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <a href="../index.html" class="text-whatsapp-text-primary hover:text-whatsapp-primary transition-colors">
-                        <i class="fas fa-home mr-1"></i> Home
-                    </a>
-                    <a href="../find-maids.html" class="text-whatsapp-text-primary hover:text-whatsapp-primary transition-colors">
-                        <i class="fas fa-search mr-1"></i> Find Maids
-                    </a>
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Registration Form -->
-    <div class="min-h-[calc(100vh-4rem)] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+<body class="font-sans bg-whatsapp-light text-whatsapp-text-primary">
+    <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div class="max-w-md w-full space-y-8">
-            <!-- Header -->
+            <!-- Logo and Title -->
             <div class="text-center">
-                <h2 class="text-3xl font-bold text-whatsapp-text-primary">Create Your Account</h2>
+                <a href="../index.html" class="text-3xl font-bold text-whatsapp-primary">CITYMAID</a>
+                <h2 class="mt-6 text-2xl font-semibold text-whatsapp-text-primary">Create your account</h2>
                 <p class="mt-2 text-sm text-whatsapp-text-secondary">
-                    Join CityMaid to find the perfect domestic help
+                    Already have an account?
+                    <a href="login.html" class="font-medium text-whatsapp-primary hover:text-whatsapp-secondary">
+                        Sign in
+                    </a>
                 </p>
             </div>
 
-            <!-- Role Selection -->
-            <div id="roleSelection" class="bg-white rounded-2xl shadow-xl p-8">
-                <h3 class="text-lg font-medium text-whatsapp-text-primary mb-6">I am a:</h3>
-                <div class="grid grid-cols-2 gap-4">
-                    <button onclick="selectRole('maid')" class="role-btn p-6 border-2 border-gray-200 rounded-lg hover:border-whatsapp-primary hover:bg-whatsapp-light transition-all duration-200 text-center">
-                        <i class="fas fa-user-tie text-3xl text-whatsapp-primary mb-3"></i>
-                        <h4 class="font-medium text-whatsapp-text-primary">Maid</h4>
-                        <p class="text-sm text-whatsapp-text-secondary mt-1">I want to find work</p>
-                    </button>
-                    <button onclick="selectRole('employer')" class="role-btn p-6 border-2 border-gray-200 rounded-lg hover:border-whatsapp-primary hover:bg-whatsapp-light transition-all duration-200 text-center">
-                        <i class="fas fa-building text-3xl text-whatsapp-primary mb-3"></i>
-                        <h4 class="font-medium text-whatsapp-text-primary">Employer</h4>
-                        <p class="text-sm text-whatsapp-text-secondary mt-1">I want to hire help</p>
-                    </button>
+            <!-- Registration Form -->
+            <form id="registerForm" class="mt-8 space-y-6" onsubmit="handleRegister(event)">
+                <!-- Error Message -->
+                <div id="errorMessage" class="hidden bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
                 </div>
-            </div>
 
-            <!-- Form Container -->
-            <div id="registrationForm" class="bg-white rounded-2xl shadow-xl p-8 hidden">
-                <form id="registerForm" class="space-y-6">
-                    <!-- Full Name -->
-                    <div>
-                        <label for="fullName" class="block text-sm font-medium text-whatsapp-text-primary">
-                            Full Name
-                        </label>
-                        <div class="mt-1 relative rounded-md shadow-sm">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <i class="fas fa-user text-whatsapp-text-secondary"></i>
-                            </div>
-                            <input type="text" id="fullName" name="fullName" required
-                                class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-whatsapp-primary focus:border-transparent"
-                                placeholder="Enter your full name">
-                        </div>
-                    </div>
-
-                    <!-- Email -->
-                    <div>
-                        <label for="email" class="block text-sm font-medium text-whatsapp-text-primary">
-                            Email Address
-                        </label>
-                        <div class="mt-1 relative rounded-md shadow-sm">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <i class="fas fa-envelope text-whatsapp-text-secondary"></i>
-                            </div>
-                            <input type="email" id="email" name="email" required
-                                class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-whatsapp-primary focus:border-transparent"
-                                placeholder="Enter your email">
-                        </div>
-                    </div>
-
-                    <!-- Phone Number -->
-                    <div>
-                        <label for="phone" class="block text-sm font-medium text-whatsapp-text-primary">
-                            Phone Number
-                        </label>
-                        <div class="mt-1 relative rounded-md shadow-sm">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <i class="fas fa-phone text-whatsapp-text-secondary"></i>
-                            </div>
-                            <input type="tel" id="phone" name="phone" required
-                                class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-whatsapp-primary focus:border-transparent"
-                                placeholder="Enter your phone number">
-                        </div>
-                    </div>
-
-                    <!-- Password -->
-                    <div>
-                        <label for="password" class="block text-sm font-medium text-whatsapp-text-primary">
-                            Password
-                        </label>
-                        <div class="mt-1 relative rounded-md shadow-sm">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <i class="fas fa-lock text-whatsapp-text-secondary"></i>
-                            </div>
-                            <input type="password" id="password" name="password" required minlength="6"
-                                class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-whatsapp-primary focus:border-transparent"
-                                placeholder="Create a password">
-                        </div>
-                        <p class="text-xs text-whatsapp-text-secondary mt-1">Password must be at least 6 characters long</p>
-                    </div>
-
-                    <!-- Confirm Password -->
-                    <div>
-                        <label for="confirmPassword" class="block text-sm font-medium text-whatsapp-text-primary">
-                            Confirm Password
-                        </label>
-                        <div class="mt-1 relative rounded-md shadow-sm">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <i class="fas fa-lock text-whatsapp-text-secondary"></i>
-                            </div>
-                            <input type="password" id="confirmPassword" name="confirmPassword" required minlength="6"
-                                class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-whatsapp-primary focus:border-transparent"
-                                placeholder="Confirm your password">
-                        </div>
-                    </div>
-
-                    <!-- Terms and Conditions -->
-                    <div class="flex items-center">
-                        <input type="checkbox" id="terms" name="terms" required
-                            class="h-4 w-4 text-whatsapp-primary focus:ring-whatsapp-primary border-gray-300 rounded">
-                        <label for="terms" class="ml-2 block text-sm text-whatsapp-text-secondary">
-                            I agree to the <a href="#" class="text-whatsapp-primary hover:text-whatsapp-secondary">Terms and Conditions</a>
-                        </label>
-                    </div>
-
-                    <!-- Submit Button -->
-                    <div>
-                        <button type="submit"
-                            class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-whatsapp-primary hover:bg-whatsapp-secondary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-whatsapp-primary transition-colors duration-200">
-                            Create Account
+                <!-- Role Selection -->
+                <div class="space-y-4">
+                    <label class="block text-sm font-medium text-whatsapp-text-primary">
+                        I am a
+                    </label>
+                    <div class="grid grid-cols-2 gap-4">
+                        <button type="button" onclick="selectRole('maid')" id="maidRole"
+                            class="p-4 border-2 border-whatsapp-primary rounded-lg hover:bg-whatsapp-primary hover:text-white transition-colors">
+                            <i class="fas fa-broom text-2xl mb-2"></i>
+                            <p class="font-medium">Maid</p>
+                            <p class="text-sm opacity-75">Looking for work</p>
+                        </button>
+                        <button type="button" onclick="selectRole('employer')" id="employerRole"
+                            class="p-4 border-2 border-whatsapp-primary rounded-lg hover:bg-whatsapp-primary hover:text-white transition-colors">
+                            <i class="fas fa-user-tie text-2xl mb-2"></i>
+                            <p class="font-medium">Employer</p>
+                            <p class="text-sm opacity-75">Looking to hire</p>
                         </button>
                     </div>
-                </form>
+                </div>
 
-                <!-- Login Link -->
-                <div class="mt-6 text-center">
-                    <p class="text-sm text-whatsapp-text-secondary">
-                        Already have an account?
-                        <a href="login.html" class="font-medium text-whatsapp-primary hover:text-whatsapp-secondary">
-                            Sign in
+                <!-- Full Name -->
+                <div>
+                    <label for="fullName" class="block text-sm font-medium text-whatsapp-text-primary">
+                        Full Name
+                    </label>
+                    <div class="mt-1">
+                        <input id="fullName" name="fullName" type="text" required
+                            class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-whatsapp-primary focus:border-whatsapp-primary">
+                    </div>
+                </div>
+
+                <!-- Email -->
+                <div>
+                    <label for="email" class="block text-sm font-medium text-whatsapp-text-primary">
+                        Email address
+                    </label>
+                    <div class="mt-1">
+                        <input id="email" name="email" type="email" required
+                            class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-whatsapp-primary focus:border-whatsapp-primary">
+                    </div>
+                </div>
+
+                <!-- Phone -->
+                <div>
+                    <label for="phone" class="block text-sm font-medium text-whatsapp-text-primary">
+                        Phone Number
+                    </label>
+                    <div class="mt-1">
+                        <input id="phone" name="phone" type="tel" required
+                            class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-whatsapp-primary focus:border-whatsapp-primary">
+                    </div>
+                </div>
+
+                <!-- Password -->
+                <div>
+                    <label for="password" class="block text-sm font-medium text-whatsapp-text-primary">
+                        Password
+                    </label>
+                    <div class="mt-1">
+                        <input id="password" name="password" type="password" required
+                            class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-whatsapp-primary focus:border-whatsapp-primary">
+                    </div>
+                </div>
+
+                <!-- Confirm Password -->
+                <div>
+                    <label for="confirmPassword" class="block text-sm font-medium text-whatsapp-text-primary">
+                        Confirm Password
+                    </label>
+                    <div class="mt-1">
+                        <input id="confirmPassword" name="confirmPassword" type="password" required
+                            class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-whatsapp-primary focus:border-whatsapp-primary">
+                    </div>
+                </div>
+
+                <!-- Terms and Conditions -->
+                <div class="flex items-center">
+                    <input id="terms" name="terms" type="checkbox" required
+                        class="h-4 w-4 text-whatsapp-primary focus:ring-whatsapp-primary border-gray-300 rounded">
+                    <label for="terms" class="ml-2 block text-sm text-whatsapp-text-secondary">
+                        I agree to the
+                        <a href="#" class="font-medium text-whatsapp-primary hover:text-whatsapp-secondary">
+                            Terms and Conditions
                         </a>
-                    </p>
+                    </label>
+                </div>
+
+                <!-- Submit Button -->
+                <div>
+                    <button type="submit"
+                        class="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-whatsapp-primary hover:bg-whatsapp-secondary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-whatsapp-primary">
+                        Create Account
+                    </button>
+                </div>
+            </form>
+
+            <!-- Loading Spinner -->
+            <div id="loadingSpinner" class="hidden">
+                <div class="flex justify-center">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-whatsapp-primary"></div>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <!-- Error Toast -->
-    <div id="errorToast" class="fixed bottom-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg hidden">
-        <div class="flex items-center">
-            <i class="fas fa-exclamation-circle mr-2"></i>
-            <span id="errorMessage"></span>
-        </div>
-    </div>
-
-    <!-- Success Toast -->
-    <div id="successToast" class="fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg hidden">
-        <div class="flex items-center">
-            <i class="fas fa-check-circle mr-2"></i>
-            <span id="successMessage"></span>
         </div>
     </div>
 
     <script>
-        // Initialize Supabase client
-        const supabaseUrl = 'https://fdgqqxyyofjnkhswkwcq.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZkZ3FxeHl5b2Zqbmtoc3drd2NxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQwMjQyMTMsImV4cCI6MjA1OTYwMDIxM30.YyJLLu3r2a7Mh7ny0ie-YzzLfPh5PdrJJHnBFBxWqVE';
-        const { createClient } = supabase;
-        const supabaseClient = createClient(supabaseUrl, supabaseKey);
+        let selectedRole = null;
 
-        let selectedRole = '';
-
-        // Function to show error message
-        function showError(message) {
-            const toast = document.getElementById('errorToast');
-            const messageEl = document.getElementById('errorMessage');
-            messageEl.textContent = message;
-            toast.classList.remove('hidden');
-            setTimeout(() => {
-                toast.classList.add('hidden');
-            }, 5000);
-        }
-
-        // Function to show success message
-        function showSuccess(message) {
-            const toast = document.getElementById('successToast');
-            const messageEl = document.getElementById('successMessage');
-            messageEl.textContent = message;
-            toast.classList.remove('hidden');
-            setTimeout(() => {
-                toast.classList.add('hidden');
-            }, 5000);
-        }
-
-        // Function to select role
+        // Handle role selection
         function selectRole(role) {
             selectedRole = role;
-            document.getElementById('roleSelection').classList.add('hidden');
-            document.getElementById('registrationForm').classList.remove('hidden');
             
-            // Update header text based on role
-            const header = document.querySelector('.text-center h2');
-            const subheader = document.querySelector('.text-center p');
+            // Update button styles
+            const maidRole = document.getElementById('maidRole');
+            const employerRole = document.getElementById('employerRole');
             
             if (role === 'maid') {
-                header.textContent = 'Create Your Maid Account';
-                subheader.textContent = 'Join CityMaid to find domestic work opportunities';
+                maidRole.classList.add('bg-whatsapp-primary', 'text-white');
+                maidRole.classList.remove('hover:bg-whatsapp-primary', 'hover:text-white');
+                employerRole.classList.remove('bg-whatsapp-primary', 'text-white');
+                employerRole.classList.add('hover:bg-whatsapp-primary', 'hover:text-white');
             } else {
-                header.textContent = 'Create Your Employer Account';
-                subheader.textContent = 'Join CityMaid to find the perfect domestic help';
+                employerRole.classList.add('bg-whatsapp-primary', 'text-white');
+                employerRole.classList.remove('hover:bg-whatsapp-primary', 'hover:text-white');
+                maidRole.classList.remove('bg-whatsapp-primary', 'text-white');
+                maidRole.classList.add('hover:bg-whatsapp-primary', 'hover:text-white');
             }
         }
 
-        // Form submission handler
-        document.getElementById('registerForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-
+        // Handle registration form submission
+        async function handleRegister(event) {
+            event.preventDefault();
+            
+            // Validate role selection
+            if (!selectedRole) {
+                const errorMessage = document.getElementById('errorMessage');
+                errorMessage.textContent = 'Please select your role';
+                errorMessage.classList.remove('hidden');
+                return;
+            }
+            
+            // Validate passwords match
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (password !== confirmPassword) {
+                const errorMessage = document.getElementById('errorMessage');
+                errorMessage.textContent = 'Passwords do not match';
+                errorMessage.classList.remove('hidden');
+                return;
+            }
+            
+            // Show loading spinner
+            document.getElementById('loadingSpinner').classList.remove('hidden');
+            document.getElementById('errorMessage').classList.add('hidden');
+            
+            // Get form data
             const fullName = document.getElementById('fullName').value;
             const email = document.getElementById('email').value;
             const phone = document.getElementById('phone').value;
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-
-            // Validate passwords match
-            if (password !== confirmPassword) {
-                showError('Passwords do not match');
-                return;
-            }
-
+            
             try {
-                // Check if user already exists
-                const { data: existingUser, error: checkError } = await supabaseClient
-                    .from('profiles')
-                    .select('email')
-                    .eq('email', email)
-                    .single();
-
-                if (existingUser) {
-                    showError('An account with this email already exists');
-                    // Redirect to login page with the same role
-                    setTimeout(() => {
-                        window.location.href = `login.html?role=${selectedRole}`;
-                    }, 2000);
-                    return;
-                }
-
-                // Create user account
-                const { data: authData, error: authError } = await supabaseClient.auth.signUp({
-                    email,
-                    password,
+                // Attempt registration
+                const { success, user, error } = await auth.signUp(email, password, {
+                    full_name: fullName,
+                    phone: phone,
+                    role: selectedRole
                 });
-
-                if (authError) throw authError;
-
-                // Create profile
-                const { error: profileError } = await supabaseClient
-                    .from('profiles')
-                    .insert([
-                        {
-                            id: authData.user.id,
-                            full_name: fullName,
-                            email: email,
-                            phone: phone,
-                            role: selectedRole
-                        }
-                    ]);
-
-                if (profileError) throw profileError;
-
-                // Show success message
-                showSuccess('Registration successful! Redirecting...');
-
-                // Redirect based on role
-                setTimeout(() => {
-                    if (selectedRole === 'maid') {
-                        window.location.href = '../maid/create-profile.html';
-                    } else {
-                        window.location.href = '../employer/dashboard.html';
-                    }
-                }, 2000);
-
+                
+                if (success) {
+                    // Simple redirect to home page for MVP
+                    window.location.href = '../index.html';
+                } else {
+                    // Show error message
+                    const errorMessage = document.getElementById('errorMessage');
+                    errorMessage.textContent = error || 'Registration failed. Please try again.';
+                    errorMessage.classList.remove('hidden');
+                }
             } catch (error) {
                 console.error('Registration error:', error);
-                showError(error.message);
+                const errorMessage = document.getElementById('errorMessage');
+                errorMessage.textContent = 'An error occurred. Please try again.';
+                errorMessage.classList.remove('hidden');
+            } finally {
+                // Hide loading spinner
+                document.getElementById('loadingSpinner').classList.add('hidden');
             }
-        });
-
-        // Check if role is provided in URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const roleFromUrl = urlParams.get('role');
-        if (roleFromUrl && ['maid', 'employer'].includes(roleFromUrl)) {
-            selectRole(roleFromUrl);
         }
+
+        // Check if user is already logged in
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Comment out automatic redirect for testing
+            /*
+            const isLoggedIn = auth.checkAuthStatus();
+            if (isLoggedIn) {
+                window.location.href = '../index.html';
+            }
+            */
+        });
     </script>
 </body>
 </html> 

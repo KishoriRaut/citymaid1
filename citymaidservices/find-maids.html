@@ -4,40 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Find Maids - City Maid Services</title>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
+    <link rel="stylesheet" href="dist/output.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Helvetica Neue', 'Segoe UI', 'Inter', 'sans-serif'],
-                    },
-                    colors: {
-                        whatsapp: {
-                            primary: '#25D366',    // WhatsApp Green
-                            secondary: '#128C7E',  // WhatsApp Teal
-                            dark: '#075E54',       // WhatsApp Dark Green
-                            light: '#F0F2F5',      // WhatsApp Background
-                            text: {
-                                primary: '#111B21',   // WhatsApp Dark Text
-                                secondary: '#667781', // WhatsApp Secondary Text
-                                light: '#FFFFFF',     // White text
-                            }
-                        }
-                    },
-                    boxShadow: {
-                        'whatsapp': '0 1px 3px rgba(0, 0, 0, 0.1)',
-                        'whatsapp-hover': '0 2px 4px rgba(0, 0, 0, 0.15)',
-                    },
-                    borderRadius: {
-                        'whatsapp': '8px',
-                    }
-                }
-            }
-        }
-    </script>
 </head>
 <body class="bg-whatsapp-light min-h-screen">
     <!-- Navigation Bar -->
@@ -222,6 +191,17 @@
             }
         }
 
+        // Function to get the profile photo URL
+        function getProfilePhotoUrl(profilePhoto) {
+            if (!profilePhoto) return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0iI2YwZjJmNSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IiM2Njc3ODEiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4=';
+            
+            // If it's already a full URL, return it
+            if (profilePhoto.startsWith('http')) return profilePhoto;
+            
+            // Otherwise, construct the Supabase storage URL
+            return `https://fdgqqxyyofjnkhswkwcq.supabase.co/storage/v1/object/public/profile-photos/${profilePhoto}`;
+        }
+
         // Display profiles
         function displayProfiles(profiles) {
             if (!profiles || profiles.length === 0) {
@@ -233,80 +213,81 @@
                 return;
             }
 
-            profilesGrid.innerHTML = profiles.map(profile => `
-                <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-                    <!-- Profile Header with Image -->
-                    <div class="relative h-72 bg-gradient-to-br from-whatsapp-primary/10 to-whatsapp-secondary/10">
-                        <div class="absolute inset-0 flex items-center justify-center">
-                            <i class="fas fa-user-circle text-whatsapp-primary/20 text-9xl"></i>
-                        </div>
-                        ${profile.profile_photo ? `
+            profilesGrid.innerHTML = profiles.map(profile => {
+                const profilePhotoUrl = getProfilePhotoUrl(profile.profile_photo);
+                return `
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                        <!-- Profile Header with Image -->
+                        <div class="relative h-72 bg-gradient-to-br from-whatsapp-primary/10 to-whatsapp-secondary/10">
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <i class="fas fa-user-circle text-whatsapp-primary/20 text-9xl"></i>
+                            </div>
                             <div class="absolute inset-0">
-                                <img src="${profile.profile_photo}" 
+                                <img src="${profilePhotoUrl}" 
                                      alt="${profile.full_name || 'Profile Photo'}"
                                      class="w-full h-full object-cover object-center"
                                      style="object-position: top center;"
                                      onerror="this.onerror=null; this.style.display='none'; this.parentElement.previousElementSibling.style.display='flex';"
                                      onload="this.parentElement.previousElementSibling.style.display='none';">
                             </div>
-                        ` : ''}
-                        <!-- Location Badge -->
-                        <div class="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-sm text-whatsapp-text-primary shadow-sm">
-                            <i class="fas fa-map-marker-alt text-whatsapp-primary mr-1"></i>
-                            ${profile.major_city || 'Location not specified'}
+                            <!-- Location Badge -->
+                            <div class="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-sm text-whatsapp-text-primary shadow-sm">
+                                <i class="fas fa-map-marker-alt text-whatsapp-primary mr-1"></i>
+                                ${profile.major_city || 'Location not specified'}
+                            </div>
+                            <!-- Preferred Time Badge -->
+                            <div class="absolute bottom-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-sm text-whatsapp-text-primary shadow-sm">
+                                <i class="fas fa-clock text-whatsapp-primary mr-1"></i>
+                                ${profile.preferred_time || 'Flexible'}
+                            </div>
                         </div>
-                        <!-- Preferred Time Badge -->
-                        <div class="absolute bottom-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-sm text-whatsapp-text-primary shadow-sm">
-                            <i class="fas fa-clock text-whatsapp-primary mr-1"></i>
-                            ${profile.preferred_time || 'Flexible'}
-                        </div>
-                    </div>
 
-                    <!-- Profile Content -->
-                    <div class="p-6">
-                        <!-- Name and Key Info -->
-                        <div class="mb-4">
-                            <h3 class="text-xl font-semibold text-whatsapp-text-primary mb-2">${profile.full_name || 'Anonymous'}</h3>
-                            <div class="flex items-center justify-between text-sm">
-                                <div class="flex items-center text-whatsapp-text-primary">
-                                    <i class="fas fa-user text-whatsapp-primary mr-1"></i>
-                                    ${profile.age_group || 'Not specified'}
-                                </div>
-                                ${profile.education ? `
+                        <!-- Profile Content -->
+                        <div class="p-6">
+                            <!-- Name and Key Info -->
+                            <div class="mb-4">
+                                <h3 class="text-xl font-semibold text-whatsapp-text-primary mb-2">${profile.full_name || 'Anonymous'}</h3>
+                                <div class="flex items-center justify-between text-sm">
                                     <div class="flex items-center text-whatsapp-text-primary">
-                                        <i class="fas fa-graduation-cap text-whatsapp-primary mr-1"></i>
-                                        ${profile.education}
+                                        <i class="fas fa-user text-whatsapp-primary mr-1"></i>
+                                        ${profile.age_group || 'Not specified'}
                                     </div>
-                                ` : ''}
-                                <div class="flex items-center text-whatsapp-text-primary">
-                                    <i class="fas fa-rupee-sign text-whatsapp-primary mr-1"></i>
-                                    ${profile.expected_salary || 'Negotiable'}
+                                    ${profile.education ? `
+                                        <div class="flex items-center text-whatsapp-text-primary">
+                                            <i class="fas fa-graduation-cap text-whatsapp-primary mr-1"></i>
+                                            ${profile.education}
+                                        </div>
+                                    ` : ''}
+                                    <div class="flex items-center text-whatsapp-text-primary">
+                                        <i class="fas fa-rupee-sign text-whatsapp-primary mr-1"></i>
+                                        ${profile.expected_salary || 'Negotiable'}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- Key Skills -->
-                        <div class="mb-4">
-                            <div class="flex flex-wrap gap-2">
-                                ${profile.skills?.slice(0, 4).map(skill => `
-                                    <span class="bg-whatsapp-primary/10 text-whatsapp-primary px-3 py-1 rounded-full text-sm font-medium">
-                                        ${skill}
-                                    </span>
-                                `).join('') || 'No skills listed'}
+                            <!-- Key Skills -->
+                            <div class="mb-4">
+                                <div class="flex flex-wrap gap-2">
+                                    ${profile.skills?.slice(0, 4).map(skill => `
+                                        <span class="bg-whatsapp-primary/10 text-whatsapp-primary px-3 py-1 rounded-full text-sm font-medium">
+                                            ${skill}
+                                        </span>
+                                    `).join('') || 'No skills listed'}
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="pt-4 border-t border-whatsapp-light">
+                                <a href="find-maids.html?id=${profile.id}" 
+                                   class="w-full bg-whatsapp-primary text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-whatsapp-secondary transition-colors flex items-center justify-center">
+                                    <span>View Full Profile</span>
+                                    <i class="fas fa-arrow-right ml-2"></i>
+                                </a>
                             </div>
                         </div>
-
-                        <!-- Action Buttons -->
-                        <div class="pt-4 border-t border-whatsapp-light">
-                            <a href="find-maids.html" 
-                               class="w-full bg-whatsapp-primary text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-whatsapp-secondary transition-colors flex items-center justify-center">
-                                <span>View Full Profile</span>
-                                <i class="fas fa-arrow-right ml-2"></i>
-                            </a>
-                        </div>
                     </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         // Update pagination
