@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Maid Profile - City Maid Services</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="../../dist/output.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Load Supabase first -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Then load our config -->
+    <script src="../../config.js"></script>
+    <!-- Load Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Initialize Tailwind config
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Helvetica Neue', 'Segoe UI', 'Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        whatsapp: {
+                            primary: '#25D366',    // WhatsApp Green
+                            secondary: '#128C7E',  // WhatsApp Teal
+                            dark: '#075E54',       // WhatsApp Dark Green
+                            light: '#F0F2F5',      // WhatsApp Background
+                            text: {
+                                primary: '#111B21',   // WhatsApp Dark Text
+                                secondary: '#667781', // WhatsApp Secondary Text
+                                light: '#FFFFFF',     // White text
+                            }
+                        }
+                    },
+                    boxShadow: {
+                        'whatsapp': '0 1px 3px rgba(0, 0, 0, 0.1)',
+                        'whatsapp-hover': '0 2px 4px rgba(0, 0, 0, 0.15)',
+                    },
+                    borderRadius: {
+                        'whatsapp': '8px',
+                    }
+                }
+            }
+        }
+
+        // Initialize Supabase client globally
+        const supabaseUrl = 'https://fdgqqxyyofjnkhswkwcq.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZkZ3FxeHl5b2Zqbmtoc3drd2NxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQwMjQyMTMsImV4cCI6MjA1OTYwMDIxM30.YyJLLu3r2a7Mh7ny0ie-YzzLfPh5PdrJJHnBFBxWqVE';
+        const { createClient } = supabase;
+        const supabaseClient = createClient(supabaseUrl, supabaseKey);
+
+        // Get profile ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const profileId = urlParams.get('id');
+
+        async function loadProfile() {
+            try {
+                console.log('Loading profile...');
+                console.log('Profile ID:', profileId);
+
+                if (!profileId) {
+                    // Try to get the current user's profile
+                    const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
+                    if (authError) {
+                        console.error('Auth error:', authError);
+                        throw authError;
+                    }
+
+                    if (user) {
+                        console.log('User found:', user.id);
+                        // Fetch profile by user_id instead
+                        const { data: profiles, error } = await supabaseClient
+                            .from('maid_profiles')
+                            .select('*')
+                            .eq('user_id', user.id);
+
+                        if (error) {
+                            console.error('Profile fetch error:', error);
+                            throw error;
+                        }
+                        if (!profiles || profiles.length === 0) {
+                            console.error('No profile found for user');
+                            throw new Error('Profile not found. Please create a profile first.');
+                        }
+
+                        // Use the first profile if multiple exist
+                        const profile = profiles[0];
+                        console.log('Profile loaded:', profile);
+                        displayProfile(profile);
+                        return;
+                    }
+                    console.error('No user found');
+                    throw new Error('No profile ID provided and user not authenticated');
+                }
+
+                // Fetch profile by ID
+                console.log('Fetching profile from Supabase...');
+                const { data: profiles, error } = await supabaseClient
+                    .from('maid_profiles')
+                    .select('*')
+                    .eq('id', profileId);
+
+                console.log('Supabase response:', { profiles, error });
+
+                if (error) {
+                    console.error('Supabase error:', error);
+                    throw error;
+                }
+                if (!profiles || profiles.length === 0) {
+                    console.error('No profile found for ID:', profileId);
+                    throw new Error('Profile not found');
+                }
+
+                // Use the first profile if multiple exist
+                const profile = profiles[0];
+                console.log('Profile loaded:', profile);
+                displayProfile(profile);
+
+            } catch (error) {
+                console.error('Error loading profile:', error);
+                document.getElementById('profile-header').innerHTML = `
+                    <div class="text-center text-red-600">
+                        <p class="text-xl">Error loading profile</p>
+                        <p class="mt-2">${error.message}</p>
+                        ${error.message.includes('create a profile') ? `
+                            <a href="create-profile.html" class="mt-4 inline-block bg-whatsapp-primary text-white px-6 py-2 rounded-whatsapp hover:bg-whatsapp-secondary transition-colors">
+                                Create Profile
+                            </a>
+                        ` : `
+                            <a href="dashboard.html" class="mt-4 inline-block bg-whatsapp-primary text-white px-6 py-2 rounded-whatsapp hover:bg-whatsapp-secondary transition-colors">
+                                Back to Dashboard
+                            </a>
+                        `}
+                    </div>
+                `;
+            }
+        }
+
+        function displayProfile(profile) {
+            console.log('Displaying profile:', profile);
+            // Update profile photo
+            const profilePhoto = document.getElementById('profile-photo');
+            profilePhoto.src = profile.profile_photo || '../../assets/default-profile.svg';
+
+            // Format the data for display
+            const formattedProfile = {
+                ...profile,
+                specific_areas: profile.specific_areas?.join(', ') || 'Not specified',
+                languages: profile.languages?.join(', ') || 'Not specified',
+                skills: profile.skills?.join(', ') || 'Not specified',
+                willing_to_travel: profile.willing_to_travel ? 'Yes' : 'No',
+                travel_distance: profile.travel_distance ? `${profile.travel_distance} km` : 'Not specified'
+            };
+
+            // Update Profile Header
+            document.getElementById('profile-header').innerHTML = `
+                <h1 class="text-2xl font-bold text-whatsapp-text-primary">${profile.full_name}</h1>
+                <p class="text-whatsapp-text-secondary">
+                    <i class="fas fa-map-marker-alt mr-1"></i>
+                    ${profile.major_city}
+                </p>
+            `;
+
+            // Update Basic Information
+            document.getElementById('basic-info').innerHTML = `
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-whatsapp-text-secondary">Age Group</p>
+                        <p class="font-medium text-whatsapp-text-primary">${profile.age_group}</p>
+                    </div>
+                    <div>
+                        <p class="text-whatsapp-text-secondary">Gender</p>
+                        <p class="font-medium text-whatsapp-text-primary">${profile.gender}</p>
+                    </div>
+                    <div>
+                        <p class="text-whatsapp-text-secondary">Marital Status</p>
+                        <p class="font-medium text-whatsapp-text-primary">${profile.marital_status}</p>
+                    </div>
+                    <div>
+                        <p class="text-whatsapp-text-secondary">Nationality</p>
+                        <p class="font-medium text-whatsapp-text-primary">${profile.nationality}</p>
+                    </div>
+                    <div>
+                        <p class="text-whatsapp-text-secondary">Religion</p>
+                        <p class="font-medium text-whatsapp-text-primary">${profile.religion || 'Not specified'}</p>
+                    </div>
+                </div>
+            `;
+
+            // Update Work Information
+            document.getElementById('work-info').innerHTML = `
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-whatsapp-text-secondary">Experience</p>
+                        <p class="font-medium text-whatsapp-text-primary">${profile.experience} years</p>
+                    </div>
+                    <div>
+                        <p class="text-whatsapp-text-secondary">Available From</p>
+                        <p class="font-medium text-whatsapp-text-primary">${profile.available_from}</p>
+                    </div>
+                    <div>
+                        <p class="text-whatsapp-text-secondary">Preferred Time</p>
+                        <p class="font-medium text-whatsapp-text-primary">${profile.preferred_time}</p>
+                    </div>
+                    <div>
+                        <p class="text-whatsapp-text-secondary">Expected Salary</p>
+                        <p class="font-medium text-whatsapp-text-primary">Rs. ${profile.expected_salary}</p>
+                    </div>
+                    <div>
+                        <p class="text-whatsapp-text-secondary">Willing to Travel</p>
+                        <p class="font-medium text-whatsapp-text-primary">${formattedProfile.willing_to_travel}</p>
+                    </div>
+                    ${profile.willing_to_travel ? `
+                        <div>
+                            <p class="text-whatsapp-text-secondary">Travel Distance</p>
+                            <p class="font-medium text-whatsapp-text-primary">${formattedProfile.travel_distance}</p>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+
+            // Update Location Information
+            document.getElementById('location-info').innerHTML = `
+                <div class="space-y-4">
+                    <div>
+                        <p class="text-whatsapp-text-secondary">Major City</p>
+                        <p class="font-medium text-whatsapp-text-primary">${profile.major_city}</p>
+                    </div>
+                    <div>
+                        <p class="text-whatsapp-text-secondary">Specific Areas</p>
+                        <p class="font-medium text-whatsapp-text-primary">${formattedProfile.specific_areas}</p>
+                    </div>
+                </div>
+            `;
+
+            // Update Skills & Languages
+            document.getElementById('skills-info').innerHTML = `
+                <div class="space-y-4">
+                    <div>
+                        <p class="text-whatsapp-text-secondary">Languages</p>
+                        <p class="font-medium text-whatsapp-text-primary">${formattedProfile.languages}</p>
+                    </div>
+                    <div>
+                        <p class="text-whatsapp-text-secondary">Skills</p>
+                        <p class="font-medium text-whatsapp-text-primary">${formattedProfile.skills}</p>
+                    </div>
+                </div>
+            `;
+
+            // Update About Section
+            document.getElementById('about-section').innerHTML = `
+                <p class="text-whatsapp-text-secondary">${profile.about}</p>
+            `;
+        }
+
+        // Logout function
+        async function logout() {
+            try {
+                const { error } = await supabaseClient.auth.signOut();
+                if (error) throw error;
+                window.location.href = '../auth/login.html';
+            } catch (error) {
+                console.error('Error logging out:', error);
+                alert('Error logging out. Please try again.');
+            }
+        }
+
+        // Add unlock contact function
+        async function unlockContact() {
+            try {
+                // Check if user is logged in
+                const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
+                if (authError || !user) {
+                    window.location.href = '../auth/login.html?role=client';
+                    return;
+                }
+
+                // Here you would typically:
+                // 1. Check if user has enough credits
+                // 2. Process payment if needed
+                // 3. Record the unlock in database
+                // 4. Show the contact information
+
+                // For now, we'll just show the contact info
+                document.getElementById('locked-contact').classList.add('hidden');
+                document.getElementById('unlocked-contact').classList.remove('hidden');
+            } catch (error) {
+                console.error('Error unlocking contact:', error);
+                alert('Error unlocking contact. Please try again.');
+            }
+        }
+
+        // Load profile when page loads
+        document.addEventListener('DOMContentLoaded', loadProfile);
+    </script>
+</head>
+<body class="font-sans bg-whatsapp-light text-whatsapp-text-primary">
+    <!-- Navigation Bar -->
+    <nav class="bg-white shadow-whatsapp sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="../../index.html" class="text-2xl font-semibold text-whatsapp-primary">CITYMAID</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="dashboard.html" class="text-whatsapp-text-primary hover:text-whatsapp-primary transition-colors">
+                        <i class="fas fa-home mr-1"></i> Dashboard
+                    </a>
+                    <a href="create-profile.html?mode=edit" class="text-whatsapp-text-primary hover:text-whatsapp-primary transition-colors">
+                        <i class="fas fa-edit mr-1"></i> Edit Profile
+                    </a>
+                    <button onclick="logout()" class="text-whatsapp-text-primary hover:text-red-600 transition-colors">
+                        <i class="fas fa-sign-out-alt mr-1"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-4xl mx-auto">
+            <!-- Profile Header Card -->
+            <div class="bg-white rounded-whatsapp shadow-whatsapp overflow-hidden mb-6">
+                <div class="relative h-48 bg-gradient-to-r from-whatsapp-primary to-whatsapp-secondary">
+                    <div class="absolute -bottom-16 left-8">
+                        <div class="w-32 h-32 rounded-full border-4 border-white overflow-hidden bg-whatsapp-primary">
+                            <img id="profile-photo"
+                                 alt="Profile Photo" 
+                                 class="w-full h-full object-cover"
+                                 onerror="this.onerror=null; this.src='../../assets/default-profile.svg';">
+                        </div>
+                    </div>
+                </div>
+                <div class="pt-20 pb-6 px-8">
+                    <div id="profile-header" class="animate-pulse">
+                        <div class="h-8 bg-gray-200 rounded w-1/3 mb-2"></div>
+                        <div class="h-4 bg-gray-200 rounded w-1/4"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Content -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Left Column -->
+                <div class="md:col-span-2 space-y-6">
+                    <!-- Basic Information Card -->
+                    <div class="bg-white rounded-whatsapp shadow-whatsapp p-6">
+                        <h2 class="text-xl font-semibold text-whatsapp-text-primary mb-4 flex items-center">
+                            <i class="fas fa-user-circle mr-2 text-whatsapp-primary"></i>
+                            Basic Information
+                        </h2>
+                        <div id="basic-info" class="space-y-4">
+                            <!-- Content will be loaded here -->
+                        </div>
+                    </div>
+
+                    <!-- Work Information Card -->
+                    <div class="bg-white rounded-whatsapp shadow-whatsapp p-6">
+                        <h2 class="text-xl font-semibold text-whatsapp-text-primary mb-4 flex items-center">
+                            <i class="fas fa-briefcase mr-2 text-whatsapp-primary"></i>
+                            Work Information
+                        </h2>
+                        <div id="work-info" class="space-y-4">
+                            <!-- Content will be loaded here -->
+                        </div>
+                    </div>
+
+                    <!-- About Card -->
+                    <div class="bg-white rounded-whatsapp shadow-whatsapp p-6">
+                        <h2 class="text-xl font-semibold text-whatsapp-text-primary mb-4 flex items-center">
+                            <i class="fas fa-info-circle mr-2 text-whatsapp-primary"></i>
+                            About
+                        </h2>
+                        <div id="about-section" class="prose max-w-none">
+                            <!-- Content will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column -->
+                <div class="space-y-6">
+                    <!-- Location Card -->
+                    <div class="bg-white rounded-whatsapp shadow-whatsapp p-6">
+                        <h2 class="text-xl font-semibold text-whatsapp-text-primary mb-4 flex items-center">
+                            <i class="fas fa-map-marker-alt mr-2 text-whatsapp-primary"></i>
+                            Location
+                        </h2>
+                        <div id="location-info" class="space-y-4">
+                            <!-- Content will be loaded here -->
+                        </div>
+                    </div>
+
+                    <!-- Skills & Languages Card -->
+                    <div class="bg-white rounded-whatsapp shadow-whatsapp p-6">
+                        <h2 class="text-xl font-semibold text-whatsapp-text-primary mb-4 flex items-center">
+                            <i class="fas fa-star mr-2 text-whatsapp-primary"></i>
+                            Skills & Languages
+                        </h2>
+                        <div id="skills-info" class="space-y-4">
+                            <!-- Content will be loaded here -->
+                        </div>
+                    </div>
+
+                    <!-- Contact Card -->
+                    <div class="bg-white rounded-whatsapp shadow-whatsapp p-6">
+                        <h2 class="text-xl font-semibold text-whatsapp-text-primary mb-4 flex items-center">
+                            <i class="fas fa-phone mr-2 text-whatsapp-primary"></i>
+                            Contact Information
+                        </h2>
+                        <div id="contact-info" class="space-y-4">
+                            <!-- Location info always visible -->
+                            <div>
+                                <p class="text-whatsapp-text-secondary">Location</p>
+                                <p class="font-medium text-whatsapp-text-primary">${profile.major_city}</p>
+                            </div>
+                            
+                            <!-- Locked contact details -->
+                            <div id="locked-contact" class="border-t pt-4">
+                                <div class="text-center">
+                                    <p class="text-whatsapp-text-secondary mb-4">Contact details are locked</p>
+                                    <button onclick="unlockContact()" 
+                                            class="bg-whatsapp-primary text-white px-6 py-2 rounded-whatsapp hover:bg-whatsapp-secondary transition-colors">
+                                        <i class="fas fa-unlock mr-2"></i>Unlock Contact
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Unlocked contact details (hidden by default) -->
+                            <div id="unlocked-contact" class="border-t pt-4 hidden">
+                                <div>
+                                    <p class="text-whatsapp-text-secondary">Email</p>
+                                    <p class="font-medium text-whatsapp-text-primary">${profile.email}</p>
+                                </div>
+                                <div>
+                                    <p class="text-whatsapp-text-secondary">Phone</p>
+                                    <p class="font-medium text-whatsapp-text-primary">${profile.phone}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

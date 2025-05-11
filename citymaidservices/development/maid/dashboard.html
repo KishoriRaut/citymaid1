@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maid Dashboard - City Maid Services</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../config.js"></script>
+    <script src="../js/auth.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Helvetica Neue', 'Segoe UI', 'Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        whatsapp: {
+                            primary: '#25D366',    // WhatsApp Green
+                            secondary: '#128C7E',  // WhatsApp Teal
+                            dark: '#075E54',       // WhatsApp Dark Green
+                            light: '#F0F2F5',      // WhatsApp Background
+                            text: {
+                                primary: '#111B21',   // WhatsApp Dark Text
+                                secondary: '#667781', // WhatsApp Secondary Text
+                                light: '#FFFFFF',     // White text
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-sans bg-whatsapp-light text-whatsapp-text-primary">
+    <!-- Navigation Bar -->
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="../index.html" class="text-2xl font-semibold text-whatsapp-primary">CITYMAID</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span id="userName" class="text-whatsapp-text-primary"></span>
+                    <button onclick="handleLogout()" class="text-whatsapp-text-primary hover:text-whatsapp-primary transition-colors">
+                        <i class="fas fa-sign-out-alt mr-1"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Welcome Section -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h1 class="text-2xl font-semibold text-whatsapp-text-primary">Welcome to your Dashboard</h1>
+            <p class="text-whatsapp-text-secondary mt-2">Manage your profile and job applications here.</p>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-medium text-whatsapp-text-primary">Profile Status</h3>
+                        <p class="text-whatsapp-text-secondary mt-1">Complete your profile to get hired</p>
+                    </div>
+                    <div class="text-3xl text-whatsapp-primary">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                </div>
+                <button onclick="window.location.href='create-profile.html?mode=edit'" class="mt-4 w-full bg-whatsapp-primary text-white px-4 py-2 rounded-lg hover:bg-whatsapp-secondary transition-colors">
+                    Update Profile
+                </button>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-medium text-whatsapp-text-primary">Job Applications</h3>
+                        <p class="text-whatsapp-text-secondary mt-1">View your job applications</p>
+                    </div>
+                    <div class="text-3xl text-whatsapp-primary">
+                        <i class="fas fa-briefcase"></i>
+                    </div>
+                </div>
+                <button onclick="window.location.href='applications.html'" class="mt-4 w-full bg-whatsapp-primary text-white px-4 py-2 rounded-lg hover:bg-whatsapp-secondary transition-colors">
+                    View Applications
+                </button>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-medium text-whatsapp-text-primary">Messages</h3>
+                        <p class="text-whatsapp-text-secondary mt-1">Check your messages</p>
+                    </div>
+                    <div class="text-3xl text-whatsapp-primary">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                </div>
+                <button onclick="window.location.href='messages.html'" class="mt-4 w-full bg-whatsapp-primary text-white px-4 py-2 rounded-lg hover:bg-whatsapp-secondary transition-colors">
+                    View Messages
+                </button>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold text-whatsapp-text-primary mb-4">Recent Activity</h2>
+            <div id="recentActivity" class="space-y-4">
+                <!-- Activity items will be loaded here -->
+                <div class="text-center text-whatsapp-text-secondary py-4">
+                    No recent activity
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check authentication and load user data
+        document.addEventListener('DOMContentLoaded', async () => {
+            const isLoggedIn = auth.checkAuthStatus();
+            if (!isLoggedIn) {
+                window.location.href = '../auth/login.html';
+                return;
+            }
+
+            const user = await auth.getCurrentUser();
+            if (!user || user.user_metadata.role !== 'maid') {
+                window.location.href = '../auth/login.html';
+                return;
+            }
+
+            // Display user name
+            const userNameElement = document.getElementById('userName');
+            if (user.user_metadata.full_name) {
+                userNameElement.textContent = `Welcome, ${user.user_metadata.full_name}`;
+            }
+        });
+
+        // Handle logout
+        async function handleLogout() {
+            try {
+                await auth.signOut();
+                window.location.href = '../auth/login.html';
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
+        }
+    </script>
+</body>
+</html> 

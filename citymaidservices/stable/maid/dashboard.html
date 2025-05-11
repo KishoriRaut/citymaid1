@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maid Dashboard - City Maid Services</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../config.js"></script>
+    <script src="../../js/auth.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Helvetica Neue', 'Segoe UI', 'Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        whatsapp: {
+                            primary: '#25D366',    // WhatsApp Green
+                            secondary: '#128C7E',  // WhatsApp Teal
+                            dark: '#075E54',       // WhatsApp Dark Green
+                            light: '#F0F2F5',      // WhatsApp Background
+                            text: {
+                                primary: '#111B21',   // WhatsApp Dark Text
+                                secondary: '#667781', // WhatsApp Secondary Text
+                                light: '#FFFFFF',     // White text
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-sans bg-whatsapp-light text-whatsapp-text-primary">
+    <!-- Navigation Bar -->
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="../../index.html" class="text-2xl font-semibold text-whatsapp-primary">CITYMAID</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span id="userName" class="text-whatsapp-text-primary"></span>
+                    <button onclick="handleLogout()" class="text-whatsapp-text-primary hover:text-whatsapp-primary transition-colors">
+                        <i class="fas fa-sign-out-alt mr-1"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Welcome Section -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h1 class="text-2xl font-semibold text-whatsapp-text-primary">Welcome to your Dashboard</h1>
+            <p class="text-whatsapp-text-secondary mt-2">Manage your profile and contact unlocks here.</p>
+        </div>
+
+        <!-- Profile Visibility -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-xl font-semibold text-whatsapp-text-primary">Profile Visibility</h2>
+                    <p class="text-whatsapp-text-secondary mt-1">Control who can see your profile</p>
+                </div>
+                <div class="flex items-center">
+                    <label class="inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="visibilityToggle" class="sr-only peer">
+                        <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-whatsapp-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-whatsapp-primary"></div>
+                        <span class="ml-3 text-sm font-medium text-whatsapp-text-primary">Profile Visible</span>
+                    </label>
+                </div>
+            </div>
+            <div id="visibilityStatus" class="mt-4 text-sm text-whatsapp-text-secondary">
+                <!-- Status message will be shown here -->
+            </div>
+        </div>
+
+        <!-- Statistics -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-medium text-whatsapp-text-primary">Profile Views</h3>
+                        <p id="profileViews" class="text-2xl font-bold text-whatsapp-primary mt-1">0</p>
+                    </div>
+                    <div class="text-3xl text-whatsapp-primary">
+                        <i class="fas fa-eye"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-medium text-whatsapp-text-primary">Contact Unlocks</h3>
+                        <p id="unlockCount" class="text-2xl font-bold text-whatsapp-primary mt-1">0</p>
+                    </div>
+                    <div class="text-3xl text-whatsapp-primary">
+                        <i class="fas fa-unlock"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-medium text-whatsapp-text-primary">View Profile</h3>
+                        <p class="text-whatsapp-text-secondary mt-1">See how others view your profile</p>
+                    </div>
+                    <div class="text-3xl text-whatsapp-primary">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                </div>
+                <button onclick="window.location.href='view-profile.html'" class="mt-4 w-full bg-whatsapp-primary text-white px-4 py-2 rounded-lg hover:bg-whatsapp-secondary transition-colors">
+                    View Profile
+                </button>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-medium text-whatsapp-text-primary">Edit Profile</h3>
+                        <p class="text-whatsapp-text-secondary mt-1">Update your profile information</p>
+                    </div>
+                    <div class="text-3xl text-whatsapp-primary">
+                        <i class="fas fa-edit"></i>
+                    </div>
+                </div>
+                <button onclick="window.location.href='profile.html?mode=edit'" class="mt-4 w-full bg-whatsapp-primary text-white px-4 py-2 rounded-lg hover:bg-whatsapp-secondary transition-colors">
+                    Edit Profile
+                </button>
+            </div>
+        </div>
+
+        <!-- Recent Unlocks -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold text-whatsapp-text-primary mb-4">Recent Contact Unlocks</h2>
+            <div id="recentUnlocks" class="space-y-4">
+                <!-- Unlock items will be loaded here -->
+                <div class="text-center text-whatsapp-text-secondary py-4">
+                    Loading recent unlocks...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Supabase client
+        const supabaseUrl = 'https://fdgqqxyyofjnkhswkwcq.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZkZ3FxeHl5b2Zqbmtoc3drd2NxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQwMjQyMTMsImV4cCI6MjA1OTYwMDIxM30.YyJLLu3r2a7Mh7ny0ie-YzzLfPh5PdrJJHnBFBxWqVE';
+        const { createClient } = supabase;
+        const supabaseClient = createClient(supabaseUrl, supabaseKey);
+
+        // Check authentication and load user data
+        document.addEventListener('DOMContentLoaded', async () => {
+            const isLoggedIn = auth.checkAuthStatus();
+            if (!isLoggedIn) {
+                window.location.href = '../../auth/login.html';
+                return;
+            }
+
+            const user = await auth.getCurrentUser();
+            if (!user || user.user_metadata.role !== 'maid') {
+                window.location.href = '../../auth/login.html';
+                return;
+            }
+
+            // Display user name
+            const userNameElement = document.getElementById('userName');
+            if (user.user_metadata.full_name) {
+                userNameElement.textContent = `Welcome, ${user.user_metadata.full_name}`;
+            }
+
+            // Load profile visibility status
+            await loadProfileVisibility(user.id);
+            
+            // Load statistics
+            await loadStatistics(user.id);
+            
+            // Load recent unlocks
+            await loadRecentUnlocks(user.id);
+        });
+
+        // Load profile visibility status
+        async function loadProfileVisibility(userId) {
+            try {
+                const { data: profile, error } = await supabaseClient
+                    .from('maid_profiles')
+                    .select('is_visible')
+                    .eq('user_id', userId)
+                    .single();
+
+                if (error) throw error;
+
+                const visibilityToggle = document.getElementById('visibilityToggle');
+                const visibilityStatus = document.getElementById('visibilityStatus');
+
+                if (profile) {
+                    visibilityToggle.checked = profile.is_visible;
+                    updateVisibilityStatus(profile.is_visible);
+                }
+            } catch (error) {
+                console.error('Error loading profile visibility:', error);
+            }
+        }
+
+        // Update visibility status message
+        function updateVisibilityStatus(isVisible) {
+            const visibilityStatus = document.getElementById('visibilityStatus');
+            if (isVisible) {
+                visibilityStatus.innerHTML = `
+                    <div class="flex items-center text-green-600">
+                        <i class="fas fa-check-circle mr-2"></i>
+                        Your profile is currently visible to potential employers
+                    </div>
+                `;
+            } else {
+                visibilityStatus.innerHTML = `
+                    <div class="flex items-center text-yellow-600">
+                        <i class="fas fa-eye-slash mr-2"></i>
+                        Your profile is currently hidden from potential employers
+                    </div>
+                `;
+            }
+        }
+
+        // Handle visibility toggle
+        document.getElementById('visibilityToggle').addEventListener('change', async function(e) {
+            try {
+                const { data: { user } } = await supabaseClient.auth.getUser();
+                if (!user) throw new Error('User not authenticated');
+
+                const { error } = await supabaseClient
+                    .from('maid_profiles')
+                    .update({ is_visible: e.target.checked })
+                    .eq('user_id', user.id);
+
+                if (error) throw error;
+
+                // Update status message
+                updateVisibilityStatus(e.target.checked);
+
+                // Add activity log
+                await supabaseClient
+                    .from('activity_log')
+                    .insert({
+                        user_id: user.id,
+                        type: 'visibility',
+                        description: `Updated profile visibility to ${e.target.checked ? 'visible' : 'hidden'}`
+                    });
+
+            } catch (error) {
+                console.error('Error updating profile visibility:', error);
+                e.target.checked = !e.target.checked; // Revert the toggle
+                alert('Error updating profile visibility. Please try again.');
+            }
+        });
+
+        // Load statistics
+        async function loadStatistics(userId) {
+            try {
+                // Get profile views
+                const { data: views, error: viewsError } = await supabaseClient
+                    .from('profile_views')
+                    .select('count')
+                    .eq('profile_id', userId)
+                    .single();
+                
+                if (!viewsError) {
+                    document.getElementById('profileViews').textContent = views?.count || 0;
+                }
+
+                // Get unlock count
+                const { data: unlocks, error: unlocksError } = await supabaseClient
+                    .from('contact_unlocks')
+                    .select('count')
+                    .eq('maid_id', userId)
+                    .single();
+                
+                if (!unlocksError) {
+                    document.getElementById('unlockCount').textContent = unlocks?.count || 0;
+                }
+            } catch (error) {
+                console.error('Error loading statistics:', error);
+            }
+        }
+
+        // Load recent unlocks
+        async function loadRecentUnlocks(userId) {
+            try {
+                const { data: unlocks, error } = await supabaseClient
+                    .from('contact_unlocks')
+                    .select('*, clients:client_id(full_name)')
+                    .eq('maid_id', userId)
+                    .order('created_at', { ascending: false })
+                    .limit(5);
+
+                if (error) throw error;
+
+                const unlocksElement = document.getElementById('recentUnlocks');
+                if (unlocks && unlocks.length > 0) {
+                    unlocksElement.innerHTML = unlocks.map(unlock => `
+                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                            <div class="flex items-center">
+                                <div class="text-whatsapp-primary mr-4">
+                                    <i class="fas fa-unlock"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-whatsapp-text-primary">${unlock.clients.full_name} unlocked your contact</p>
+                                    <p class="text-sm text-whatsapp-text-secondary">${formatDate(unlock.created_at)}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    unlocksElement.innerHTML = `
+                        <div class="text-center text-whatsapp-text-secondary py-4">
+                            No recent contact unlocks
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading recent unlocks:', error);
+            }
+        }
+
+        // Helper function to format date
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diff = now - date;
+            
+            // Less than 24 hours
+            if (diff < 24 * 60 * 60 * 1000) {
+                const hours = Math.floor(diff / (60 * 60 * 1000));
+                return `${hours} hour${hours !== 1 ? 's' : ''} ago`;
+            }
+            
+            // Less than 7 days
+            if (diff < 7 * 24 * 60 * 60 * 1000) {
+                const days = Math.floor(diff / (24 * 60 * 60 * 1000));
+                return `${days} day${days !== 1 ? 's' : ''} ago`;
+            }
+            
+            // Otherwise show the date
+            return date.toLocaleDateString();
+        }
+
+        // Handle logout
+        async function handleLogout() {
+            try {
+                await auth.signOut();
+                window.location.href = '../../auth/login.html';
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
+        }
+    </script>
+</body>
+</html> 
