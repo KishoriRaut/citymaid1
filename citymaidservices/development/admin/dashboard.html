@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - City Maid Services</title>
+    <!-- External Dependencies -->
+    <link href="../dist/output.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../config.js"></script>
+</head>
+<body class="bg-whatsapp-light min-h-screen font-sans">
+    <!-- Navigation Bar -->
+    <nav class="bg-white shadow-whatsapp sticky top-0 z-50 mb-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <!-- Logo -->
+                <div class="flex items-center">
+                    <a href="../index.html" class="text-2xl font-semibold text-whatsapp-primary">CITYMAID</a>
+                </div>
+                <!-- Navigation Links -->
+                <div class="flex items-center space-x-4">
+                    <a href="dashboard.html" class="text-whatsapp-text-primary hover:text-whatsapp-primary transition-colors">
+                        <i class="fas fa-home mr-1"></i> Dashboard
+                    </a>
+                    <a href="users.html" class="text-whatsapp-text-primary hover:text-whatsapp-primary transition-colors">
+                        <i class="fas fa-users mr-1"></i> Users
+                    </a>
+                    <a href="maids.html" class="text-whatsapp-text-primary hover:text-whatsapp-primary transition-colors">
+                        <i class="fas fa-user-tie mr-1"></i> Maids
+                    </a>
+                    <button onclick="logout()" class="text-whatsapp-text-primary hover:text-red-600 transition-colors">
+                        <i class="fas fa-sign-out-alt mr-1"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <h1 class="text-2xl font-bold text-whatsapp-primary mb-6">Admin Dashboard</h1>
+        
+        <!-- Statistics Cards Section -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Total Users Card -->
+            <div class="bg-white rounded-whatsapp shadow-whatsapp p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500">Total Users</p>
+                        <h3 class="text-2xl font-bold" id="totalUsers">0</h3>
+                    </div>
+                    <div class="text-whatsapp-primary">
+                        <i class="fas fa-users text-3xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Maids Card -->
+            <div class="bg-white rounded-whatsapp shadow-whatsapp p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500">Total Maids</p>
+                        <h3 class="text-2xl font-bold" id="totalMaids">0</h3>
+                    </div>
+                    <div class="text-whatsapp-primary">
+                        <i class="fas fa-user-tie text-3xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Bookings Card -->
+            <div class="bg-white rounded-whatsapp shadow-whatsapp p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500">Active Bookings</p>
+                        <h3 class="text-2xl font-bold" id="activeBookings">0</h3>
+                    </div>
+                    <div class="text-whatsapp-primary">
+                        <i class="fas fa-calendar-check text-3xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Revenue Card -->
+            <div class="bg-white rounded-whatsapp shadow-whatsapp p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500">Total Revenue</p>
+                        <h3 class="text-2xl font-bold" id="totalRevenue">$0</h3>
+                    </div>
+                    <div class="text-whatsapp-primary">
+                        <i class="fas fa-dollar-sign text-3xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity Section -->
+        <div class="bg-white rounded-whatsapp shadow-whatsapp p-6">
+            <h2 class="text-xl font-semibold mb-4">Recent Activity</h2>
+            <div id="recentActivity" class="space-y-4">
+                <!-- Activity items will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Supabase client for database operations
+        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+        /**
+         * Loads and displays all dashboard data including statistics and recent activities
+         * Handles authentication check and data fetching from various tables
+         */
+        async function loadDashboardData() {
+            try {
+                // Verify admin authentication
+                const { data: { user }, error: userError } = await supabase.auth.getUser();
+                if (userError || !user) {
+                    window.location.href = '../auth/login.html';
+                    return;
+                }
+
+                // Fetch and display total users count
+                const { count: userCount, error: userCountError } = await supabase
+                    .from('profiles')
+                    .select('*', { count: 'exact', head: true });
+
+                if (!userCountError) {
+                    document.getElementById('totalUsers').textContent = userCount;
+                }
+
+                // Fetch and display total maids count
+                const { count: maidCount, error: maidCountError } = await supabase
+                    .from('maid_profiles')
+                    .select('*', { count: 'exact', head: true });
+
+                if (!maidCountError) {
+                    document.getElementById('totalMaids').textContent = maidCount;
+                }
+
+                // Fetch and display active bookings count
+                const { count: bookingCount, error: bookingCountError } = await supabase
+                    .from('bookings')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('status', 'active');
+
+                if (!bookingCountError) {
+                    document.getElementById('activeBookings').textContent = bookingCount;
+                }
+
+                // Fetch and display recent activities
+                const { data: activities, error: activityError } = await supabase
+                    .from('activity_log')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(5);
+
+                if (!activityError && activities) {
+                    const activityContainer = document.getElementById('recentActivity');
+                    activityContainer.innerHTML = activities.map(activity => `
+                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded">
+                            <div>
+                                <p class="font-medium">${activity.description}</p>
+                                <p class="text-sm text-gray-500">${new Date(activity.created_at).toLocaleString()}</p>
+                            </div>
+                            <div class="text-whatsapp-primary">
+                                <i class="fas ${getActivityIcon(activity.type)}"></i>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+
+        /**
+         * Returns the appropriate Font Awesome icon class based on activity type
+         * @param {string} type - The type of activity (booking, user, maid, payment)
+         * @returns {string} The Font Awesome icon class
+         */
+        function getActivityIcon(type) {
+            switch (type) {
+                case 'booking':
+                    return 'fa-calendar-check';
+                case 'user':
+                    return 'fa-user';
+                case 'maid':
+                    return 'fa-user-tie';
+                case 'payment':
+                    return 'fa-dollar-sign';
+                default:
+                    return 'fa-info-circle';
+            }
+        }
+
+        /**
+         * Handles user logout process
+         * Signs out the user and redirects to login page
+         */
+        async function logout() {
+            try {
+                const { error } = await supabase.auth.signOut();
+                if (error) throw error;
+                window.location.href = '../auth/login.html';
+            } catch (error) {
+                console.error('Error logging out:', error);
+                alert('Error logging out. Please try again.');
+            }
+        }
+
+        // Initialize dashboard when DOM is loaded
+        document.addEventListener('DOMContentLoaded', loadDashboardData);
+    </script>
+</body>
+</html> 
